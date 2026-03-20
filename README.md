@@ -156,6 +156,15 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 
 ---
 
+## Credits
+
+The idea, requirements and direction for this project came from **Jan Erik Mueller**.  
+The entire codebase — every line of PowerShell, the WPF GUI, the scan engine, all dialogs and tools — was written by **[Claude](https://claude.ai)**, an AI assistant made by [Anthropic](https://www.anthropic.com).
+
+This project is an example of human–AI collaboration: a person with a vision, and an AI that implements it.
+
+---
+
 ## Contributing
 
 This is an early alpha — bug reports, feature requests and pull requests are welcome!
