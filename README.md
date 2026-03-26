@@ -8,22 +8,17 @@ ACLens is a PowerShell-based GUI tool that recursively reads NTFS permissions fr
 
 ---
 
-## Screenshots
-
-*Screenshots will be added in a future release.*
-
----
-
 ## Features
 
 - 📂 **Recursive NTFS scan** — reads all subfolders with configurable depth limit
 - 🔍 **Change detection** — highlights folders where permissions differ from the parent
 - 📄 **Interactive HTML report** — filter, search, expand/collapse, print
-- 📖 **Collapsible legend** — explains all permission types, scopes and inheritance options
-- 💾 **JSON snapshot export** — automatic baseline for future comparisons
-- 🔄 **Compare Scans** — diff two snapshots: shows added/removed folders and exact permission changes
+- 📖 **Collapsible legend** — explains all permission types, scopes and inheritance
+- 💾 **JSON snapshot export** — automatic baseline saved alongside every HTML report
+- 🔄 **Compare Scans** — diff two snapshots: added/removed folders and exact permission changes
 - 🖥️ **Full GUI** — no command line knowledge required
-- 🔒 **Admin check** — prompts to restart as Administrator for full coverage
+- 🔒 **Admin check on startup** — prompts to restart as Administrator for full coverage
+- 📁 **Output to script folder** — reports saved next to `ACLens.ps1` by default
 
 ---
 
@@ -41,25 +36,23 @@ ACLens is a PowerShell-based GUI tool that recursively reads NTFS permissions fr
 
 ### 1. Download
 
-Download `ACLens.ps1` from the [Releases](../../releases) page.
+Download `ACLens.ps1` from the [Releases](../../releases) page. No installation needed — single file.
 
 ### 2. Allow script execution
 
-Windows blocks PowerShell scripts by default. Open PowerShell and run:
-
 ```powershell
-# Option A — single run only (recommended for first try)
+# Option A — single run only (recommended)
 powershell.exe -ExecutionPolicy Bypass -File "C:\Path\To\ACLens.ps1"
 
 # Option B — permanently allow for your user account
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### 3. Run ACLens
+### 3. Run
 
 Right-click `ACLens.ps1` → **Run with PowerShell**, or use the command above.
 
-> **Tip:** Run as Administrator for complete results on protected system folders.
+> ACLens will automatically prompt you to restart as Administrator if it detects it's running without elevated privileges.
 
 ---
 
@@ -68,13 +61,13 @@ Right-click `ACLens.ps1` → **Run with PowerShell**, or use the command above.
 ### Basic Scan
 
 1. Click **Browse...** and select the folder to scan
-2. Optionally set a custom output path and maximum scan depth
+2. Optionally set a custom output path and maximum depth (`0` = unlimited)
 3. Click **Start Analysis**
 4. The HTML report opens automatically in your browser
 
 ### Output Files
 
-Both files are saved in the **same folder as `ACLens.ps1`** by default:
+Saved in the **same folder as `ACLens.ps1`** by default:
 
 | File | Description |
 |---|---|
@@ -83,37 +76,37 @@ Both files are saved in the **same folder as `ACLens.ps1`** by default:
 
 ### Compare Scans
 
-1. Run a first scan to create a baseline JSON
+1. Run a first scan to create a baseline JSON snapshot
 2. Click **Compare Scans** in the footer
-3. Select the baseline `.json` file
-4. Enter the folder path for a new live scan
-5. Click **Run Comparison** — the diff report is saved and opened automatically
+3. Select the baseline `.json` file (auto-filled with last scan)
+4. Enter the folder path for the new live scan
+5. Click **Run Comparison** — diff report opens automatically
 
-The diff report shows:
+**Diff report shows:**
 - 🟢 **Added** — folders not present in the baseline
 - 🔴 **Removed** — folders that no longer exist
-- 🟡 **Changed** — exact permission differences per folder (added/removed rules, owner changes, inheritance changes)
+- 🟡 **Changed** — exact permission differences per folder
 
 ---
 
 ## HTML Report
 
-The report includes:
-
-- **Header** — scanned path, date, computer, user, total folders
-- **Statistics** — total / changed / inherited-only / errors
-- **Legend** — collapsible reference for all status codes, permission types and scopes
-- **Toolbar** — filter by status, full-text search, expand/collapse all, print
-- **Folder list** — click any folder to expand and see the full permission table
+| Section | Description |
+|---|---|
+| Header | Scanned path, date, computer, user, total folder count |
+| Statistics | Total / Changed / Inherited-only / Errors |
+| Legend | Collapsible reference for all status codes and permission types |
+| Toolbar | Filter by status, full-text search, expand/collapse all, print |
+| Folder list | Click any row to expand the full permission table |
 
 ### Folder Status
 
 | Badge | Meaning |
 |---|---|
 | 🟣 Root | The start folder |
-| 🟡 Changed | Permissions differ from parent — explicit rules set or inheritance modified |
+| 🟡 Changed | Permissions differ from parent |
 | 🟢 Inherited only | All permissions passed down from parent, no local changes |
-| 🔴 Error | Could not read permissions — access denied or protected system folder |
+| 🔴 Error | Could not read permissions — access denied or system folder |
 
 ---
 
@@ -121,61 +114,43 @@ The report includes:
 
 | Problem | Solution |
 |---|---|
-| Script blocked on start | Use `-ExecutionPolicy Bypass` or set `RemoteSigned` (see Getting Started) |
-| Folders show "Error" | Run as Administrator for full access to system folders |
+| Script blocked | Use `-ExecutionPolicy Bypass` or set `RemoteSigned` |
+| Folders show "Error" | Run as Administrator |
 | 0 folders in report | Verify the start path exists and is accessible |
-| JSON baseline not found | Run a new scan first — JSON is saved automatically next to the HTML report |
-| Browser doesn't open | Uncheck "Open report in browser" and open the HTML file manually |
+| JSON not found | Run a new scan first — JSON saves automatically next to the HTML |
+| Browser doesn't open | Uncheck "Open report in browser" and open the file manually |
 
 ---
 
 ## Known Limitations (v0.1.0-alpha)
 
-- No dark/light theme toggle in the HTML report
 - Compare Scans always uses unlimited depth for the live scan
-- No export to CSV or Excel
-- No scheduled/automated scan support built-in
-- GUI is not DPI-aware on very high-resolution displays
+- No CSV / Excel export
+- No scheduled scan support
+- GUI not DPI-aware on very high-resolution displays
 
 ---
 
 ## Roadmap
 
-- [ ] Version tagging and automatic update check
+- [ ] **v0.2.0** — SharePoint Online support (Graph API, Sites, Libraries, Groups, External Sharing)
 - [ ] Scheduled scan support
 - [ ] CSV / Excel export
-- [ ] Side-by-side diff view in HTML
 - [ ] DPI-aware GUI scaling
-- [ ] Dark/light mode toggle in HTML report
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
-
----
-
-## Credits
-
-The idea for the tool came from **Philipp Herrmann (an awesome guy :-))**, requirements and direction for this project came from **Jan Erik Mueller**.  
-The entire codebase — every line of PowerShell, the WPF GUI, the scan engine, all dialogs and tools — was written by **[Claude](https://claude.ai)**, an AI assistant made by [Anthropic](https://www.anthropic.com).
-
-This project is an example of human–AI collaboration: a person with a vision, and an AI that implements it.
+MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
 ## Contributing
 
-This is an early alpha — bug reports, feature requests and pull requests are welcome!
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes
-4. Open a Pull Request
-
-Please open an issue first for larger changes.
+Bug reports, feature requests and pull requests are welcome!
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 ---
 
-*Made with PowerShell + Windows Forms*
+*Built with PowerShell 5.1 + Windows Forms*
