@@ -7,7 +7,7 @@
     Entry point. Loads all modules and launches the GUI.
 
 .NOTES
-    Version:    0.1.0-alpha
+    Version:    0.2.1-alpha
     Author:     ACLens Contributors
     Compatible: Windows 10/11, Server 2016-2025, PowerShell 5.1+
 #>
@@ -1106,7 +1106,7 @@ $BTN_H  = 26   # Höhe Browse/Save Buttons
 $form = [System.Windows.Forms.Form]::new()
 $form.Text            = "ACLens"
 $form.Size            = [System.Drawing.Size]::new(760, 480)
-$form.MinimumSize     = [System.Drawing.Size]::new(600, 420)
+$form.MinimumSize     = [System.Drawing.Size]::new(700, 440)
 $form.StartPosition   = "CenterScreen"
 $form.FormBorderStyle = "Sizable"
 $form.MaximizeBox     = $true
@@ -1126,16 +1126,28 @@ $lblTitle.Font      = $FT
 $lblTitle.ForeColor = $C_ACCENT
 $lblTitle.BackColor = [System.Drawing.Color]::Transparent
 $lblTitle.AutoSize  = $true
-$lblTitle.Location  = [System.Drawing.Point]::new(16, 12)
+$lblTitle.Location  = [System.Drawing.Point]::new(18, 10)
 $pnlHdr.Controls.Add($lblTitle)
 
+# Version badge next to title
+# Version badge — same style as title, inline
+$lblVersion = [System.Windows.Forms.Label]::new()
+$lblVersion.Text      = "v0.2.1-alpha"
+$lblVersion.Font      = [System.Drawing.Font]::new("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+$lblVersion.ForeColor = HC '#A78BFA'
+$lblVersion.BackColor = [System.Drawing.Color]::Transparent
+$lblVersion.AutoSize  = $true
+$lblVersion.Location  = [System.Drawing.Point]::new(100, 14)   # will be adjusted after lblTitle loads
+$pnlHdr.Controls.Add($lblVersion)
+
+# Subtitle — right of version badge
 $lblSub = [System.Windows.Forms.Label]::new()
-$lblSub.Text      = "NTFS Permission Analyzer & Reporter"
+$lblSub.Text      = "NTFS & SharePoint Permission Analyzer"
 $lblSub.Font      = $FS
-$lblSub.ForeColor = $C_LOW
+$lblSub.ForeColor = HC '#6B7280'
 $lblSub.BackColor = [System.Drawing.Color]::Transparent
 $lblSub.AutoSize  = $true
-$lblSub.Location  = [System.Drawing.Point]::new(118, 21)
+$lblSub.Location  = [System.Drawing.Point]::new(200, 21)   # will be positioned after version label
 $pnlHdr.Controls.Add($lblSub)
 
 $sepHdr = [System.Windows.Forms.Panel]::new()
@@ -1223,6 +1235,64 @@ $btnCompare.FlatAppearance.BorderSize  = 1
 $pnlFtr.Controls.Add($btnCompare)
 
 
+
+# ── Tab bar (below header, above content) ────────────────────
+$pnlTabs = [System.Windows.Forms.Panel]::new()
+$pnlTabs.BackColor = HC '#1A1A2E'
+$form.Controls.Add($pnlTabs)
+
+$tabNTFS = [System.Windows.Forms.Button]::new()
+$tabNTFS.Text = "  NTFS"; $tabNTFS.Size = [System.Drawing.Size]::new(120, 36)
+$tabNTFS.FlatStyle = "Flat"; $tabNTFS.Font = $FB; $tabNTFS.Cursor = "Hand"
+$tabNTFS.BackColor = HC '#1E1E2E'; $tabNTFS.ForeColor = HC '#A78BFA'; $tabNTFS.FlatAppearance.BorderSize = 0
+$tabNTFS.FlatAppearance.BorderSize = 0
+$pnlTabs.Controls.Add($tabNTFS)
+
+$tabSP = [System.Windows.Forms.Button]::new()
+$tabSP.Text = "  SharePoint"; $tabSP.Size = [System.Drawing.Size]::new(140, 36)
+$tabSP.FlatStyle = "Flat"; $tabSP.Font = $FB; $tabSP.Cursor = "Hand"
+$tabSP.BackColor = HC '#1A1A2E'; $tabSP.ForeColor = HC '#6B7280'
+$tabSP.FlatAppearance.BorderSize = 0
+$pnlTabs.Controls.Add($tabSP)
+
+$tabLine = [System.Windows.Forms.Panel]::new()
+$tabLine.BackColor = HC '#7C3AED'; $tabLine.Height = 2
+$pnlTabs.Controls.Add($tabLine)
+
+$tabSep = [System.Windows.Forms.Panel]::new()
+$tabSep.BackColor = HC '#4B5563'; $tabSep.Height = 1
+$form.Controls.Add($tabSep)
+
+$script:activeTab = "NTFS"
+
+# ── NTFS content panel ────────────────────────────────────────
+$pnlIn = [System.Windows.Forms.Panel]::new()
+$pnlIn.BackColor = HC '#1E1E2E'
+$form.Controls.Add($pnlIn)
+
+# ── SharePoint content panel ──────────────────────────────────
+$pnlSP = [System.Windows.Forms.Panel]::new()
+$pnlSP.BackColor = HC '#1E1E2E'
+$pnlSP.Visible   = $false
+$form.Controls.Add($pnlSP)
+
+function Set-ActiveTab($tab) {
+    $script:activeTab = $tab
+    if ($tab -eq "NTFS") {
+        $tabNTFS.BackColor = HC '#1E1E2E'; $tabNTFS.ForeColor = HC '#A78BFA'; $tabNTFS.FlatAppearance.BorderSize = 0
+        $tabSP.BackColor   = HC '#1A1A2E'; $tabSP.ForeColor   = HC '#6B7280'
+        $pnlIn.Visible = $true;  $pnlSP.Visible = $false
+    } else {
+        $tabSP.BackColor   = HC '#1E1E2E'; $tabSP.ForeColor   = HC '#A78BFA'
+        $tabNTFS.BackColor = HC '#1A1A2E'; $tabNTFS.ForeColor = HC '#6B7280'
+        $pnlIn.Visible = $false; $pnlSP.Visible = $true
+    }
+    Do-Layout
+}
+
+$tabNTFS.add_Click({ Set-ActiveTab "NTFS" })
+$tabSP.add_Click({   Set-ActiveTab "SP"   })
+
 # ── Eingabefelder ────────────────────────────────────────────
 function New-Label($text, $bold) {
     $l = [System.Windows.Forms.Label]::new()
@@ -1267,21 +1337,21 @@ function New-Btn($text) {
 $lblPath   = New-Label "Start Path:" $true
 $tbPath    = New-TB $null
 $btnBrowse = New-Btn "Browse..."
-$form.Controls.Add($lblPath)
-$form.Controls.Add($tbPath)
-$form.Controls.Add($btnBrowse)
+$pnlIn.Controls.Add($lblPath)
+$pnlIn.Controls.Add($tbPath)
+$pnlIn.Controls.Add($btnBrowse)
 
 # Zeile 2: Output File
 $lblOut  = New-Label "Output File (HTML + JSON):" $true
 $tbOut   = New-TB "(automatic — saved to script folder)"
 $btnSave = New-Btn "Save as..."
-$form.Controls.Add($lblOut)
-$form.Controls.Add($tbOut)
-$form.Controls.Add($btnSave)
+$pnlIn.Controls.Add($lblOut)
+$pnlIn.Controls.Add($tbOut)
+$pnlIn.Controls.Add($btnSave)
 
 # Zeile 3: Depth
 $lblDepth = New-Label "Maximum Depth:" $true
-$form.Controls.Add($lblDepth)
+$pnlIn.Controls.Add($lblDepth)
 
 $numDepth = [System.Windows.Forms.NumericUpDown]::new()
 $numDepth.Size      = [System.Drawing.Size]::new(68, $BTN_H)
@@ -1291,11 +1361,11 @@ $numDepth.Value     = 0
 $numDepth.BackColor = $C_INPUT
 $numDepth.ForeColor = $C_TXT
 $numDepth.Font      = $FN
-$form.Controls.Add($numDepth)
+$pnlIn.Controls.Add($numDepth)
 
 $lblUnlim = New-Label "  0 = unlimited" $false
 $lblUnlim.ForeColor = $C_LOW
-$form.Controls.Add($lblUnlim)
+$pnlIn.Controls.Add($lblUnlim)
 
 # Checkbox
 $chk = [System.Windows.Forms.CheckBox]::new()
@@ -1305,12 +1375,12 @@ $chk.ForeColor = $C_MID
 $chk.BackColor = [System.Drawing.Color]::Transparent
 $chk.Checked   = $true
 $chk.AutoSize  = $true
-$form.Controls.Add($chk)
+$pnlIn.Controls.Add($chk)
 
 # Separator (zwischen Feldern und Progress)
 $sepMid = [System.Windows.Forms.Panel]::new()
 $sepMid.BackColor = $C_BORDER
-$form.Controls.Add($sepMid)
+$pnlIn.Controls.Add($sepMid)
 
 # ── Progress ─────────────────────────────────────────────────
 $lblStatus = [System.Windows.Forms.Label]::new()
@@ -1318,20 +1388,20 @@ $lblStatus.Text      = "Ready."
 $lblStatus.Font      = $FN
 $lblStatus.ForeColor = $C_MID
 $lblStatus.BackColor = [System.Drawing.Color]::Transparent
-$form.Controls.Add($lblStatus)
+$pnlIn.Controls.Add($lblStatus)
 
 $progBar = [System.Windows.Forms.ProgressBar]::new()
 $progBar.Style   = "Continuous"
 $progBar.Minimum = 0
 $progBar.Maximum = 100
-$form.Controls.Add($progBar)
+$pnlIn.Controls.Add($progBar)
 
 $lblStats = [System.Windows.Forms.Label]::new()
 $lblStats.Text      = ""
 $lblStats.Font      = $FS
 $lblStats.ForeColor = $C_MID
 $lblStats.BackColor = [System.Drawing.Color]::Transparent
-$form.Controls.Add($lblStats)
+$pnlIn.Controls.Add($lblStats)
 
 # ── Layout-Funktion (absolut, sauber) ────────────────────────
 function Do-Layout {
@@ -1342,17 +1412,39 @@ function Do-Layout {
     $tbW    = $cw - $PAD * 2 - $BTN_W - 8   # Textbox-Breite
     $fullW  = $cw - $PAD * 2                 # Volle Inhaltsbreite
 
-    # Header & Trennlinie
+    # Header & Tab-Bar
     $pnlHdr.SetBounds(0, 0, $cw, $HDR_H)
     $sepHdr.SetBounds(0, $HDR_H, $cw, 1)
+    $pnlTabs.SetBounds(0, $HDR_H + 1, $cw, 36)
+    $tabNTFS.Location  = [System.Drawing.Point]::new(0, 0)
+    $tabSP.Location    = [System.Drawing.Point]::new(120, 0)
+    $tabLineW = if ($script:activeTab -eq "NTFS") { 120 } else { 140 }
+    $tabLineX = if ($script:activeTab -eq "NTFS") { 0 } else { 120 }
+    $tabLine.SetBounds($tabLineX, 34, $tabLineW, 2)
+    $tabSep.SetBounds(0, $HDR_H + 37, $cw, 1)
+    $contentY = $HDR_H + 38
+    $contentH = $ch - $FTR_H - $contentY - 2
+    $pnlIn.SetBounds(0, $contentY, $cw, $contentH)
+    $pnlSP.SetBounds(0, $contentY, $cw, $contentH)
+    # SP controls layout
+    $spW = $cw - $PAD * 2
+    $spLblConn.Location       = [System.Drawing.Point]::new($PAD, 14)
+    $spLblConnDetail.SetBounds($PAD, 36, $spW, 20)
+    $spLblUrl.Location        = [System.Drawing.Point]::new($PAD, 66)
+    $spTbUrl.SetBounds($PAD, 88, $spW - 170, 26)
+    $btnSPSetup.Location      = [System.Drawing.Point]::new($spW - 160 + $PAD, 88)
+    $spLblDepth.Location      = [System.Drawing.Point]::new($PAD, 126)
+    $spNumDepth.Location      = [System.Drawing.Point]::new($PAD, 148)
+    $spLblUnlim.Location      = [System.Drawing.Point]::new($PAD + 74, 152)
+    $spChk.Location           = [System.Drawing.Point]::new($PAD, 186)
 
     # Footer & Trennlinie (von unten)
     $sepFtr.SetBounds(0, $ch - $FTR_H - 1, $cw, 1)
     $pnlFtr.SetBounds(0, $ch - $FTR_H, $cw, $FTR_H)
 
 
-    # Inhaltsbereich Y-Start
-    $contentTop = $HDR_H + 1
+    # Inhaltsbereich Y-Start — NTFS panel is now self-contained, Y starts at 0
+    $contentTop = 0
 
     # Zeile 1: Start Path  (Y = contentTop + 16)
     $y1 = $contentTop + 16
@@ -1387,7 +1479,15 @@ function Do-Layout {
     $lblStats.SetBounds($x, ($progY + 42), $fullW, 18)
 }
 
-$form.add_Load({   Do-Layout })
+$form.add_Load({
+    Do-Layout
+    # Pin all header items to same Y = 14 (visual baseline for 54px header)
+    $lblTitle.Location   = [System.Drawing.Point]::new(18, 13)
+    # Bottom-align smaller labels to title baseline
+    $botY = $lblTitle.Bottom - $lblVersion.Height - 2
+    $lblVersion.Location = [System.Drawing.Point]::new($lblTitle.Right + 8, $botY)
+    $lblSub.Location     = [System.Drawing.Point]::new($lblVersion.Right + 10, $lblTitle.Bottom - $lblSub.Height - 2)
+})
 $form.add_Resize({ Do-Layout })
 
 # ── Events ───────────────────────────────────────────────────
@@ -1417,6 +1517,41 @@ $script:cancelFlag = $false
 $btnCancel.add_Click({ $script:cancelFlag = $true })
 
 $btnStart.add_Click({
+    # Route to correct scanner based on active tab
+    if ($script:activeTab -eq "SP") {
+        $siteUrl = $spTbUrl.Text.Trim()
+        if ([string]::IsNullOrEmpty($siteUrl) -or $siteUrl -like "*yourtenant*") {
+            [System.Windows.Forms.MessageBox]::Show("Please enter a valid SharePoint Site URL.", "Invalid URL", "OK", "Warning") | Out-Null
+            return
+        }
+        $creds = Get-SPCredentials
+        if (-not $creds.IsConfigured) {
+            [System.Windows.Forms.MessageBox]::Show("SharePoint is not configured yet.`nPlease use 'Setup / Reconnect' first.", "Not configured", "OK", "Warning") | Out-Null
+            return
+        }
+        $ts      = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
+        $outFile = Join-Path $PSScriptRoot "ACLens_SP_Report_$ts.html"
+        $btnStart.Enabled  = $false
+        $btnCancel.Enabled = $true
+        $progBar.Value     = 0
+        $lblStats.Text     = ""
+        try {
+            Start-SPScan -SiteUrl $siteUrl -MaxDepth ([int]$spNumDepth.Value) `
+                -OutputPath $outFile -StatusLabel $lblStatus -ProgressBar $progBar `
+                -StatsLabel $lblStats -FormRef $form
+            $script:lastReport = $outFile
+            $btnOpenLast.Enabled = $true
+            if ($spChk.Checked) { Start-Process $outFile }
+        } catch {
+            $lblStatus.Text      = "Error: $($_.Exception.Message)"
+            $lblStatus.ForeColor = $C_ERR
+        } finally {
+            $btnStart.Enabled  = $true
+            $btnCancel.Enabled = $false
+        }
+        return
+    }
+
     $rootPath = $tbPath.Text.Trim()
     if ([string]::IsNullOrEmpty($rootPath) -or -not (Test-Path $rootPath -PathType Container)) {
         [System.Windows.Forms.MessageBox]::Show(
@@ -1540,6 +1675,752 @@ $btnStart.add_Click({
     }
 })
 
+
+# ── SharePoint Tab Controls ───────────────────────────────────
+$spCredsFile = Join-Path $PSScriptRoot "sp_credentials.xml"
+
+function Get-SPCredentials {
+    if (Test-Path $spCredsFile) {
+        try {
+            $xml = [xml](Get-Content $spCredsFile -Raw)
+            return [PSCustomObject]@{
+                TenantId     = $xml.ACLens.TenantId
+                ClientId     = $xml.ACLens.ClientId
+                IsConfigured = ($xml.ACLens.TenantId -ne "")
+            }
+        } catch { }
+    }
+    return [PSCustomObject]@{ TenantId = ""; ClientId = ""; IsConfigured = $false }
+}
+
+function Save-SPCredentials($tenantId, $clientId, $clientSecret) {
+    $secureSecret    = ConvertTo-SecureString $clientSecret -AsPlainText -Force
+    $encryptedSecret = $secureSecret | ConvertFrom-SecureString
+    @"
+<?xml version="1.0" encoding="utf-8"?>
+<ACLens>
+  <TenantId>$tenantId</TenantId>
+  <ClientId>$clientId</ClientId>
+  <ClientSecret>$encryptedSecret</ClientSecret>
+</ACLens>
+"@ | Out-File -FilePath $spCredsFile -Encoding UTF8 -Force
+}
+
+# SP: Connection status
+$spLblConn = [System.Windows.Forms.Label]::new()
+$spLblConn.Font = $FB; $spLblConn.BackColor = [System.Drawing.Color]::Transparent; $spLblConn.AutoSize = $true
+$pnlSP.Controls.Add($spLblConn)
+
+$spLblConnDetail = [System.Windows.Forms.Label]::new()
+$spLblConnDetail.Font = $FS; $spLblConnDetail.ForeColor = HC '#9CA3AF'
+$spLblConnDetail.BackColor = [System.Drawing.Color]::Transparent
+$pnlSP.Controls.Add($spLblConnDetail)
+
+# SP: Site URL
+$spLblUrl = [System.Windows.Forms.Label]::new()
+$spLblUrl.Text = "SharePoint Site URL:"; $spLblUrl.Font = $FB
+$spLblUrl.ForeColor = HC '#E2E8F0'; $spLblUrl.BackColor = [System.Drawing.Color]::Transparent; $spLblUrl.AutoSize = $true
+$pnlSP.Controls.Add($spLblUrl)
+
+$spTbUrl = [System.Windows.Forms.TextBox]::new()
+$spTbUrl.BackColor = HC '#2D2D3F'; $spTbUrl.ForeColor = HC '#6B7280'
+$spTbUrl.Text = "https://yourtenant.sharepoint.com/sites/yoursite"
+$spTbUrl.BorderStyle = "FixedSingle"; $spTbUrl.Font = $FN; $spTbUrl.Height = 26
+$pnlSP.Controls.Add($spTbUrl)
+
+# SP: Depth
+$spLblDepth = [System.Windows.Forms.Label]::new()
+$spLblDepth.Text = "Maximum Depth:"; $spLblDepth.Font = $FB
+$spLblDepth.ForeColor = HC '#E2E8F0'; $spLblDepth.BackColor = [System.Drawing.Color]::Transparent; $spLblDepth.AutoSize = $true
+$pnlSP.Controls.Add($spLblDepth)
+
+$spNumDepth = [System.Windows.Forms.NumericUpDown]::new()
+$spNumDepth.Size = [System.Drawing.Size]::new(68, 26); $spNumDepth.Minimum = 0; $spNumDepth.Maximum = 100; $spNumDepth.Value = 0
+$spNumDepth.BackColor = HC '#2D2D3F'; $spNumDepth.ForeColor = HC '#E2E8F0'; $spNumDepth.Font = $FN
+$pnlSP.Controls.Add($spNumDepth)
+
+$spLblUnlim = [System.Windows.Forms.Label]::new()
+$spLblUnlim.Text = "  0 = unlimited"; $spLblUnlim.Font = $FS
+$spLblUnlim.ForeColor = HC '#6B7280'; $spLblUnlim.BackColor = [System.Drawing.Color]::Transparent; $spLblUnlim.AutoSize = $true
+$pnlSP.Controls.Add($spLblUnlim)
+
+# SP: Checkbox
+$spChk = [System.Windows.Forms.CheckBox]::new()
+$spChk.Text = "Open report in browser after creation"; $spChk.Font = $FN
+$spChk.ForeColor = HC '#9CA3AF'; $spChk.BackColor = [System.Drawing.Color]::Transparent
+$spChk.Checked = $true; $spChk.AutoSize = $true
+$pnlSP.Controls.Add($spChk)
+
+# SP: Setup button
+$btnSPSetup = [System.Windows.Forms.Button]::new()
+$btnSPSetup.Text = "Setup / Reconnect"; $btnSPSetup.Size = [System.Drawing.Size]::new(160, 26)
+$btnSPSetup.FlatStyle = "Flat"; $btnSPSetup.Font = $FN
+$btnSPSetup.BackColor = HC '#7C3AED'; $btnSPSetup.ForeColor = [System.Drawing.Color]::White; $btnSPSetup.Cursor = "Hand"
+$btnSPSetup.FlatAppearance.BorderColor = HC '#4C1D95'; $btnSPSetup.FlatAppearance.BorderSize = 1
+$pnlSP.Controls.Add($btnSPSetup)
+
+function Update-SPStatus {
+    $creds = Get-SPCredentials
+    if ($creds.IsConfigured) {
+        $spLblConn.Text      = "Connected"
+        $spLblConn.ForeColor = HC '#34D399'
+        $spLblConnDetail.Text = "Tenant: $($creds.TenantId)  |  Client: $($creds.ClientId)"
+    } else {
+        $spLblConn.Text      = "Not configured"
+        $spLblConn.ForeColor = HC '#F87171'
+        $spLblConnDetail.Text = "Click 'Setup / Reconnect' to register ACLens with your Microsoft 365 tenant."
+    }
+}
+
+Update-SPStatus
+$btnSPSetup.add_Click({ Show-SPSetupWizard })
+
+# ── SharePoint Scanner Functions ─────────────────────────────
+function Get-SPAccessToken {
+    $credsFile = Join-Path $PSScriptRoot "sp_credentials.xml"
+    if (-not (Test-Path $credsFile)) { throw "SharePoint not configured. Use Setup / Reconnect first." }
+    $xml = [xml](Get-Content $credsFile -Raw)
+    $tenantId  = $xml.ACLens.TenantId
+    $clientId  = $xml.ACLens.ClientId
+    $secSecret = $xml.ACLens.ClientSecret | ConvertTo-SecureString
+    $bstr      = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secSecret)
+    $secret    = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+    [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+
+    $body = @{
+        grant_type    = "client_credentials"
+        client_id     = $clientId
+        client_secret = $secret
+        scope         = "https://graph.microsoft.com/.default"
+    }
+    $resp = Invoke-RestMethod -Uri "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token" `
+        -Method Post -Body $body -ContentType "application/x-www-form-urlencoded"
+    return $resp.access_token
+}
+
+function Invoke-GraphAPI {
+    param([string]$Uri, [string]$Token, [string]$Method = "GET", [string]$Body = $null)
+    $headers = @{ Authorization = "Bearer $Token"; "Content-Type" = "application/json" }
+    $params  = @{ Uri = $Uri; Headers = $headers; Method = $Method; ErrorAction = "Stop" }
+    if ($Body) { $params.Body = $Body }
+    $resp    = Invoke-RestMethod @params
+    return $resp
+}
+
+function Get-GraphPagedResults {
+    param([string]$Uri, [string]$Token)
+    $results = [System.Collections.Generic.List[object]]::new()
+    $nextUri = $Uri
+    while ($nextUri) {
+        $page    = Invoke-GraphAPI -Uri $nextUri -Token $Token
+        if ($page.value) { foreach ($item in $page.value) { $results.Add($item) } }
+        $nextUri = $page.'@odata.nextLink'
+    }
+    return $results.ToArray()
+}
+
+function Get-SPSitePermissions {
+    param([string]$SiteId, [string]$Token)
+    $perms = @()
+    try {
+        $resp = Invoke-GraphAPI -Uri "https://graph.microsoft.com/v1.0/sites/$SiteId/permissions" -Token $Token
+        foreach ($p in $resp.value) {
+            $roles     = $p.roles -join ", "
+            $grantedTo = if ($p.grantedToIdentitiesV2) {
+                ($p.grantedToIdentitiesV2 | ForEach-Object {
+                    if ($_.user)  { $_.user.displayName }
+                    elseif ($_.group) { $_.group.displayName }
+                    else { "Unknown" }
+                }) -join "; "
+            } elseif ($p.grantedToV2) {
+                if ($p.grantedToV2.user)  { $p.grantedToV2.user.displayName }
+                elseif ($p.grantedToV2.group) { $p.grantedToV2.group.displayName }
+                else { "Unknown" }
+            } else { "Unknown" }
+
+            $perms += [PSCustomObject]@{
+                GrantedTo   = $grantedTo
+                Roles       = $roles
+                Type        = if ($p.grantedToV2.user) { "User" } elseif ($p.grantedToV2.group) { "Group" } else { "App" }
+                InviteToken = $p.id
+            }
+        }
+    } catch { }
+    return $perms
+}
+
+function Get-SPListPermissions {
+    param([string]$SiteId, [string]$ListId, [string]$Token)
+    # SharePoint REST for list-level permissions (Graph doesn't expose these directly)
+    $perms = @()
+    try {
+        $siteResp = Invoke-GraphAPI -Uri "https://graph.microsoft.com/v1.0/sites/$SiteId" -Token $Token
+        $hostname  = ([System.Uri]$siteResp.webUrl).Host
+        $sitePath  = ([System.Uri]$siteResp.webUrl).AbsolutePath
+        $restUrl   = "https://$hostname/_api/web/lists(guid'$ListId')/roleassignments?`$expand=Member,RoleDefinitionBindings"
+        $headers   = @{ Authorization = "Bearer $Token"; Accept = "application/json;odata=nometadata" }
+        $resp      = Invoke-RestMethod -Uri $restUrl -Headers $headers -ErrorAction Stop
+        foreach ($ra in $resp.value) {
+            $memberName = $ra.Member.Title
+            $roles      = ($ra.RoleDefinitionBindings | ForEach-Object { $_.Name }) -join ", "
+            $memberType = switch ($ra.Member.PrincipalType) {
+                1  { "User" }
+                 4 { "SecurityGroup" }
+                8  { "SharePoint Group" }
+                default { "Unknown" }
+            }
+            $perms += [PSCustomObject]@{
+                GrantedTo       = $memberName
+                Roles           = $roles
+                Type            = $memberType
+                UniquePerms     = $true
+            }
+        }
+    } catch { }
+    return $perms
+}
+
+function Get-SPGroupMembers {
+    param([string]$SiteId, [string]$Token)
+    $groups = [System.Collections.Generic.List[object]]::new()
+    try {
+        $siteResp = Invoke-GraphAPI -Uri "https://graph.microsoft.com/v1.0/sites/$SiteId" -Token $Token
+        $hostname  = ([System.Uri]$siteResp.webUrl).Host
+        $restUrl   = "https://$hostname/_api/web/sitegroups?`$expand=Users"
+        $headers   = @{ Authorization = "Bearer $Token"; Accept = "application/json;odata=nometadata" }
+        $resp      = Invoke-RestMethod -Uri $restUrl -Headers $headers -ErrorAction Stop
+        foreach ($grp in $resp.value) {
+            $members = ($grp.Users | ForEach-Object { $_.Title }) -join "; "
+            $groups.Add([PSCustomObject]@{
+                Name    = $grp.Title
+                Members = $members
+                Count   = $grp.Users.Count
+            })
+        }
+    } catch { }
+    return $groups.ToArray()
+}
+
+function Get-SPExternalSharing {
+    param([string]$SiteId, [string]$Token)
+    try {
+        $site = Invoke-GraphAPI -Uri "https://graph.microsoft.com/v1.0/sites/$SiteId" -Token $Token
+        $policy = $site.sharingCapability
+        $result = switch ($policy) {
+            "disabled"                        { "Disabled" }
+            "externalUserSharingOnly"         { "External users only" }
+            "externalUserAndGuestSharing"     { "External users and guests" }
+            "existingExternalUserSharingOnly" { "Existing external users only" }
+            default                           { if ($policy) { $policy } else { "Unknown" } }
+        }
+        return $result
+    } catch { return "Unknown" }
+}
+
+function Get-SPFolderTree {
+    param([string]$SiteId, [string]$DriveId, [string]$ItemId = "root", [int]$MaxDepth, [int]$CurrentDepth = 0, [string]$Token)
+    $results = [System.Collections.Generic.List[object]]::new()
+    if ($MaxDepth -gt 0 -and $CurrentDepth -ge $MaxDepth) { return $results.ToArray() }
+    try {
+        $uri = if ($ItemId -eq "root") {
+            "https://graph.microsoft.com/v1.0/sites/$SiteId/drives/$DriveId/root/children"
+        } else {
+            "https://graph.microsoft.com/v1.0/sites/$SiteId/drives/$DriveId/items/$ItemId/children"
+        }
+        $children = Get-GraphPagedResults -Uri $uri -Token $Token
+        foreach ($child in $children) {
+            if ($child.folder) {
+                # Get permissions for this folder
+                $permUri  = "https://graph.microsoft.com/v1.0/sites/$SiteId/drives/$DriveId/items/$($child.id)/permissions"
+                $permResp = Invoke-GraphAPI -Uri $permUri -Token $Token -ErrorAction SilentlyContinue
+                $perms    = @()
+                if ($permResp -and $permResp.value) {
+                    foreach ($p in $permResp.value) {
+                        $grantedTo = "Unknown"
+                        if ($p.grantedToV2) {
+                            if ($p.grantedToV2.user)        { $grantedTo = $p.grantedToV2.user.displayName }
+                            elseif ($p.grantedToV2.group)   { $grantedTo = $p.grantedToV2.group.displayName }
+                            elseif ($p.grantedToV2.siteUser){ $grantedTo = $p.grantedToV2.siteUser.displayName }
+                        }
+                        $roles = if ($p.roles) { $p.roles -join ", " } else { "Custom" }
+                        $perms += [PSCustomObject]@{
+                            GrantedTo   = $grantedTo
+                            Roles       = $roles
+                            IsInherited = ($p.inheritedFrom -ne $null)
+                            Link        = ($p.link -ne $null)
+                        }
+                    }
+                }
+                $hasUniquePerms = ($perms | Where-Object { -not $_.IsInherited }).Count -gt 0
+                $results.Add([PSCustomObject]@{
+                    Path            = $child.name
+                    FullPath        = $child.parentReference.path + "/" + $child.name
+                    WebUrl          = $child.webUrl
+                    Depth           = $CurrentDepth
+                    HasUniquePerms  = $hasUniquePerms
+                    Permissions     = $perms
+                    Error           = $null
+                })
+                # Recurse
+                $sub = Get-SPFolderTree -SiteId $SiteId -DriveId $DriveId -ItemId $child.id `
+                    -MaxDepth $MaxDepth -CurrentDepth ($CurrentDepth + 1) -Token $Token
+                foreach ($s in $sub) { $results.Add($s) }
+            }
+        }
+    } catch {
+        $results.Add([PSCustomObject]@{
+            Path = "Error"; FullPath = ""; WebUrl = ""; Depth = $CurrentDepth
+            HasUniquePerms = $false; Permissions = @(); Error = $_.Exception.Message
+        })
+    }
+    return $results.ToArray()
+}
+
+function Start-SPScan {
+    param(
+        [string]$SiteUrl,
+        [int]$MaxDepth,
+        [string]$OutputPath,
+        [System.Windows.Forms.Label]$StatusLabel,
+        [System.Windows.Forms.ProgressBar]$ProgressBar,
+        [System.Windows.Forms.Label]$StatsLabel,
+        [System.Windows.Forms.Form]$FormRef
+    )
+
+    $StatusLabel.Text      = "Authenticating..."
+    $StatusLabel.ForeColor = HC '#9CA3AF'
+    $FormRef.Refresh()
+
+    $token = Get-SPAccessToken
+
+    # Resolve site ID from URL
+    $StatusLabel.Text = "Resolving site..."
+    $FormRef.Refresh()
+
+    $encodedUrl  = [System.Uri]::EscapeDataString($SiteUrl)
+    $siteInfo    = Invoke-GraphAPI -Uri "https://graph.microsoft.com/v1.0/sites?`$filter=webUrl eq '$encodedUrl'" -Token $token
+    if (-not $siteInfo.value -or $siteInfo.value.Count -eq 0) {
+        # Try direct lookup
+        $uri2    = $SiteUrl -replace "https://", "" -replace "\.sharepoint\.com", ".sharepoint.com:"
+        $siteInfo2 = Invoke-GraphAPI -Uri "https://graph.microsoft.com/v1.0/sites/$uri2" -Token $token
+        $site    = $siteInfo2
+    } else {
+        $site = $siteInfo.value[0]
+    }
+    $siteId = $site.id
+
+    # Get site-level permissions
+    $StatusLabel.Text = "Reading site permissions..."
+    $FormRef.Refresh()
+    $sitePerms    = Get-SPSitePermissions -SiteId $siteId -Token $token
+    $siteGroups   = Get-SPGroupMembers -SiteId $siteId -Token $token
+    $extSharing   = Get-SPExternalSharing -SiteId $siteId -Token $token
+
+    # Get drives (document libraries)
+    $StatusLabel.Text = "Scanning document libraries..."
+    $FormRef.Refresh()
+    $drives = Get-GraphPagedResults -Uri "https://graph.microsoft.com/v1.0/sites/$siteId/drives" -Token $token
+
+    $allItems  = [System.Collections.Generic.List[object]]::new()
+    $driveData = [System.Collections.Generic.List[object]]::new()
+    $totalDrives = $drives.Count
+    $driveIdx    = 0
+
+    foreach ($drive in $drives) {
+        $driveIdx++
+        $pct = [int](($driveIdx / $totalDrives) * 90)
+        $ProgressBar.Value = $pct
+        $StatusLabel.Text  = "Scanning library $driveIdx / $totalDrives : $($drive.name)"
+        $FormRef.Refresh()
+
+        # Get library-level permissions
+        $listId    = $drive.list.id
+        $listPerms = if ($listId) { Get-SPListPermissions -SiteId $siteId -ListId $listId -Token $token } else { @() }
+
+        # Get folder tree
+        $folders = Get-SPFolderTree -SiteId $siteId -DriveId $drive.id `
+            -MaxDepth $MaxDepth -CurrentDepth 0 -Token $token
+
+        $driveData.Add([PSCustomObject]@{
+            Name        = $drive.name
+            DriveType   = $drive.driveType
+            WebUrl      = $drive.webUrl
+            Permissions = $listPerms
+            Folders     = $folders
+        })
+        foreach ($f in $folders) { $allItems.Add($f) }
+    }
+
+    $ProgressBar.Value = 99
+    $StatusLabel.Text  = "Generating HTML report..."
+    $FormRef.Refresh()
+
+    $result = New-SPHTMLReport -SiteUrl $SiteUrl -SiteId $siteId -SiteName $site.displayName `
+        -SitePerms $sitePerms -Groups $siteGroups -ExternalSharing $extSharing `
+        -Drives $driveData -OutputPath $OutputPath
+
+    $ProgressBar.Value   = 100
+    $StatusLabel.Text    = "Done!  Report saved to: $OutputPath"
+    $StatusLabel.ForeColor = HC '#34D399'
+    $StatsLabel.Text     = "Libraries: $($drives.Count)   |   Folders scanned: $($allItems.Count)   |   External Sharing: $extSharing"
+
+    # Save SP JSON snapshot for comparison
+    $jsonOut  = [System.IO.Path]::ChangeExtension($OutputPath, '.json')
+    $snapshot = $allItems.ToArray() | Select-Object FullPath, WebUrl, Depth, HasUniquePerms, Error,
+        @{N='Permissions';E={ $_.Permissions | Select-Object GrantedTo, Roles, IsInherited, Link }}
+    $snapshot | ConvertTo-Json -Depth 5 | Out-File -FilePath $jsonOut -Encoding UTF8
+
+    return $result
+}
+
+
+function Show-SPSetupWizard {
+    $wiz = [System.Windows.Forms.Form]::new()
+    $wiz.Text            = "ACLens — SharePoint Setup"
+    $wiz.ClientSize      = [System.Drawing.Size]::new(620, 480)
+    $wiz.StartPosition   = "CenterParent"
+    $wiz.FormBorderStyle = "FixedDialog"
+    $wiz.MaximizeBox     = $false
+    $wiz.BackColor       = HC '#1E1E2E'
+    $wiz.Font            = $FN
+
+    # Header
+    $wHdr = [System.Windows.Forms.Panel]::new()
+    $wHdr.SetBounds(0, 0, 620, 56); $wHdr.BackColor = HC '#1A1A2E'
+    $wiz.Controls.Add($wHdr)
+
+    $wTitle = [System.Windows.Forms.Label]::new()
+    $wTitle.Text = "SharePoint Setup"; $wTitle.Font = [System.Drawing.Font]::new("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
+    $wTitle.ForeColor = HC '#A78BFA'; $wTitle.BackColor = [System.Drawing.Color]::Transparent
+    $wTitle.AutoSize = $true; $wTitle.Location = [System.Drawing.Point]::new(16, 13)
+    $wHdr.Controls.Add($wTitle)
+
+    $wSub = [System.Windows.Forms.Label]::new()
+    $wSub.Text = "Connect ACLens to Microsoft 365"
+    $wSub.Font = $FS; $wSub.ForeColor = HC '#6B7280'
+    $wSub.BackColor = [System.Drawing.Color]::Transparent; $wSub.AutoSize = $true
+    $wSub.Location = [System.Drawing.Point]::new(190, 21)
+    $wHdr.Controls.Add($wSub)
+
+    $wSepHdr = [System.Windows.Forms.Panel]::new()
+    $wSepHdr.SetBounds(0, 56, 620, 1); $wSepHdr.BackColor = HC '#4B5563'
+    $wiz.Controls.Add($wSepHdr)
+
+    # Tab buttons: Auto (Device Code) | Manual
+    $wTabAuto = [System.Windows.Forms.Button]::new()
+    $wTabAuto.Text = "  ⚡  Automatic Setup"; $wTabAuto.Size = [System.Drawing.Size]::new(200, 34)
+    $wTabAuto.Location = [System.Drawing.Point]::new(16, 68); $wTabAuto.FlatStyle = "Flat"
+    $wTabAuto.Font = $FB; $wTabAuto.BackColor = HC '#7C3AED'; $wTabAuto.ForeColor = [System.Drawing.Color]::White
+    $wTabAuto.Cursor = "Hand"; $wTabAuto.FlatAppearance.BorderColor = HC '#4C1D95'; $wTabAuto.FlatAppearance.BorderSize = 1
+    $wiz.Controls.Add($wTabAuto)
+
+    $wTabManual = [System.Windows.Forms.Button]::new()
+    $wTabManual.Text = "  📋  Manual Setup"; $wTabManual.Size = [System.Drawing.Size]::new(180, 34)
+    $wTabManual.Location = [System.Drawing.Point]::new(224, 68); $wTabManual.FlatStyle = "Flat"
+    $wTabManual.Font = $FB; $wTabManual.BackColor = HC '#374151'; $wTabManual.ForeColor = HC '#9CA3AF'
+    $wTabManual.Cursor = "Hand"; $wTabManual.FlatAppearance.BorderColor = HC '#4B5563'; $wTabManual.FlatAppearance.BorderSize = 1
+    $wiz.Controls.Add($wTabManual)
+
+    $wSepTab = [System.Windows.Forms.Panel]::new()
+    $wSepTab.SetBounds(0, 103, 620, 1); $wSepTab.BackColor = HC '#374151'
+    $wiz.Controls.Add($wSepTab)
+
+    # ── Auto panel ───────────────────────────────────────────
+    $pAuto = [System.Windows.Forms.Panel]::new()
+    $pAuto.SetBounds(0, 104, 620, 316); $pAuto.BackColor = HC '#1E1E2E'
+    $wiz.Controls.Add($pAuto)
+
+    $aInfo = [System.Windows.Forms.Label]::new()
+    $aInfo.Text = "ACLens will automatically create an App Registration in your Azure AD tenant using the Device Code flow. You need an account with Application Administrator or Global Administrator role."
+    $aInfo.Font = $FN; $aInfo.ForeColor = HC '#9CA3AF'; $aInfo.BackColor = [System.Drawing.Color]::Transparent
+    $aInfo.Size = [System.Drawing.Size]::new(580, 52); $aInfo.Location = [System.Drawing.Point]::new(20, 14)
+    $pAuto.Controls.Add($aInfo)
+
+    $aStep1 = [System.Windows.Forms.Label]::new()
+    $aStep1.Text = "Step 1 — Click 'Get Device Code' below"
+    $aStep1.Font = $FB; $aStep1.ForeColor = HC '#E2E8F0'; $aStep1.BackColor = [System.Drawing.Color]::Transparent
+    $aStep1.AutoSize = $true; $aStep1.Location = [System.Drawing.Point]::new(20, 74)
+    $pAuto.Controls.Add($aStep1)
+
+    $aStep2 = [System.Windows.Forms.Label]::new()
+    $aStep2.Text = "Step 2 — Open the link and enter the code shown below"
+    $aStep2.Font = $FB; $aStep2.ForeColor = HC '#E2E8F0'; $aStep2.BackColor = [System.Drawing.Color]::Transparent
+    $aStep2.AutoSize = $true; $aStep2.Location = [System.Drawing.Point]::new(20, 98)
+    $pAuto.Controls.Add($aStep2)
+
+    $aStep3 = [System.Windows.Forms.Label]::new()
+    $aStep3.Text = "Step 3 — Sign in with your admin account — ACLens handles the rest"
+    $aStep3.Font = $FB; $aStep3.ForeColor = HC '#E2E8F0'; $aStep3.BackColor = [System.Drawing.Color]::Transparent
+    $aStep3.AutoSize = $true; $aStep3.Location = [System.Drawing.Point]::new(20, 122)
+    $pAuto.Controls.Add($aStep3)
+
+    # Device code box
+    $aCodeBox = [System.Windows.Forms.Panel]::new()
+    $aCodeBox.SetBounds(20, 152, 580, 64); $aCodeBox.BackColor = HC '#1A1A2E'
+    $pAuto.Controls.Add($aCodeBox)
+
+    $aCodeLabel = [System.Windows.Forms.Label]::new()
+    $aCodeLabel.Text = "Click 'Get Device Code' to start"
+    $aCodeLabel.Font = [System.Drawing.Font]::new("Consolas", 14, [System.Drawing.FontStyle]::Bold)
+    $aCodeLabel.ForeColor = HC '#FBBF24'; $aCodeLabel.BackColor = [System.Drawing.Color]::Transparent
+    $aCodeLabel.AutoSize = $true; $aCodeLabel.Location = [System.Drawing.Point]::new(16, 18)
+    $aCodeBox.Controls.Add($aCodeLabel)
+
+    $aUrlLabel = [System.Windows.Forms.Label]::new()
+    $aUrlLabel.Text = ""; $aUrlLabel.Font = $FS
+    $aUrlLabel.ForeColor = HC '#60A5FA'; $aUrlLabel.BackColor = [System.Drawing.Color]::Transparent
+    $aUrlLabel.AutoSize = $true; $aUrlLabel.Location = [System.Drawing.Point]::new(16, 42)
+    $aCodeBox.Controls.Add($aUrlLabel)
+
+    $aStatusLabel = [System.Windows.Forms.Label]::new()
+    $aStatusLabel.Text = ""; $aStatusLabel.Font = $FN
+    $aStatusLabel.ForeColor = HC '#9CA3AF'; $aStatusLabel.BackColor = [System.Drawing.Color]::Transparent
+    $aStatusLabel.Size = [System.Drawing.Size]::new(580, 20); $aStatusLabel.Location = [System.Drawing.Point]::new(20, 226)
+    $pAuto.Controls.Add($aStatusLabel)
+
+    $aBtnGetCode = [System.Windows.Forms.Button]::new()
+    $aBtnGetCode.Text = "Get Device Code"; $aBtnGetCode.Size = [System.Drawing.Size]::new(160, 34)
+    $aBtnGetCode.Location = [System.Drawing.Point]::new(20, 254); $aBtnGetCode.FlatStyle = "Flat"
+    $aBtnGetCode.Font = $FB; $aBtnGetCode.BackColor = HC '#7C3AED'; $aBtnGetCode.ForeColor = [System.Drawing.Color]::White
+    $aBtnGetCode.Cursor = "Hand"; $aBtnGetCode.FlatAppearance.BorderColor = HC '#4C1D95'; $aBtnGetCode.FlatAppearance.BorderSize = 1
+    $pAuto.Controls.Add($aBtnGetCode)
+
+    $aBtnOpenBrowser = [System.Windows.Forms.Button]::new()
+    $aBtnOpenBrowser.Text = "Open microsoft.com/devicelogin"; $aBtnOpenBrowser.Size = [System.Drawing.Size]::new(240, 34)
+    $aBtnOpenBrowser.Location = [System.Drawing.Point]::new(190, 254); $aBtnOpenBrowser.FlatStyle = "Flat"
+    $aBtnOpenBrowser.Font = $FN; $aBtnOpenBrowser.BackColor = HC '#1D4ED8'; $aBtnOpenBrowser.ForeColor = [System.Drawing.Color]::White
+    $aBtnOpenBrowser.Cursor = "Hand"; $aBtnOpenBrowser.Enabled = $false
+    $aBtnOpenBrowser.FlatAppearance.BorderColor = HC '#1E40AF'; $aBtnOpenBrowser.FlatAppearance.BorderSize = 1
+    $pAuto.Controls.Add($aBtnOpenBrowser)
+
+    # ── Manual panel ─────────────────────────────────────────
+    $pManual = [System.Windows.Forms.Panel]::new()
+    $pManual.SetBounds(0, 104, 620, 316); $pManual.BackColor = HC '#1E1E2E'; $pManual.Visible = $false
+    $wiz.Controls.Add($pManual)
+
+    $mInfo = [System.Windows.Forms.Label]::new()
+    $mInfo.Text = "Manually enter credentials from an existing Azure AD App Registration. See the documentation for setup instructions."
+    $mInfo.Font = $FN; $mInfo.ForeColor = HC '#9CA3AF'; $mInfo.BackColor = [System.Drawing.Color]::Transparent
+    $mInfo.Size = [System.Drawing.Size]::new(580, 36); $mInfo.Location = [System.Drawing.Point]::new(20, 14)
+    $pManual.Controls.Add($mInfo)
+
+    $mBtnDocs = [System.Windows.Forms.Button]::new()
+    $mBtnDocs.Text = "Open Manual Setup Guide"; $mBtnDocs.Size = [System.Drawing.Size]::new(200, 28)
+    $mBtnDocs.Location = [System.Drawing.Point]::new(20, 52); $mBtnDocs.FlatStyle = "Flat"
+    $mBtnDocs.Font = $FS; $mBtnDocs.BackColor = HC '#374151'; $mBtnDocs.ForeColor = HC '#60A5FA'
+    $mBtnDocs.Cursor = "Hand"; $mBtnDocs.FlatAppearance.BorderColor = HC '#4B5563'; $mBtnDocs.FlatAppearance.BorderSize = 1
+    $mBtnDocs.add_Click({ Start-Process "https://github.com/jemil/ACLens/blob/main/docs/manual-sp-setup.md" })
+    $pManual.Controls.Add($mBtnDocs)
+
+    function New-MField($label, $y, $placeholder) {
+        $lbl = [System.Windows.Forms.Label]::new()
+        $lbl.Text = $label; $lbl.Font = $FB; $lbl.ForeColor = HC '#E2E8F0'
+        $lbl.BackColor = [System.Drawing.Color]::Transparent; $lbl.AutoSize = $true
+        $lbl.Location = [System.Drawing.Point]::new(20, $y)
+        $pManual.Controls.Add($lbl)
+        $tb = [System.Windows.Forms.TextBox]::new()
+        $tb.Size = [System.Drawing.Size]::new(578, 26); $tb.Location = [System.Drawing.Point]::new(20, $y + 20)
+        $tb.BackColor = HC '#2D2D3F'; $tb.ForeColor = HC '#6B7280'
+        $tb.Text = $placeholder; $tb.BorderStyle = "FixedSingle"; $tb.Font = $FN
+        $pManual.Controls.Add($tb)
+        return $tb
+    }
+
+    $mTbTenant = New-MField "Tenant ID"     90  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    $mTbClient = New-MField "Client ID"     140 "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    $mTbSecret = New-MField "Client Secret" 190 "your-client-secret-value"
+    $mTbSecret.UseSystemPasswordChar = $false
+
+    $mBtnSave = [System.Windows.Forms.Button]::new()
+    $mBtnSave.Text = "Save & Connect"; $mBtnSave.Size = [System.Drawing.Size]::new(160, 34)
+    $mBtnSave.Location = [System.Drawing.Point]::new(20, 250); $mBtnSave.FlatStyle = "Flat"
+    $mBtnSave.Font = $FB; $mBtnSave.BackColor = HC '#7C3AED'; $mBtnSave.ForeColor = [System.Drawing.Color]::White
+    $mBtnSave.Cursor = "Hand"; $mBtnSave.FlatAppearance.BorderColor = HC '#4C1D95'; $mBtnSave.FlatAppearance.BorderSize = 1
+    $pManual.Controls.Add($mBtnSave)
+
+    $mBtnSave.add_Click({
+        $t = $mTbTenant.Text.Trim(); $c = $mTbClient.Text.Trim(); $sec = $mTbSecret.Text.Trim()
+        if (-not $t -or -not $c -or -not $sec -or $t -like "*xxxx*") {
+            [System.Windows.Forms.MessageBox]::Show("Please fill in all fields.", "Missing data", "OK", "Warning") | Out-Null
+            return
+        }
+        Save-SPCredentials $t $c $sec
+        Update-SPStatus
+        [System.Windows.Forms.MessageBox]::Show("Credentials saved successfully.", "ACLens", "OK", "Information") | Out-Null
+        $wiz.Close()
+    })
+
+    # ── Tab switching ─────────────────────────────────────────
+    $wTabAuto.add_Click({
+        $pAuto.Visible = $true; $pManual.Visible = $false
+        $wTabAuto.BackColor = HC '#7C3AED'; $wTabAuto.ForeColor = [System.Drawing.Color]::White
+        $wTabManual.BackColor = HC '#374151'; $wTabManual.ForeColor = HC '#9CA3AF'
+    })
+    $wTabManual.add_Click({
+        $pManual.Visible = $true; $pAuto.Visible = $false
+        $wTabManual.BackColor = HC '#7C3AED'; $wTabManual.ForeColor = [System.Drawing.Color]::White
+        $wTabAuto.BackColor = HC '#374151'; $wTabAuto.ForeColor = HC '#9CA3AF'
+    })
+
+    # ── Device Code Flow ──────────────────────────────────────
+    $script:deviceCode = $null
+    $script:pollTimer  = $null
+
+    $aBtnGetCode.add_Click({
+        $aBtnGetCode.Enabled = $false
+        $aStatusLabel.Text   = "Requesting device code..."
+        $aStatusLabel.ForeColor = HC '#9CA3AF'
+        $wiz.Refresh()
+
+        try {
+            # Request device code using well-known Microsoft first-party client
+            # (Azure PowerShell App ID - widely trusted, allows app registration)
+            $body = @{
+                client_id = "1950a258-227b-4e31-a9cf-717495945fc2"
+                scope     = "https://graph.microsoft.com/.default offline_access"
+            }
+            $resp = Invoke-RestMethod -Uri "https://login.microsoftonline.com/common/oauth2/v2.0/devicecode" `
+                -Method Post -Body $body -ContentType "application/x-www-form-urlencoded"
+
+            $script:deviceCode  = $resp
+            $aCodeLabel.Text    = $resp.user_code
+            $aUrlLabel.Text     = "Go to: $($resp.verification_uri)"
+            $aStatusLabel.Text  = "Waiting for sign-in... (expires in $([int]($resp.expires_in / 60)) minutes)"
+            $aStatusLabel.ForeColor = HC '#FBBF24'
+            $aBtnOpenBrowser.Enabled = $true
+
+            # Start polling timer
+            $script:pollTimer = [System.Windows.Forms.Timer]::new()
+            $script:pollTimer.Interval = ($resp.interval * 1000)
+            $script:pollTimer.add_Tick({
+                try {
+                    $tokenBody = @{
+                        client_id   = "1950a258-227b-4e31-a9cf-717495945fc2"
+                        grant_type  = "urn:ietf:params:oauth:grant-type:device_code"
+                        device_code = $script:deviceCode.device_code
+                    }
+                    $token = Invoke-RestMethod -Uri "https://login.microsoftonline.com/common/oauth2/v2.0/token" `
+                        -Method Post -Body $tokenBody -ContentType "application/x-www-form-urlencoded" -ErrorAction Stop
+
+                    # Got token — now auto-register the app
+                    $script:pollTimer.Stop()
+                    $aStatusLabel.Text = "Signed in! Creating App Registration..."
+                    $aStatusLabel.ForeColor = HC '#34D399'
+                    $wiz.Refresh()
+
+                    $headers = @{ Authorization = "Bearer $($token.access_token)"; "Content-Type" = "application/json" }
+
+                    # Get tenant info
+                    $me = Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/me" -Headers $headers
+                    $orgResp = Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/organization" -Headers $headers
+                    $tenantId = $orgResp.value[0].id
+
+                    # Create App Registration
+                    $appBody = @{
+                        displayName    = "ACLens"
+                        signInAudience = "AzureADMyOrg"
+                        requiredResourceAccess = @(
+                            @{
+                                resourceAppId  = "00000003-0000-0000-c000-000000000000"  # Microsoft Graph
+                                resourceAccess = @(
+                                    @{ id = "9a5d68dd-52b0-4cc2-bd40-abcf44ac3a30"; type = "Role" }  # Application.Read.All
+                                    @{ id = "0c0bf378-bf22-4279-b716-2d4f4c1e1be4"; type = "Role" }  # Sites.Read.All
+                                    @{ id = "741f803b-c850-494e-b5df-cde7c675a1ca"; type = "Role" }  # User.Read.All
+                                    @{ id = "98830695-27a2-44f7-8c18-0c3ebc9698f6"; type = "Role" }  # GroupMember.Read.All
+                                )
+                            }
+                        )
+                    } | ConvertTo-Json -Depth 5
+
+                    $app = Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/applications" `
+                        -Method Post -Headers $headers -Body $appBody
+
+                    # Create Service Principal
+                    $spBody = @{ appId = $app.appId } | ConvertTo-Json
+                    $sp = Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/servicePrincipals" `
+                        -Method Post -Headers $headers -Body $spBody
+
+                    # Grant Admin Consent
+                    $grantBody = @{
+                        clientId   = $sp.id
+                        consentType = "AllPrincipals"
+                        principalId = $null
+                        resourceId  = (Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/servicePrincipals?`$filter=appId eq '00000003-0000-0000-c000-000000000000'" -Headers $headers).value[0].id
+                        scope       = "Sites.Read.All User.Read.All GroupMember.Read.All"
+                    } | ConvertTo-Json
+                    Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/oauth2PermissionGrants" `
+                        -Method Post -Headers $headers -Body $grantBody -ErrorAction SilentlyContinue | Out-Null
+
+                    # Add Client Secret
+                    $secretBody = @{
+                        passwordCredential = @{
+                            displayName = "ACLens Auto Secret"
+                            endDateTime = (Get-Date).AddYears(2).ToString("o")
+                        }
+                    } | ConvertTo-Json
+                    $secret = Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/applications/$($app.id)/addPassword" `
+                        -Method Post -Headers $headers -Body $secretBody
+
+                    # Save credentials
+                    Save-SPCredentials $tenantId $app.appId $secret.secretText
+                    Update-SPStatus
+
+                    $aStatusLabel.Text = "✔  App Registration created! Client ID: $($app.appId)"
+                    $aStatusLabel.ForeColor = HC '#34D399'
+                    $aCodeLabel.Text = "Setup complete!"
+                    $aCodeLabel.ForeColor = HC '#34D399'
+
+                    Start-Sleep -Milliseconds 1500
+                    $wiz.Close()
+
+                } catch {
+                    $err = $_.Exception.Message
+                    if ($err -notlike "*authorization_pending*" -and $err -notlike "*slow_down*") {
+                        if ($err -like "*authorization_declined*" -or $err -like "*expired*") {
+                            $script:pollTimer.Stop()
+                            $aStatusLabel.Text = "Sign-in cancelled or expired. Try again."
+                            $aStatusLabel.ForeColor = HC '#F87171'
+                            $aBtnGetCode.Enabled = $true
+                        }
+                    }
+                }
+            })
+            $script:pollTimer.Start()
+
+        } catch {
+            $aStatusLabel.Text = "Error: $($_.Exception.Message)"
+            $aStatusLabel.ForeColor = HC '#F87171'
+            $aBtnGetCode.Enabled = $true
+        }
+    })
+
+    $aBtnOpenBrowser.add_Click({
+        Start-Process "https://microsoft.com/devicelogin"
+    })
+
+    # Footer separator + close
+    $wSepFtr = [System.Windows.Forms.Panel]::new()
+    $wSepFtr.SetBounds(0, 420, 620, 1); $wSepFtr.BackColor = HC '#4B5563'
+    $wiz.Controls.Add($wSepFtr)
+
+    $wBtnClose = [System.Windows.Forms.Button]::new()
+    $wBtnClose.Text = "Close"; $wBtnClose.Size = [System.Drawing.Size]::new(100, 34)
+    $wBtnClose.Location = [System.Drawing.Point]::new(500, 434); $wBtnClose.FlatStyle = "Flat"
+    $wBtnClose.Font = $FN; $wBtnClose.BackColor = HC '#374151'; $wBtnClose.ForeColor = HC '#E2E8F0'
+    $wBtnClose.Cursor = "Hand"; $wBtnClose.FlatAppearance.BorderColor = HC '#4B5563'; $wBtnClose.FlatAppearance.BorderSize = 1
+    $wBtnClose.add_Click({
+        if ($null -ne $script:pollTimer) { $script:pollTimer.Stop() }
+        $wiz.Close()
+    })
+    $wiz.Controls.Add($wBtnClose)
+
+    $wiz.add_FormClosing({
+        if ($null -ne $script:pollTimer) { $script:pollTimer.Stop() }
+    })
+
+    $wiz.ShowDialog($form) | Out-Null
+}
+
 $btnOpenLast.add_Click({
     if ($script:lastReport -and (Test-Path $script:lastReport)) {
         Start-Process $script:lastReport
@@ -1549,6 +2430,24 @@ $btnOpenLast.add_Click({
 $changelogText = @"
 ACLens Changelog
 ================
+
+v0.2.1-alpha  (2026-03-27)
+---------------------------
+- Fixed: switch statement spacing causing ParseException on PS 5.1
+- Version label added to main window header
+
+v0.2.0-alpha  (2026-03-27)
+---------------------------
+- SharePoint Online support via Microsoft Graph API
+- NTFS/SharePoint tab switcher in main GUI
+- Setup Wizard: automatic App Registration via Device Code Flow
+- Setup Wizard: manual mode with Tenant ID / Client ID / Secret
+- Encrypted credential storage (sp_credentials.xml, DPAPI)
+- SP Scanner: Sites, Libraries, Folders, Groups & Members, External Sharing
+- SP HTML report with collapsible library/folder tree
+- SP JSON snapshot saved alongside every SP report
+- Compare Scans extended: NTFS Compare + SharePoint Compare tabs
+- SP Diff report: added/removed folders, changed permissions
 
 v0.1.0-alpha  (2026-03-14)
 ---------------------------
@@ -1743,11 +2642,12 @@ function New-CompareHTMLReport {
     return [PSCustomObject]@{ Changed=$totalChanged; Added=$totalAdded; Removed=$totalRemoved }
 }
 
-# ── Compare Window ────────────────────────────────────────────
+# ── Compare Window ─────────────────────────────────────────
 $btnCompare.add_Click({
+
     $cWin = [System.Windows.Forms.Form]::new()
     $cWin.Text            = "ACLens - Compare Scans"
-    $cWin.Size            = [System.Drawing.Size]::new(660, 380)
+    $cWin.Size            = [System.Drawing.Size]::new(700, 480)
     $cWin.StartPosition   = "CenterParent"
     $cWin.FormBorderStyle = "FixedDialog"
     $cWin.MaximizeBox     = $false
@@ -1756,183 +2656,316 @@ $btnCompare.add_Click({
 
     # Header
     $cHdr = [System.Windows.Forms.Panel]::new()
-    $cHdr.Size      = [System.Drawing.Size]::new(660, 52)
-    $cHdr.Location  = [System.Drawing.Point]::new(0, 0)
+    $cHdr.Size = [System.Drawing.Size]::new(700, 52); $cHdr.Location = [System.Drawing.Point]::new(0, 0)
     $cHdr.BackColor = HC '#1A1A2E'
     $cWin.Controls.Add($cHdr)
 
     $cTitle = [System.Windows.Forms.Label]::new()
-    $cTitle.Text      = "Compare Scans"
-    $cTitle.Font      = [System.Drawing.Font]::new("Segoe UI", 13, [System.Drawing.FontStyle]::Bold)
-    $cTitle.ForeColor = HC '#A78BFA'
-    $cTitle.BackColor = [System.Drawing.Color]::Transparent
-    $cTitle.AutoSize  = $true
-    $cTitle.Location  = [System.Drawing.Point]::new(16, 12)
+    $cTitle.Text = "Compare Scans"; $cTitle.Font = [System.Drawing.Font]::new("Segoe UI", 13, [System.Drawing.FontStyle]::Bold)
+    $cTitle.ForeColor = HC '#A78BFA'; $cTitle.BackColor = [System.Drawing.Color]::Transparent
+    $cTitle.AutoSize = $true; $cTitle.Location = [System.Drawing.Point]::new(16, 13)
     $cHdr.Controls.Add($cTitle)
 
     $cSub = [System.Windows.Forms.Label]::new()
-    $cSub.Text      = "Select a baseline JSON and run a new live scan to compare"
-    $cSub.Font      = $FS
-    $cSub.ForeColor = HC '#6B7280'
-    $cSub.BackColor = [System.Drawing.Color]::Transparent
-    $cSub.AutoSize  = $true
-    $cSub.Location  = [System.Drawing.Point]::new(172, 20)
+    $cSub.Font = $FS; $cSub.ForeColor = HC '#6B7280'; $cSub.BackColor = [System.Drawing.Color]::Transparent
+    $cSub.AutoSize = $true; $cSub.Location = [System.Drawing.Point]::new(180, 20)
     $cHdr.Controls.Add($cSub)
 
+    $cSepHdr = [System.Windows.Forms.Panel]::new()
+    $cSepHdr.SetBounds(0, 52, 700, 1); $cSepHdr.BackColor = HC '#4B5563'
+    $cWin.Controls.Add($cSepHdr)
+
+    # ── Mode selector tabs ────────────────────────────────────
+    $cTabNTFS = [System.Windows.Forms.Button]::new()
+    $cTabNTFS.Text = "  NTFS Compare"; $cTabNTFS.Size = [System.Drawing.Size]::new(150, 34)
+    $cTabNTFS.Location = [System.Drawing.Point]::new(16, 62); $cTabNTFS.FlatStyle = "Flat"
+    $cTabNTFS.Font = $FB; $cTabNTFS.BackColor = HC '#7C3AED'; $cTabNTFS.ForeColor = [System.Drawing.Color]::White
+    $cTabNTFS.Cursor = "Hand"; $cTabNTFS.FlatAppearance.BorderColor = HC '#4C1D95'; $cTabNTFS.FlatAppearance.BorderSize = 1
+    $cWin.Controls.Add($cTabNTFS)
+
+    $cTabSP = [System.Windows.Forms.Button]::new()
+    $cTabSP.Text = "  SharePoint Compare"; $cTabSP.Size = [System.Drawing.Size]::new(180, 34)
+    $cTabSP.Location = [System.Drawing.Point]::new(174, 62); $cTabSP.FlatStyle = "Flat"
+    $cTabSP.Font = $FB; $cTabSP.BackColor = HC '#374151'; $cTabSP.ForeColor = HC '#9CA3AF'
+    $cTabSP.Cursor = "Hand"; $cTabSP.FlatAppearance.BorderColor = HC '#4B5563'; $cTabSP.FlatAppearance.BorderSize = 1
+    $cWin.Controls.Add($cTabSP)
+
+    $cSepTab = [System.Windows.Forms.Panel]::new()
+    $cSepTab.SetBounds(0, 97, 700, 1); $cSepTab.BackColor = HC '#374151'
+    $cWin.Controls.Add($cSepTab)
+
+    # ── NTFS Compare panel ────────────────────────────────────
+    $pNTFS = [System.Windows.Forms.Panel]::new()
+    $pNTFS.SetBounds(0, 98, 700, 280); $pNTFS.BackColor = HC '#1E1E2E'
+    $cWin.Controls.Add($pNTFS)
+
     # Baseline JSON
-    $lbl1 = [System.Windows.Forms.Label]::new()
-    $lbl1.Text = "Baseline (JSON):"; $lbl1.Font = $FB; $lbl1.ForeColor = HC '#E2E8F0'
-    $lbl1.BackColor = [System.Drawing.Color]::Transparent; $lbl1.AutoSize = $true
-    $lbl1.Location = [System.Drawing.Point]::new(20, 72)
-    $cWin.Controls.Add($lbl1)
+    $nLbl1 = [System.Windows.Forms.Label]::new()
+    $nLbl1.Text = "Baseline (JSON):"; $nLbl1.Font = $FB; $nLbl1.ForeColor = HC '#E2E8F0'
+    $nLbl1.BackColor = [System.Drawing.Color]::Transparent; $nLbl1.AutoSize = $true
+    $nLbl1.Location = [System.Drawing.Point]::new(20, 14)
+    $pNTFS.Controls.Add($nLbl1)
 
-    $tbJson = [System.Windows.Forms.TextBox]::new()
-    $tbJson.Size = [System.Drawing.Size]::new(490, 26); $tbJson.Location = [System.Drawing.Point]::new(20, 94)
-    $tbJson.BackColor = HC '#2D2D3F'; $tbJson.ForeColor = HC '#E2E8F0'; $tbJson.BorderStyle = "FixedSingle"
-    if ($script:lastJson -and (Test-Path $script:lastJson)) { $tbJson.Text = $script:lastJson }
-    $cWin.Controls.Add($tbJson)
+    $nTbJson = [System.Windows.Forms.TextBox]::new()
+    $nTbJson.Size = [System.Drawing.Size]::new(528, 26); $nTbJson.Location = [System.Drawing.Point]::new(20, 36)
+    $nTbJson.BackColor = HC '#2D2D3F'; $nTbJson.ForeColor = HC '#E2E8F0'; $nTbJson.BorderStyle = "FixedSingle"; $nTbJson.Font = $FN
+    if ($script:lastJson -and (Test-Path $script:lastJson)) { $nTbJson.Text = $script:lastJson }
+    $pNTFS.Controls.Add($nTbJson)
 
-    $btnPickJson = [System.Windows.Forms.Button]::new()
-    $btnPickJson.Text = "Browse..."; $btnPickJson.Size = [System.Drawing.Size]::new(110, 26)
-    $btnPickJson.Location = [System.Drawing.Point]::new(516, 94); $btnPickJson.FlatStyle = "Flat"
-    $btnPickJson.BackColor = HC '#374151'; $btnPickJson.ForeColor = HC '#E2E8F0'; $btnPickJson.Cursor = "Hand"
-    $btnPickJson.FlatAppearance.BorderColor = HC '#4B5563'; $btnPickJson.FlatAppearance.BorderSize = 1
-    $btnPickJson.add_Click({
+    $nBtnJson = [System.Windows.Forms.Button]::new()
+    $nBtnJson.Text = "Browse..."; $nBtnJson.Size = [System.Drawing.Size]::new(110, 26)
+    $nBtnJson.Location = [System.Drawing.Point]::new(554, 36); $nBtnJson.FlatStyle = "Flat"
+    $nBtnJson.BackColor = HC '#374151'; $nBtnJson.ForeColor = HC '#E2E8F0'; $nBtnJson.Cursor = "Hand"
+    $nBtnJson.FlatAppearance.BorderColor = HC '#4B5563'; $nBtnJson.FlatAppearance.BorderSize = 1
+    $nBtnJson.add_Click({
         $ofd = [System.Windows.Forms.OpenFileDialog]::new()
-        $ofd.Filter = "ACLens JSON (*.json)|*.json|All files (*.*)|*.*"
-        $ofd.Title  = "Select baseline JSON snapshot"
-        if ($ofd.ShowDialog() -eq "OK") { $tbJson.Text = $ofd.FileName }
+        $ofd.Filter = "ACLens JSON (*.json)|*.json"
+        if ($ofd.ShowDialog() -eq "OK") { $nTbJson.Text = $ofd.FileName }
     })
-    $cWin.Controls.Add($btnPickJson)
+    $pNTFS.Controls.Add($nBtnJson)
 
-    # Live Scan Path
-    $lbl2 = [System.Windows.Forms.Label]::new()
-    $lbl2.Text = "Current Scan Path:"; $lbl2.Font = $FB; $lbl2.ForeColor = HC '#E2E8F0'
-    $lbl2.BackColor = [System.Drawing.Color]::Transparent; $lbl2.AutoSize = $true
-    $lbl2.Location = [System.Drawing.Point]::new(20, 136)
-    $cWin.Controls.Add($lbl2)
+    # Current scan path
+    $nLbl2 = [System.Windows.Forms.Label]::new()
+    $nLbl2.Text = "Current Scan Path:"; $nLbl2.Font = $FB; $nLbl2.ForeColor = HC '#E2E8F0'
+    $nLbl2.BackColor = [System.Drawing.Color]::Transparent; $nLbl2.AutoSize = $true
+    $nLbl2.Location = [System.Drawing.Point]::new(20, 74)
+    $pNTFS.Controls.Add($nLbl2)
 
-    $tbScanPath = [System.Windows.Forms.TextBox]::new()
-    $tbScanPath.Size = [System.Drawing.Size]::new(490, 26); $tbScanPath.Location = [System.Drawing.Point]::new(20, 158)
-    $tbScanPath.BackColor = HC '#2D2D3F'; $tbScanPath.ForeColor = HC '#E2E8F0'; $tbScanPath.BorderStyle = "FixedSingle"
-    if ($tbPath.Text) { $tbScanPath.Text = $tbPath.Text }
-    $cWin.Controls.Add($tbScanPath)
+    $nTbPath = [System.Windows.Forms.TextBox]::new()
+    $nTbPath.Size = [System.Drawing.Size]::new(528, 26); $nTbPath.Location = [System.Drawing.Point]::new(20, 96)
+    $nTbPath.BackColor = HC '#2D2D3F'; $nTbPath.ForeColor = HC '#E2E8F0'; $nTbPath.BorderStyle = "FixedSingle"; $nTbPath.Font = $FN
+    if ($tbPath.Text) { $nTbPath.Text = $tbPath.Text }
+    $pNTFS.Controls.Add($nTbPath)
 
-    $btnPickPath = [System.Windows.Forms.Button]::new()
-    $btnPickPath.Text = "Browse..."; $btnPickPath.Size = [System.Drawing.Size]::new(110, 26)
-    $btnPickPath.Location = [System.Drawing.Point]::new(516, 158); $btnPickPath.FlatStyle = "Flat"
-    $btnPickPath.BackColor = HC '#374151'; $btnPickPath.ForeColor = HC '#E2E8F0'; $btnPickPath.Cursor = "Hand"
-    $btnPickPath.FlatAppearance.BorderColor = HC '#4B5563'; $btnPickPath.FlatAppearance.BorderSize = 1
-    $btnPickPath.add_Click({
+    $nBtnPath = [System.Windows.Forms.Button]::new()
+    $nBtnPath.Text = "Browse..."; $nBtnPath.Size = [System.Drawing.Size]::new(110, 26)
+    $nBtnPath.Location = [System.Drawing.Point]::new(554, 96); $nBtnPath.FlatStyle = "Flat"
+    $nBtnPath.BackColor = HC '#374151'; $nBtnPath.ForeColor = HC '#E2E8F0'; $nBtnPath.Cursor = "Hand"
+    $nBtnPath.FlatAppearance.BorderColor = HC '#4B5563'; $nBtnPath.FlatAppearance.BorderSize = 1
+    $nBtnPath.add_Click({
         $fbd = [System.Windows.Forms.FolderBrowserDialog]::new()
-        $fbd.Description = "Select folder to scan"
-        if ($tbScanPath.Text -and (Test-Path $tbScanPath.Text)) { $fbd.SelectedPath = $tbScanPath.Text }
-        if ($fbd.ShowDialog() -eq "OK") { $tbScanPath.Text = $fbd.SelectedPath }
+        if ($nTbPath.Text -and (Test-Path $nTbPath.Text)) { $fbd.SelectedPath = $nTbPath.Text }
+        if ($fbd.ShowDialog() -eq "OK") { $nTbPath.Text = $fbd.SelectedPath }
     })
-    $cWin.Controls.Add($btnPickPath)
+    $pNTFS.Controls.Add($nBtnPath)
 
-    # Status
+    # ── SP Compare panel ──────────────────────────────────────
+    $pSP = [System.Windows.Forms.Panel]::new()
+    $pSP.SetBounds(0, 98, 700, 280); $pSP.BackColor = HC '#1E1E2E'; $pSP.Visible = $false
+    $cWin.Controls.Add($pSP)
+
+    $sLbl1 = [System.Windows.Forms.Label]::new()
+    $sLbl1.Text = "Baseline SP Snapshot (JSON):"; $sLbl1.Font = $FB; $sLbl1.ForeColor = HC '#E2E8F0'
+    $sLbl1.BackColor = [System.Drawing.Color]::Transparent; $sLbl1.AutoSize = $true
+    $sLbl1.Location = [System.Drawing.Point]::new(20, 14)
+    $pSP.Controls.Add($sLbl1)
+
+    $sTbJson = [System.Windows.Forms.TextBox]::new()
+    $sTbJson.Size = [System.Drawing.Size]::new(528, 26); $sTbJson.Location = [System.Drawing.Point]::new(20, 36)
+    $sTbJson.BackColor = HC '#2D2D3F'; $sTbJson.ForeColor = HC '#E2E8F0'; $sTbJson.BorderStyle = "FixedSingle"; $sTbJson.Font = $FN
+    $pSP.Controls.Add($sTbJson)
+
+    $sBtnJson = [System.Windows.Forms.Button]::new()
+    $sBtnJson.Text = "Browse..."; $sBtnJson.Size = [System.Drawing.Size]::new(110, 26)
+    $sBtnJson.Location = [System.Drawing.Point]::new(554, 36); $sBtnJson.FlatStyle = "Flat"
+    $sBtnJson.BackColor = HC '#374151'; $sBtnJson.ForeColor = HC '#E2E8F0'; $sBtnJson.Cursor = "Hand"
+    $sBtnJson.FlatAppearance.BorderColor = HC '#4B5563'; $sBtnJson.FlatAppearance.BorderSize = 1
+    $sBtnJson.add_Click({
+        $ofd = [System.Windows.Forms.OpenFileDialog]::new()
+        $ofd.Filter = "ACLens SP Snapshot (*.json)|*.json"
+        if ($ofd.ShowDialog() -eq "OK") { $sTbJson.Text = $ofd.FileName }
+    })
+    $pSP.Controls.Add($sBtnJson)
+
+    $sLbl2 = [System.Windows.Forms.Label]::new()
+    $sLbl2.Text = "Current SharePoint Site URL:"; $sLbl2.Font = $FB; $sLbl2.ForeColor = HC '#E2E8F0'
+    $sLbl2.BackColor = [System.Drawing.Color]::Transparent; $sLbl2.AutoSize = $true
+    $sLbl2.Location = [System.Drawing.Point]::new(20, 74)
+    $pSP.Controls.Add($sLbl2)
+
+    $sTbUrl = [System.Windows.Forms.TextBox]::new()
+    $sTbUrl.Size = [System.Drawing.Size]::new(640, 26); $sTbUrl.Location = [System.Drawing.Point]::new(20, 96)
+    $sTbUrl.BackColor = HC '#2D2D3F'; $sTbUrl.ForeColor = HC '#6B7280'; $sTbUrl.BorderStyle = "FixedSingle"; $sTbUrl.Font = $FN
+    $sTbUrl.Text = if ($spTbUrl.Text -notlike "*yourtenant*") { $spTbUrl.Text } else { "https://yourtenant.sharepoint.com/sites/yoursite" }
+    $pSP.Controls.Add($sTbUrl)
+
+    $sNote = [System.Windows.Forms.Label]::new()
+    $sNote.Text = "Note: A new live SP scan will run and be compared against the baseline JSON."
+    $sNote.Font = $FS; $sNote.ForeColor = HC '#6B7280'; $sNote.BackColor = [System.Drawing.Color]::Transparent
+    $sNote.Size = [System.Drawing.Size]::new(640, 18); $sNote.Location = [System.Drawing.Point]::new(20, 130)
+    $pSP.Controls.Add($sNote)
+
+    # ── Tab switching ─────────────────────────────────────────
+    $script:cMode = "NTFS"
+    $cTabNTFS.add_Click({
+        $script:cMode = "NTFS"
+        $pNTFS.Visible = $true;  $pSP.Visible = $false
+        $cTabNTFS.BackColor = HC '#7C3AED'; $cTabNTFS.ForeColor = [System.Drawing.Color]::White
+        $cTabSP.BackColor   = HC '#374151'; $cTabSP.ForeColor   = HC '#9CA3AF'
+        $cSub.Text = "NTFS permission diff"
+    })
+    $cTabSP.add_Click({
+        $script:cMode = "SP"
+        $pSP.Visible = $true;  $pNTFS.Visible = $false
+        $cTabSP.BackColor   = HC '#7C3AED'; $cTabSP.ForeColor   = [System.Drawing.Color]::White
+        $cTabNTFS.BackColor = HC '#374151'; $cTabNTFS.ForeColor = HC '#9CA3AF'
+        $cSub.Text = "SharePoint permission diff"
+    })
+    $cSub.Text = "NTFS permission diff"
+
+    # ── Shared: Status + Progress ─────────────────────────────
+    $cSepMid = [System.Windows.Forms.Panel]::new()
+    $cSepMid.SetBounds(0, 378, 700, 1); $cSepMid.BackColor = HC '#4B5563'
+    $cWin.Controls.Add($cSepMid)
+
     $cStatus = [System.Windows.Forms.Label]::new()
     $cStatus.Text = "Ready."; $cStatus.Font = $FN; $cStatus.ForeColor = HC '#6B7280'
     $cStatus.BackColor = [System.Drawing.Color]::Transparent
-    $cStatus.Size = [System.Drawing.Size]::new(620, 20); $cStatus.Location = [System.Drawing.Point]::new(20, 200)
+    $cStatus.Size = [System.Drawing.Size]::new(660, 18); $cStatus.Location = [System.Drawing.Point]::new(20, 390)
     $cWin.Controls.Add($cStatus)
 
     $cBar = [System.Windows.Forms.ProgressBar]::new()
-    $cBar.Size = [System.Drawing.Size]::new(620, 12); $cBar.Location = [System.Drawing.Point]::new(20, 226)
+    $cBar.Size = [System.Drawing.Size]::new(660, 12); $cBar.Location = [System.Drawing.Point]::new(20, 412)
     $cBar.Style = "Continuous"; $cBar.Minimum = 0; $cBar.Maximum = 100
     $cWin.Controls.Add($cBar)
 
-    # Separator
-    $cSep = [System.Windows.Forms.Panel]::new()
-    $cSep.Size = [System.Drawing.Size]::new(660, 1); $cSep.Location = [System.Drawing.Point]::new(0, 258)
-    $cSep.BackColor = HC '#4B5563'
-    $cWin.Controls.Add($cSep)
+    # ── Footer ────────────────────────────────────────────────
+    $cSepFtr = [System.Windows.Forms.Panel]::new()
+    $cSepFtr.SetBounds(0, 430, 700, 1); $cSepFtr.BackColor = HC '#4B5563'
+    $cWin.Controls.Add($cSepFtr)
 
-    # Run button
     $btnRun = [System.Windows.Forms.Button]::new()
     $btnRun.Text = "Run Comparison"; $btnRun.Size = [System.Drawing.Size]::new(160, 36)
-    $btnRun.Location = [System.Drawing.Point]::new(20, 272); $btnRun.FlatStyle = "Flat"
+    $btnRun.Location = [System.Drawing.Point]::new(16, 440); $btnRun.FlatStyle = "Flat"
     $btnRun.Font = $FB; $btnRun.BackColor = HC '#7C3AED'; $btnRun.ForeColor = [System.Drawing.Color]::White
     $btnRun.Cursor = "Hand"; $btnRun.FlatAppearance.BorderColor = HC '#4C1D95'; $btnRun.FlatAppearance.BorderSize = 1
     $cWin.Controls.Add($btnRun)
 
     $btnRun.add_Click({
-        $jsonPath = $tbJson.Text.Trim()
-        $scanPath = $tbScanPath.Text.Trim()
-
-        if (-not $jsonPath -or -not (Test-Path $jsonPath)) {
-            [System.Windows.Forms.MessageBox]::Show("Please select a valid baseline JSON file.", "Missing input", "OK", "Warning") | Out-Null
-            return
-        }
-        if (-not $scanPath -or -not (Test-Path $scanPath -PathType Container)) {
-            [System.Windows.Forms.MessageBox]::Show("Please enter a valid scan path.", "Missing input", "OK", "Warning") | Out-Null
-            return
-        }
-
         $btnRun.Enabled = $false
         $cBar.Value     = 0
-        $cStatus.Text   = "Loading baseline..."
         $cStatus.ForeColor = HC '#9CA3AF'
-        $cWin.Refresh()
 
-        try {
-            $oldData  = Load-JsonSnapshot -Path $jsonPath
-            $oldLabel = $jsonPath
+        if ($script:cMode -eq "NTFS") {
+            # ── NTFS diff ─────────────────────────────────────
+            $jsonPath = $nTbJson.Text.Trim()
+            $scanPath = $nTbPath.Text.Trim()
+            if (-not $jsonPath -or -not (Test-Path $jsonPath)) {
+                [System.Windows.Forms.MessageBox]::Show("Please select a valid baseline JSON file.", "Missing input", "OK", "Warning") | Out-Null
+                $btnRun.Enabled = $true; return
+            }
+            if (-not $scanPath -or -not (Test-Path $scanPath -PathType Container)) {
+                [System.Windows.Forms.MessageBox]::Show("Please enter a valid scan path.", "Missing input", "OK", "Warning") | Out-Null
+                $btnRun.Enabled = $true; return
+            }
+            try {
+                $cStatus.Text = "Loading baseline..."; $cWin.Refresh()
+                $oldData  = Load-JsonSnapshot -Path $jsonPath
 
-            $cStatus.Text = "Step 1/2: Scanning folders..."
-            $cWin.Refresh()
-            $allFolders = Get-AllFolders -RootPath $scanPath -MaxDepth 0
-            $total = $allFolders.Count
+                $cStatus.Text = "Step 1/2: Scanning folders..."; $cWin.Refresh()
+                $allFolders = Get-AllFolders -RootPath $scanPath -MaxDepth 0
+                $total = $allFolders.Count
+                $newData = @{}
+                $rootClean = $scanPath.TrimEnd('\')
+                $counter   = 0
 
-            $newData       = @{}
-            $rootPathClean = $scanPath.TrimEnd('\')
-            $counter       = 0
-
-            foreach ($fp in $allFolders) {
-                $counter++
-                $pct = [int](($counter / $total) * 100)
-                if ($cBar.Value -ne $pct) { $cBar.Value = $pct }
-                if ($counter % 5 -eq 0 -or $counter -eq $total) {
-                    $short = if ($fp.Length -gt 80) { "..." + $fp.Substring($fp.Length-77) } else { $fp }
-                    $cStatus.Text = "Step 2/2: $counter / $total  -  $short"
-                    $cWin.Refresh()
+                foreach ($fp in $allFolders) {
+                    $counter++
+                    $pct = [int](($counter / $total) * 100)
+                    if ($cBar.Value -ne $pct) { $cBar.Value = $pct }
+                    if ($counter % 5 -eq 0 -or $counter -eq $total) {
+                        $short = if ($fp.Length -gt 70) { "..." + $fp.Substring($fp.Length-67) } else { $fp }
+                        $cStatus.Text = "Step 2/2: $counter / $total  —  $short"; $cWin.Refresh()
+                    }
+                    $aclData = Get-FolderACL -FolderPath $fp
+                    $newData[$fp] = [PSCustomObject]@{
+                        Path = $fp; Owner = $aclData.Owner
+                        InheritanceEnabled = $aclData.InheritanceEnabled
+                        AreAccessRulesProtected = $aclData.AreAccessRulesProtected
+                        Rules = $aclData.Rules
+                    }
                 }
-                $aclData = Get-FolderACL -FolderPath $fp
-                $newData[$fp] = [PSCustomObject]@{
-                    Path                    = $fp
-                    Owner                   = $aclData.Owner
-                    InheritanceEnabled      = $aclData.InheritanceEnabled
-                    AreAccessRulesProtected = $aclData.AreAccessRulesProtected
-                    Rules                   = $aclData.Rules
-                }
+
+                $cBar.Value = 99; $cStatus.Text = "Generating diff report..."; $cWin.Refresh()
+                $ts      = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
+                $outPath = Join-Path $PSScriptRoot "ACLens_Compare_$ts.html"
+                $result  = New-CompareHTMLReport -OldData $oldData -NewData $newData `
+                    -OldLabel $jsonPath -NewLabel $scanPath -OutputPath $outPath
+
+                $cBar.Value = 100
+                $cStatus.Text = "Done!  Changed: $($result.Changed)  Added: $($result.Added)  Removed: $($result.Removed)"
+                $cStatus.ForeColor = HC '#34D399'
+                Start-Process $outPath
+
+            } catch {
+                $cStatus.Text = "Error: $($_.Exception.Message)"; $cStatus.ForeColor = HC '#F87171'
             }
 
-            $cBar.Value   = 99
-            $cStatus.Text = "Generating diff report..."
-            $cWin.Refresh()
+        } else {
+            # ── SharePoint diff ───────────────────────────────
+            $jsonPath = $sTbJson.Text.Trim()
+            $siteUrl  = $sTbUrl.Text.Trim()
 
-            $ts        = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
-            $outPath   = Join-Path $PSScriptRoot "ACLens_Compare_$ts.html"
-            $result    = New-CompareHTMLReport -OldData $oldData -NewData $newData -OldLabel $oldLabel -NewLabel $scanPath -OutputPath $outPath
+            if (-not $jsonPath -or -not (Test-Path $jsonPath)) {
+                [System.Windows.Forms.MessageBox]::Show("Please select a valid baseline SP JSON file.", "Missing input", "OK", "Warning") | Out-Null
+                $btnRun.Enabled = $true; return
+            }
+            if (-not $siteUrl -or $siteUrl -like "*yourtenant*") {
+                [System.Windows.Forms.MessageBox]::Show("Please enter a valid SharePoint Site URL.", "Missing input", "OK", "Warning") | Out-Null
+                $btnRun.Enabled = $true; return
+            }
+            $creds = Get-SPCredentials
+            if (-not $creds.IsConfigured) {
+                [System.Windows.Forms.MessageBox]::Show("SharePoint is not configured. Use Setup / Reconnect first.", "Not configured", "OK", "Warning") | Out-Null
+                $btnRun.Enabled = $true; return
+            }
 
-            $cBar.Value        = 100
-            $cStatus.Text      = "Done! Changed: $($result.Changed)  Added: $($result.Added)  Removed: $($result.Removed)  - $outPath"
-            $cStatus.ForeColor = HC '#34D399'
+            try {
+                $cStatus.Text = "Loading SP baseline..."; $cWin.Refresh()
+                $baselineRaw  = Get-Content $jsonPath -Raw | ConvertFrom-Json
+                $oldSPData    = @{}
+                foreach ($item in $baselineRaw) {
+                    $oldSPData[$item.FullPath] = $item
+                }
 
-            Start-Process $outPath
+                $cStatus.Text = "Running live SP scan..."; $cWin.Refresh()
+                $ts      = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
+                $tmpOut  = Join-Path $env:TEMP "ACLens_SPtemp_$ts.html"
+                $tmpJson = Join-Path $PSScriptRoot "ACLens_SP_Report_$ts.json"
+
+                Start-SPScan -SiteUrl $siteUrl -MaxDepth 0 -OutputPath $tmpOut `
+                    -StatusLabel $cStatus -ProgressBar $cBar -StatsLabel ([System.Windows.Forms.Label]::new()) -FormRef $cWin
+
+                # Load new scan data from JSON snapshot
+                if (Test-Path $tmpJson) {
+                    $newRaw    = Get-Content $tmpJson -Raw | ConvertFrom-Json
+                    $newSPData = @{}
+                    foreach ($item in $newRaw) { $newSPData[$item.FullPath] = $item }
+
+                    $cStatus.Text = "Generating SP diff report..."; $cWin.Refresh()
+                    $outPath = Join-Path $PSScriptRoot "ACLens_SP_Compare_$ts.html"
+                    New-SPCompareHTMLReport -OldData $oldSPData -NewData $newSPData `
+                        -OldLabel $jsonPath -NewLabel $siteUrl -OutputPath $outPath
+
+                    $cBar.Value = 100
+                    $cStatus.Text = "Done!  SP diff report saved."
+                    $cStatus.ForeColor = HC '#34D399'
+                    Start-Process $outPath
+                } else {
+                    throw "SP scan snapshot not found. Scan may have failed."
+                }
+
+            } catch {
+                $cStatus.Text = "Error: $($_.Exception.Message)"; $cStatus.ForeColor = HC '#F87171'
+            }
         }
-        catch {
-            $cStatus.Text      = "Error: $($_.Exception.Message)"
-            $cStatus.ForeColor = HC '#F87171'
-        }
-        finally {
-            $btnRun.Enabled = $true
-        }
+
+        $btnRun.Enabled = $true
     })
 
     $cWin.ShowDialog($form) | Out-Null
 })
+
 
 
     [System.Windows.Forms.Application]::Run($form)
@@ -1943,3 +2976,264 @@ $btnCompare.add_Click({
 
 # ── Launch ───────────────────────────────────────────────────
 Start-ACLensGUI
+# ── SharePoint HTML Report ────────────────────────────────────
+function New-SPHTMLReport {
+    param(
+        [string]$SiteUrl,
+        [string]$SiteId,
+        [string]$SiteName,
+        [array]$SitePerms,
+        [array]$Groups,
+        [string]$ExternalSharing,
+        [array]$Drives,
+        [string]$OutputPath
+    )
+
+    $reportDate   = Get-Date -Format "dd.MM.yyyy HH:mm:ss"
+    $computerName = $env:COMPUTERNAME
+    $currentUser  = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+
+    $extClass = switch ($ExternalSharing) {
+        "Disabled"                 { "ext-disabled" }
+        "Existing external users only" { "ext-limited" }
+        default                    { "ext-open" }
+    }
+
+    # ── Site permissions table ────────────────────────────────
+    $sitePermRows = [System.Text.StringBuilder]::new()
+    foreach ($p in $SitePerms) {
+        [void]$sitePermRows.Append("<tr><td class='sp-identity'>$([System.Web.HttpUtility]::HtmlEncode($p.GrantedTo))</td>")
+        [void]$sitePermRows.Append("<td><span class='sp-type-badge'>$([System.Web.HttpUtility]::HtmlEncode($p.Type))</span></td>")
+        [void]$sitePermRows.Append("<td class='sp-roles'>$([System.Web.HttpUtility]::HtmlEncode($p.Roles))</td></tr>")
+    }
+
+    # ── Groups table ──────────────────────────────────────────
+    $groupRows = [System.Text.StringBuilder]::new()
+    foreach ($g in $Groups) {
+        [void]$groupRows.Append("<tr><td class='sp-identity'>$([System.Web.HttpUtility]::HtmlEncode($g.Name))</td>")
+        [void]$groupRows.Append("<td class='sp-count'>$($g.Count)</td>")
+        [void]$groupRows.Append("<td class='sp-members'>$([System.Web.HttpUtility]::HtmlEncode($g.Members))</td></tr>")
+    }
+
+    # ── Library + folder rows ─────────────────────────────────
+    $libRows = [System.Text.StringBuilder]::new()
+    $rowIdx  = 0
+    foreach ($drive in $Drives) {
+        $rowIdx++
+        $libPermsHtml = ""
+        if ($drive.Permissions.Count -gt 0) {
+            $libPermsHtml = "<table class='sp-mini-table'><thead><tr><th>Principal</th><th>Type</th><th>Roles</th></tr></thead><tbody>"
+            foreach ($p in $drive.Permissions) {
+                $libPermsHtml += "<tr><td>$([System.Web.HttpUtility]::HtmlEncode($p.GrantedTo))</td><td>$([System.Web.HttpUtility]::HtmlEncode($p.Type))</td><td>$([System.Web.HttpUtility]::HtmlEncode($p.Roles))</td></tr>"
+            }
+            $libPermsHtml += "</tbody></table>"
+        } else {
+            $libPermsHtml = "<span class='sp-note'>No unique permissions</span>"
+        }
+
+        [void]$libRows.Append("<div class='sp-library' id='lib-$rowIdx'>")
+        [void]$libRows.Append("<div class='sp-lib-header' onclick='toggleSP(""lib-body-$rowIdx"",this)'>")
+        [void]$libRows.Append("<span class='sp-toggle'>&#9658;</span>")
+        [void]$libRows.Append("<span class='sp-lib-icon'>&#128218;</span>")
+        [void]$libRows.Append("<span class='sp-lib-name'>$([System.Web.HttpUtility]::HtmlEncode($drive.Name))</span>")
+        [void]$libRows.Append("<span class='sp-lib-type'>$([System.Web.HttpUtility]::HtmlEncode($drive.DriveType))</span>")
+        [void]$libRows.Append("<span class='sp-folder-count'>$($drive.Folders.Count) folders</span>")
+        [void]$libRows.Append("</div>")
+        [void]$libRows.Append("<div class='sp-lib-body' id='lib-body-$rowIdx'>")
+        [void]$libRows.Append("<div class='sp-section-title'>Library Permissions</div>")
+        [void]$libRows.Append($libPermsHtml)
+
+        if ($drive.Folders.Count -gt 0) {
+            [void]$libRows.Append("<div class='sp-section-title' style='margin-top:12px'>Folder Permissions</div>")
+            [void]$libRows.Append("<div class='sp-folder-list'>")
+            foreach ($folder in $drive.Folders) {
+                $indent = "&nbsp;" * ($folder.Depth * 4)
+                $statusClass = if ($folder.HasUniquePerms) { "sp-folder-unique" } elseif ($folder.Error) { "sp-folder-error" } else { "sp-folder-inherited" }
+                $statusBadge = if ($folder.HasUniquePerms) { "<span class='sp-badge sp-badge-unique'>Unique</span>" } elseif ($folder.Error) { "<span class='sp-badge sp-badge-error'>Error</span>" } else { "<span class='sp-badge sp-badge-inherited'>Inherited</span>" }
+
+                $fRowIdx = "${rowIdx}_$($drive.Folders.IndexOf($folder))"
+                [void]$libRows.Append("<div class='sp-folder-row $statusClass'>")
+                [void]$libRows.Append("<div class='sp-folder-hdr' onclick='toggleSP(""fp-$fRowIdx"",this)'>")
+                [void]$libRows.Append("<span class='sp-toggle sp-toggle-sm'>&#9658;</span>")
+                [void]$libRows.Append("<span class='sp-folder-icon'>&#128193;</span>")
+                [void]$libRows.Append("$indent<span class='sp-folder-name'>$([System.Web.HttpUtility]::HtmlEncode($folder.Path))</span>")
+                [void]$libRows.Append($statusBadge)
+                [void]$libRows.Append("</div>")
+
+                if ($folder.HasUniquePerms -and $folder.Permissions.Count -gt 0) {
+                    [void]$libRows.Append("<div class='sp-folder-detail' id='fp-$fRowIdx'>")
+                    [void]$libRows.Append("<table class='sp-mini-table'><thead><tr><th>Principal</th><th>Roles</th><th>Inherited</th><th>Link</th></tr></thead><tbody>")
+                    foreach ($p in $folder.Permissions) {
+                        if (-not $p.IsInherited) {
+                            $linkBadge = if ($p.Link) { "<span class='sp-badge sp-badge-link'>Sharing Link</span>" } else { "" }
+                            [void]$libRows.Append("<tr><td>$([System.Web.HttpUtility]::HtmlEncode($p.GrantedTo))</td><td>$([System.Web.HttpUtility]::HtmlEncode($p.Roles))</td><td>No</td><td>$linkBadge</td></tr>")
+                        }
+                    }
+                    [void]$libRows.Append("</tbody></table></div>")
+                } elseif ($folder.Error) {
+                    [void]$libRows.Append("<div class='sp-folder-detail' id='fp-$fRowIdx'><span class='sp-error'>$([System.Web.HttpUtility]::HtmlEncode($folder.Error))</span></div>")
+                } else {
+                    [void]$libRows.Append("<div class='sp-folder-detail' id='fp-$fRowIdx'><span class='sp-note'>Permissions inherited from library</span></div>")
+                }
+                [void]$libRows.Append("</div>")
+            }
+            [void]$libRows.Append("</div>")
+        }
+        [void]$libRows.Append("</div></div>")
+    }
+
+    # ── CSS ───────────────────────────────────────────────────
+    $css = ":root{--bg:#1E1E2E;--bg2:#2D2D3F;--bg3:#1A1A2E;--bg4:#252535;--border:#4B5563;--border2:#374151;--text:#E2E8F0;--text2:#9CA3AF;--text3:#6B7280;--accent:#A78BFA;--accent2:#7C3AED;--green:#34D399;--red:#F87171;--yellow:#FBBF24;--blue:#60A5FA;--font-mono:Consolas,monospace;--font-ui:'Segoe UI',system-ui,sans-serif;--radius:6px}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:13px;line-height:1.5}.header{background:linear-gradient(180deg,#2D2D3F,#1E1E2E);border-bottom:1px solid var(--border);padding:24px 32px 18px}.source-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);color:var(--blue);font-size:11px;padding:3px 10px;border-radius:12px;margin-bottom:8px;font-weight:600}.title{font-size:20px;font-weight:700;margin-bottom:4px}.subtitle{color:var(--text2);font-family:var(--font-mono);font-size:11px;margin-bottom:14px;word-break:break-all}.meta{display:flex;flex-wrap:wrap;gap:18px}.meta-item{display:flex;flex-direction:column;gap:2px}.meta-lbl{color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.8px}.meta-val{font-size:13px;font-weight:500}.stats-bar{display:flex;gap:10px;padding:14px 32px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}.stat{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:9px 16px;display:flex;flex-direction:column;align-items:center;min-width:110px}.stat-num{font-size:22px;font-weight:700;line-height:1}.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}.s-site .stat-num{color:var(--accent)}.s-libs .stat-num{color:var(--blue)}.s-folders .stat-num{color:var(--green)}.s-ext .stat-num{color:var(--yellow)}.section{padding:20px 32px;border-bottom:1px solid var(--border2)}.section-title{font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}.sp-table{width:100%;border-collapse:collapse;font-size:12px}.sp-table thead tr{background:var(--bg4)}.sp-table th{text-align:left;padding:5px 10px;color:var(--text2);font-weight:500;font-size:11px;border-bottom:1px solid var(--border)}.sp-table td{padding:5px 10px;border-bottom:1px solid var(--border2);vertical-align:top}.sp-identity{font-family:var(--font-mono);font-size:11px;font-weight:500}.sp-type-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:var(--accent)}.sp-roles{color:var(--text2)}.sp-count{color:var(--text2);text-align:center}.sp-members{color:var(--text2);font-size:11px}.ext-disabled{color:var(--green)}.ext-limited{color:var(--yellow)}.ext-open{color:var(--red)}.sp-library{border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:6px;overflow:hidden}.sp-lib-header{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;background:var(--bg2);user-select:none}.sp-lib-header:hover{background:var(--bg4)}.sp-toggle{font-size:10px;color:var(--text3);transition:transform .2s}.sp-toggle-sm{font-size:9px;color:var(--text3);transition:transform .2s}.sp-lib-icon{font-size:15px}.sp-lib-name{font-family:var(--font-mono);font-size:12px;font-weight:600;flex:1}.sp-lib-type{font-size:10px;color:var(--text3);padding:2px 7px;background:var(--bg4);border-radius:10px}.sp-folder-count{font-size:10px;color:var(--text3)}.sp-lib-body{display:none;padding:12px 16px;border-top:1px solid var(--border2)}.sp-lib-body.open{display:block}.sp-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);margin-bottom:6px}.sp-mini-table{width:100%;border-collapse:collapse;font-size:11px}.sp-mini-table th{text-align:left;padding:4px 8px;color:var(--text3);border-bottom:1px solid var(--border2);font-weight:500}.sp-mini-table td{padding:4px 8px;border-bottom:1px solid var(--border2)}.sp-folder-list{margin-top:4px}.sp-folder-row{border:1px solid var(--border2);border-radius:4px;margin-bottom:2px;overflow:hidden}.sp-folder-inherited{border-left:3px solid var(--border2)}.sp-folder-unique{border-left:3px solid var(--yellow);background:rgba(251,191,36,.04)}.sp-folder-error{border-left:3px solid var(--red)}.sp-folder-hdr{display:flex;align-items:center;gap:6px;padding:5px 10px;cursor:pointer;user-select:none}.sp-folder-hdr:hover{background:var(--bg2)}.sp-folder-icon{font-size:12px}.sp-folder-name{font-family:var(--font-mono);font-size:11px;flex:1}.sp-badge{display:inline-block;font-size:9px;padding:1px 6px;border-radius:8px;font-weight:500}.sp-badge-unique{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:var(--yellow)}.sp-badge-inherited{background:var(--bg4);border:1px solid var(--border2);color:var(--text3)}.sp-badge-error{background:rgba(241,113,113,.12);border:1px solid var(--red);color:var(--red)}.sp-badge-link{background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:var(--blue)}.sp-folder-detail{display:none;padding:8px 12px;border-top:1px solid var(--border2);background:var(--bg3)}.sp-folder-detail.open{display:block}.sp-note{color:var(--text3);font-style:italic;font-size:11px}.sp-error{color:var(--red);font-size:11px}.libraries{padding:16px 32px}.footer{text-align:center;padding:16px;color:var(--text3);font-size:11px;border-top:1px solid var(--border2);background:var(--bg3)}"
+
+    $js = "function toggleSP(id,hdr){var d=document.getElementById(id),ic=hdr.querySelector('.sp-toggle,.sp-toggle-sm');if(!d)return;if(d.classList.contains('open')){d.classList.remove('open');if(ic)ic.style.transform='';}else{d.classList.add('open');if(ic)ic.style.transform='rotate(90deg)';}}"
+
+    $totalFolders = ($Drives | ForEach-Object { $_.Folders.Count } | Measure-Object -Sum).Sum
+
+    $encodedSite = [System.Web.HttpUtility]::HtmlEncode($SiteUrl)
+    $encodedName = [System.Web.HttpUtility]::HtmlEncode($SiteName)
+    $encodedUser = [System.Web.HttpUtility]::HtmlEncode($currentUser)
+
+    $html  = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>"
+    $html += "<title>ACLens SP &mdash; $encodedName</title><style>$css</style></head><body>"
+    $html += "<div class='header'>"
+    $html += "<div class='source-badge'>&#9729; SharePoint Online</div>"
+    $html += "<div class='title'>ACLens &mdash; SharePoint Permission Report</div>"
+    $html += "<div class='subtitle'>$encodedSite</div>"
+    $html += "<div class='meta'>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Site</span><span class='meta-val'>$encodedName</span></div>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Created on</span><span class='meta-val'>$reportDate</span></div>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Computer</span><span class='meta-val'>$computerName</span></div>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>User</span><span class='meta-val'>$encodedUser</span></div>"
+    $html += "</div></div>"
+
+    $html += "<div class='stats-bar'>"
+    $html += "<div class='stat s-site'><span class='stat-num'>$($SitePerms.Count)</span><span class='stat-lbl'>Site permissions</span></div>"
+    $html += "<div class='stat s-libs'><span class='stat-num'>$($Drives.Count)</span><span class='stat-lbl'>Libraries</span></div>"
+    $html += "<div class='stat s-folders'><span class='stat-num'>$totalFolders</span><span class='stat-lbl'>Folders scanned</span></div>"
+    $html += "<div class='stat s-ext'><span class='stat-num ext-badge $extClass'>$([System.Web.HttpUtility]::HtmlEncode($ExternalSharing))</span><span class='stat-lbl'>External sharing</span></div>"
+    $html += "</div>"
+
+    # Site Permissions
+    $html += "<div class='section'><div class='section-title'>&#127968; Site-Level Permissions</div>"
+    if ($SitePerms.Count -gt 0) {
+        $html += "<table class='sp-table'><thead><tr><th>Principal</th><th>Type</th><th>Roles</th></tr></thead><tbody>"
+        $html += $sitePermRows.ToString()
+        $html += "</tbody></table>"
+    } else {
+        $html += "<span class='sp-note'>No site-level permissions found.</span>"
+    }
+    $html += "</div>"
+
+    # Groups
+    if ($Groups.Count -gt 0) {
+        $html += "<div class='section'><div class='section-title'>&#128101; SharePoint Groups &amp; Members</div>"
+        $html += "<table class='sp-table'><thead><tr><th>Group</th><th>Members</th><th>Details</th></tr></thead><tbody>"
+        $html += $groupRows.ToString()
+        $html += "</tbody></table></div>"
+    }
+
+    # Libraries
+    $html += "<div class='libraries'>"
+    $html += "<div class='section-title' style='margin-bottom:12px'>&#128218; Document Libraries &amp; Folder Permissions</div>"
+    $html += $libRows.ToString()
+    $html += "</div>"
+
+    $html += "<div class='footer'>ACLens SharePoint Report &bull; $reportDate &bull; $computerName</div>"
+    $html += "<script>$js</script></body></html>"
+
+    [System.IO.File]::WriteAllText($OutputPath, $html, [System.Text.UTF8Encoding]::new($true))
+    return [PSCustomObject]@{ Libraries = $Drives.Count; Folders = $totalFolders }
+}
+
+
+# ── SharePoint Compare HTML Report ───────────────────────────
+function New-SPCompareHTMLReport {
+    param([hashtable]$OldData, [hashtable]$NewData, [string]$OldLabel, [string]$NewLabel, [string]$OutputPath)
+
+    $reportDate = Get-Date -Format "dd.MM.yyyy HH:mm:ss"
+    $allPaths   = @($OldData.Keys) + @($NewData.Keys) | Sort-Object -Unique
+
+    $added = 0; $removed = 0; $changed = 0; $same = 0
+    $rows  = [System.Text.StringBuilder]::new()
+
+    foreach ($path in $allPaths) {
+        $inOld = $OldData.ContainsKey($path)
+        $inNew = $NewData.ContainsKey($path)
+
+        if (-not $inOld -and $inNew) {
+            $added++
+            [void]$rows.Append("<tr class='row-added'><td class='sp-diff-path'>+ $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
+            [void]$rows.Append("<td><span class='diff-badge badge-added'>Added</span></td>")
+            [void]$rows.Append("<td class='diff-note'>New folder — not in baseline</td></tr>")
+        }
+        elseif ($inOld -and -not $inNew) {
+            $removed++
+            [void]$rows.Append("<tr class='row-removed'><td class='sp-diff-path'>- $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
+            [void]$rows.Append("<td><span class='diff-badge badge-removed'>Removed</span></td>")
+            [void]$rows.Append("<td class='diff-note'>Folder removed — no longer exists</td></tr>")
+        }
+        else {
+            $old = $OldData[$path]; $new = $NewData[$path]
+            $oldPerms = ($old.Permissions | Sort-Object GrantedTo,Roles | ForEach-Object { "$($_.GrantedTo)|$($_.Roles)|$($_.IsInherited)" }) -join ";"
+            $newPerms = ($new.Permissions | Sort-Object GrantedTo,Roles | ForEach-Object { "$($_.GrantedTo)|$($_.Roles)|$($_.IsInherited)" }) -join ";"
+            $oldUniq  = $old.HasUniquePerms; $newUniq = $new.HasUniquePerms
+
+            if ($oldPerms -ne $newPerms -or $oldUniq -ne $newUniq) {
+                $changed++
+                $details = [System.Text.StringBuilder]::new()
+
+                if ($oldUniq -ne $newUniq) {
+                    $oldU = if ($oldUniq) { "Unique" } else { "Inherited" }
+                    $newU = if ($newUniq) { "Unique" } else { "Inherited" }
+                    [void]$details.Append("<div class='sp-diff-detail'><span class='diff-key'>Permissions:</span> <span class='old-val'>$oldU</span> &rarr; <span class='new-val'>$newU</span></div>")
+                }
+
+                $oldSet = @{}; foreach ($p in $old.Permissions) { $oldSet["$($p.GrantedTo)|$($p.Roles)"] = $p }
+                $newSet = @{}; foreach ($p in $new.Permissions) { $newSet["$($p.GrantedTo)|$($p.Roles)"] = $p }
+                foreach ($k in ($newSet.Keys | Where-Object { -not $oldSet.ContainsKey($_) })) {
+                    [void]$details.Append("<div class='sp-diff-detail added-rule'>+ $([System.Web.HttpUtility]::HtmlEncode($k))</div>")
+                }
+                foreach ($k in ($oldSet.Keys | Where-Object { -not $newSet.ContainsKey($_) })) {
+                    [void]$details.Append("<div class='sp-diff-detail removed-rule'>- $([System.Web.HttpUtility]::HtmlEncode($k))</div>")
+                }
+
+                [void]$rows.Append("<tr class='row-changed'><td class='sp-diff-path'>~ $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
+                [void]$rows.Append("<td><span class='diff-badge badge-changed'>Changed</span></td>")
+                [void]$rows.Append("<td>$($details.ToString())</td></tr>")
+            } else {
+                $same++
+            }
+        }
+    }
+
+    $css = ":root{--bg:#1E1E2E;--bg2:#2D2D3F;--bg3:#1A1A2E;--bg4:#252535;--border:#4B5563;--border2:#374151;--text:#E2E8F0;--text2:#9CA3AF;--text3:#6B7280;--accent:#A78BFA;--green:#34D399;--red:#F87171;--yellow:#FBBF24;--blue:#60A5FA;--font-mono:Consolas,monospace;--font-ui:'Segoe UI',system-ui,sans-serif;--radius:6px}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:13px;line-height:1.5}.header{background:linear-gradient(180deg,#2D2D3F,#1E1E2E);border-bottom:1px solid var(--border);padding:24px 32px 18px}.source-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);color:var(--blue);font-size:11px;padding:3px 10px;border-radius:12px;margin-bottom:8px;font-weight:600}.title{font-size:20px;font-weight:700;margin-bottom:6px}.meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:10px}.meta-item{display:flex;flex-direction:column;gap:2px}.meta-lbl{color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.8px}.meta-val{font-size:13px;font-weight:500}.stats-bar{display:flex;gap:10px;padding:14px 32px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}.stat{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:9px 16px;display:flex;flex-direction:column;align-items:center;min-width:100px}.stat-num{font-size:22px;font-weight:700;line-height:1}.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}.s-changed .stat-num{color:var(--yellow)}.s-added .stat-num{color:var(--green)}.s-removed .stat-num{color:var(--red)}.s-same .stat-num{color:var(--text2)}.table-wrap{padding:16px 24px}.sp-diff-table{width:100%;border-collapse:collapse;font-size:12px}thead tr{background:var(--bg4)}th{text-align:left;padding:6px 10px;color:var(--text2);font-weight:500;font-size:11px;border-bottom:1px solid var(--border)}td{padding:6px 10px;border-bottom:1px solid var(--border2);vertical-align:top}.sp-diff-path{font-family:var(--font-mono);font-size:11px}.row-added{background:rgba(52,211,153,.05)}.row-added .sp-diff-path{color:var(--green)}.row-removed{background:rgba(241,113,113,.05)}.row-removed .sp-diff-path{color:var(--red)}.row-changed{background:rgba(251,191,36,.04)}.row-changed .sp-diff-path{color:var(--yellow)}.diff-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}.badge-added{background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.4);color:var(--green)}.badge-removed{background:rgba(241,113,113,.15);border:1px solid rgba(241,113,113,.4);color:var(--red)}.badge-changed{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--yellow)}.diff-note{color:var(--text2)}.sp-diff-detail{font-size:11px;margin:2px 0;color:var(--text2)}.diff-key{font-weight:600;color:var(--text);margin-right:4px}.old-val{color:var(--red);text-decoration:line-through;margin-right:4px}.new-val{color:var(--green)}.added-rule{color:var(--green)}.removed-rule{color:var(--red)}.no-diff{padding:40px 32px;text-align:center;color:var(--text3);font-size:14px}.footer{text-align:center;padding:16px;color:var(--text3);font-size:11px;border-top:1px solid var(--border2);background:var(--bg3)}"
+
+    $html  = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>ACLens SP Compare</title><style>$css</style></head><body>"
+    $html += "<div class='header'><div class='source-badge'>&#9729; SharePoint Online &mdash; Diff</div>"
+    $html += "<div class='title'>ACLens &mdash; SharePoint Permission Diff</div>"
+    $html += "<div class='meta'>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Baseline</span><span class='meta-val'>$([System.Web.HttpUtility]::HtmlEncode($OldLabel))</span></div>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Current Scan</span><span class='meta-val'>$([System.Web.HttpUtility]::HtmlEncode($NewLabel))</span></div>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Generated</span><span class='meta-val'>$reportDate</span></div>"
+    $html += "</div></div>"
+    $html += "<div class='stats-bar'>"
+    $html += "<div class='stat s-changed'><span class='stat-num'>$changed</span><span class='stat-lbl'>Permissions changed</span></div>"
+    $html += "<div class='stat s-added'><span class='stat-num'>$added</span><span class='stat-lbl'>Folders added</span></div>"
+    $html += "<div class='stat s-removed'><span class='stat-num'>$removed</span><span class='stat-lbl'>Folders removed</span></div>"
+    $html += "<div class='stat s-same'><span class='stat-num'>$same</span><span class='stat-lbl'>Unchanged</span></div>"
+    $html += "</div>"
+
+    if (($changed + $added + $removed) -eq 0) {
+        $html += "<div class='no-diff'>&#10003; No differences found — SharePoint permissions are identical.</div>"
+    } else {
+        $html += "<div class='table-wrap'><table class='sp-diff-table'>"
+        $html += "<thead><tr><th>Path</th><th>Status</th><th>Details</th></tr></thead><tbody>"
+        $html += $rows.ToString()
+        $html += "</tbody></table></div>"
+    }
+
+    $html += "<div class='footer'>ACLens SharePoint Compare &bull; $reportDate</div></body></html>"
+    [System.IO.File]::WriteAllText($OutputPath, $html, [System.Text.UTF8Encoding]::new($true))
+}
+
+

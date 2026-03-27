@@ -33,6 +33,7 @@ Thank you for your interest in contributing! This is an early alpha project and 
 ## Code Style
 
 - PowerShell 5.1 compatible — no PS 7-only syntax
+- SP scanner uses `Invoke-RestMethod` — no external modules required
 - Use `[void]$stringBuilder.Append(...)` for HTML generation
 - All user-facing strings in English
 - Keep GUI controls consistent with the existing DiskLens color palette
