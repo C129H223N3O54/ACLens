@@ -14,6 +14,14 @@ This tool was born from a real-world need. A big thank you to **Philipp Herrmann
 
 ---
 
+## Built with AI
+
+The idea, requirements and direction for this project came from **Jan Erik Mueller**. The entire codebase — every line of PowerShell, the Windows Forms GUI, the scan engine, all dialogs and tools — was written by **[Claude](https://claude.ai)**, an AI assistant made by **[Anthropic](https://anthropic.com)**.
+
+This project is an example of human–AI collaboration: a person with a vision, and an AI that implements it.
+
+---
+
 ## Features
 
 ### NTFS
