@@ -205,7 +205,7 @@ Click **Compare Scans** in the footer to open the comparison window.
 
 ## Documentation
 
-- [Manual SharePoint Setup](docs/manual-sp-setup.md) — step-by-step Azure App Registration guide
+- [Manual SharePoint Setup](manual-sp-setup.md) — step-by-step Azure App Registration guide
 
 ---
 
@@ -219,12 +219,6 @@ MIT — see [LICENSE](LICENSE) for details.
 
 Bug reports, feature requests and pull requests are welcome!
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
-
----
-
-## Author
-
-**Jan Erik Mueller**
 
 ---
 
