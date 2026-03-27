@@ -1,4 +1,16 @@
 ﻿#Requires -Version 5.1
+<#
+.SYNOPSIS
+    ACLens - NTFS Permission Analyzer & Reporter
+
+.DESCRIPTION
+    Entry point. Loads all modules and launches the GUI.
+
+.NOTES
+    Version:    0.1.0-alpha
+    Author:     ACLens Contributors
+    Compatible: Windows 10/11, Server 2016-2025, PowerShell 5.1+
+#>
 
 # ── Admin check ──────────────────────────────────────────────
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -15,7 +27,6 @@ if (-not $isAdmin) {
             [Convert]::ToInt32($h.Substring(4,2),16))
     }
 
-    # Fensterhoehe: Header(56) + Inhalt(140) + Separator(1) + Footer(70) = 267 + Titelleiste(~32)
     $adm = [System.Windows.Forms.Form]::new()
     $adm.Text            = "ACLens"
     $adm.ClientSize      = [System.Drawing.Size]::new(500, 267)
@@ -26,106 +37,75 @@ if (-not $isAdmin) {
     $adm.BackColor       = HAC '#1E1E2E'
     $adm.Font            = [System.Drawing.Font]::new("Segoe UI", 9)
 
-    # ── Header (0..55) ──────────────────────────────────────
     $aHdr = [System.Windows.Forms.Panel]::new()
     $aHdr.SetBounds(0, 0, 500, 56)
     $aHdr.BackColor = HAC '#1A1A2E'
     $adm.Controls.Add($aHdr)
 
     $aTitle = [System.Windows.Forms.Label]::new()
-    $aTitle.Text      = "ACLens"
-    $aTitle.Font      = [System.Drawing.Font]::new("Segoe UI", 15, [System.Drawing.FontStyle]::Bold)
-    $aTitle.ForeColor = HAC '#A78BFA'
-    $aTitle.BackColor = [System.Drawing.Color]::Transparent
-    $aTitle.AutoSize  = $true
-    $aTitle.Location  = [System.Drawing.Point]::new(18, 13)
+    $aTitle.Text = "ACLens"; $aTitle.Font = [System.Drawing.Font]::new("Segoe UI", 15, [System.Drawing.FontStyle]::Bold)
+    $aTitle.ForeColor = HAC '#A78BFA'; $aTitle.BackColor = [System.Drawing.Color]::Transparent
+    $aTitle.AutoSize = $true; $aTitle.Location = [System.Drawing.Point]::new(18, 13)
     $aHdr.Controls.Add($aTitle)
 
     $aSub = [System.Windows.Forms.Label]::new()
-    $aSub.Text      = "Administrator Recommended"
-    $aSub.Font      = [System.Drawing.Font]::new("Segoe UI", 9)
-    $aSub.ForeColor = HAC '#6B7280'
-    $aSub.BackColor = [System.Drawing.Color]::Transparent
-    $aSub.AutoSize  = $true
-    $aSub.Location  = [System.Drawing.Point]::new(130, 21)
+    $aSub.Text = "Administrator Recommended"; $aSub.Font = [System.Drawing.Font]::new("Segoe UI", 9)
+    $aSub.ForeColor = HAC '#6B7280'; $aSub.BackColor = [System.Drawing.Color]::Transparent
+    $aSub.AutoSize = $true; $aSub.Location = [System.Drawing.Point]::new(130, 21)
     $aHdr.Controls.Add($aSub)
 
-    # Header separator
     $aHdrSep = [System.Windows.Forms.Panel]::new()
-    $aHdrSep.SetBounds(0, 56, 500, 1)
-    $aHdrSep.BackColor = HAC '#4B5563'
+    $aHdrSep.SetBounds(0, 56, 500, 1); $aHdrSep.BackColor = HAC '#4B5563'
     $adm.Controls.Add($aHdrSep)
 
-    # ── Content (57..196) ───────────────────────────────────
-    # Warning icon
     $aIcon = [System.Windows.Forms.Label]::new()
-    $aIcon.Text      = [char]0x26A0
-    $aIcon.Font      = [System.Drawing.Font]::new("Segoe UI", 28)
-    $aIcon.ForeColor = HAC '#FBBF24'
-    $aIcon.BackColor = [System.Drawing.Color]::Transparent
-    $aIcon.AutoSize  = $true
-    $aIcon.Location  = [System.Drawing.Point]::new(18, 66)
+    $aIcon.Text = [char]0x26A0; $aIcon.Font = [System.Drawing.Font]::new("Segoe UI", 28)
+    $aIcon.ForeColor = HAC '#FBBF24'; $aIcon.BackColor = [System.Drawing.Color]::Transparent
+    $aIcon.AutoSize = $true; $aIcon.Location = [System.Drawing.Point]::new(18, 66)
     $adm.Controls.Add($aIcon)
 
-    # Main message
     $aMsg1 = [System.Windows.Forms.Label]::new()
-    $aMsg1.Text      = "ACLens is not running as Administrator."
-    $aMsg1.Font      = [System.Drawing.Font]::new("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-    $aMsg1.ForeColor = HAC '#E2E8F0'
-    $aMsg1.BackColor = [System.Drawing.Color]::Transparent
-    $aMsg1.AutoSize  = $true
-    $aMsg1.Location  = [System.Drawing.Point]::new(68, 68)
+    $aMsg1.Text = "ACLens is not running as Administrator."
+    $aMsg1.Font = [System.Drawing.Font]::new("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
+    $aMsg1.ForeColor = HAC '#E2E8F0'; $aMsg1.BackColor = [System.Drawing.Color]::Transparent
+    $aMsg1.AutoSize = $true; $aMsg1.Location = [System.Drawing.Point]::new(68, 68)
     $adm.Controls.Add($aMsg1)
 
     $aMsg2 = [System.Windows.Forms.Label]::new()
-    $aMsg2.Text      = "Without administrator privileges some folders may not be readable and permission results could be incomplete."
-    $aMsg2.Font      = [System.Drawing.Font]::new("Segoe UI", 9)
-    $aMsg2.ForeColor = HAC '#9CA3AF'
-    $aMsg2.BackColor = [System.Drawing.Color]::Transparent
-    $aMsg2.Size      = [System.Drawing.Size]::new(414, 42)
-    $aMsg2.Location  = [System.Drawing.Point]::new(68, 96)
+    $aMsg2.Text = "Without administrator privileges some folders may not be readable and permission results could be incomplete."
+    $aMsg2.Font = [System.Drawing.Font]::new("Segoe UI", 9)
+    $aMsg2.ForeColor = HAC '#9CA3AF'; $aMsg2.BackColor = [System.Drawing.Color]::Transparent
+    $aMsg2.Size = [System.Drawing.Size]::new(414, 42); $aMsg2.Location = [System.Drawing.Point]::new(68, 96)
     $adm.Controls.Add($aMsg2)
 
     $aMsg3 = [System.Windows.Forms.Label]::new()
-    $aMsg3.Text      = "Restart ACLens as Administrator now?"
-    $aMsg3.Font      = [System.Drawing.Font]::new("Segoe UI", 9)
-    $aMsg3.ForeColor = HAC '#E2E8F0'
-    $aMsg3.BackColor = [System.Drawing.Color]::Transparent
-    $aMsg3.AutoSize  = $true
-    $aMsg3.Location  = [System.Drawing.Point]::new(68, 148)
+    $aMsg3.Text = "Restart ACLens as Administrator now?"
+    $aMsg3.Font = [System.Drawing.Font]::new("Segoe UI", 9)
+    $aMsg3.ForeColor = HAC '#E2E8F0'; $aMsg3.BackColor = [System.Drawing.Color]::Transparent
+    $aMsg3.AutoSize = $true; $aMsg3.Location = [System.Drawing.Point]::new(68, 148)
     $adm.Controls.Add($aMsg3)
 
-    # ── Footer separator + buttons (197..267) ───────────────
     $aSep = [System.Windows.Forms.Panel]::new()
-    $aSep.SetBounds(0, 196, 500, 1)
-    $aSep.BackColor = HAC '#4B5563'
+    $aSep.SetBounds(0, 196, 500, 1); $aSep.BackColor = HAC '#4B5563'
     $adm.Controls.Add($aSep)
 
     $aYes = [System.Windows.Forms.Button]::new()
-    $aYes.Text      = "Yes, restart as Admin"
-    $aYes.Size      = [System.Drawing.Size]::new(180, 38)
-    $aYes.Location  = [System.Drawing.Point]::new(18, 214)
-    $aYes.FlatStyle = "Flat"
-    $aYes.Font      = [System.Drawing.Font]::new("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
-    $aYes.BackColor = HAC '#7C3AED'
-    $aYes.ForeColor = [System.Drawing.Color]::White
-    $aYes.Cursor    = "Hand"
-    $aYes.FlatAppearance.BorderColor = HAC '#4C1D95'
-    $aYes.FlatAppearance.BorderSize  = 1
+    $aYes.Text = "Yes, restart as Admin"; $aYes.Size = [System.Drawing.Size]::new(180, 38)
+    $aYes.Location = [System.Drawing.Point]::new(18, 214); $aYes.FlatStyle = "Flat"
+    $aYes.Font = [System.Drawing.Font]::new("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
+    $aYes.BackColor = HAC '#7C3AED'; $aYes.ForeColor = [System.Drawing.Color]::White
+    $aYes.Cursor = "Hand"; $aYes.FlatAppearance.BorderColor = HAC '#4C1D95'
+    $aYes.FlatAppearance.BorderSize = 1
     $aYes.DialogResult = [System.Windows.Forms.DialogResult]::Yes
     $adm.Controls.Add($aYes)
 
     $aNo = [System.Windows.Forms.Button]::new()
-    $aNo.Text      = "Continue without Admin"
-    $aNo.Size      = [System.Drawing.Size]::new(180, 38)
-    $aNo.Location  = [System.Drawing.Point]::new(208, 214)
-    $aNo.FlatStyle = "Flat"
-    $aNo.Font      = [System.Drawing.Font]::new("Segoe UI", 9)
-    $aNo.BackColor = HAC '#374151'
-    $aNo.ForeColor = HAC '#E2E8F0'
-    $aNo.Cursor    = "Hand"
-    $aNo.FlatAppearance.BorderColor = HAC '#4B5563'
-    $aNo.FlatAppearance.BorderSize  = 1
+    $aNo.Text = "Continue without Admin"; $aNo.Size = [System.Drawing.Size]::new(180, 38)
+    $aNo.Location = [System.Drawing.Point]::new(208, 214); $aNo.FlatStyle = "Flat"
+    $aNo.Font = [System.Drawing.Font]::new("Segoe UI", 9)
+    $aNo.BackColor = HAC '#374151'; $aNo.ForeColor = HAC '#E2E8F0'
+    $aNo.Cursor = "Hand"; $aNo.FlatAppearance.BorderColor = HAC '#4B5563'
+    $aNo.FlatAppearance.BorderSize = 1
     $aNo.DialogResult = [System.Windows.Forms.DialogResult]::No
     $adm.Controls.Add($aNo)
 
@@ -140,13 +120,74 @@ if (-not $isAdmin) {
     }
 }
 
+# ── Load assemblies ───────────────────────────────────────────
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Web
 
+# ── Load modules ─────────────────────────────────────────────
+$moduleRoot = Join-Path $PSScriptRoot "modules"
+
 # ============================================================
-# HILFSFUNKTIONEN (NTFS-Logik)
+# MODULE: Core
 # ============================================================
+# ACLens - Core.psm1
+# Shared colors, fonts, and helper functions used by all modules
+
+function HC([string]$h) {
+    $h = $h.TrimStart('#')
+    [System.Drawing.Color]::FromArgb(
+        [Convert]::ToInt32($h.Substring(0,2),16),
+        [Convert]::ToInt32($h.Substring(2,2),16),
+        [Convert]::ToInt32($h.Substring(4,2),16))
+}
+
+# ── Color palette (DiskLens standard) ────────────────────────
+$script:COL = @{
+    BgMain      = HC '#1E1E2E'
+    BgInput     = HC '#2D2D3F'
+    BgTitle     = HC '#1A1A2E'
+    BgStatus    = HC '#111827'
+    BgMid       = HC '#252535'
+    BtnPrimary  = HC '#7C3AED'
+    BtnPrimBrd  = HC '#4C1D95'
+    BtnNeutral  = HC '#374151'
+    BtnCancel   = HC '#991B1B'
+    BtnCnclBrd  = HC '#7F1D1D'
+    BtnBlue     = HC '#1D4ED8'
+    BtnBlueBrd  = HC '#1E40AF'
+    Border      = HC '#4B5563'
+    BorderDark  = HC '#374151'
+    TxtHi       = HC '#E2E8F0'
+    TxtAccent   = HC '#A78BFA'
+    TxtMid      = HC '#9CA3AF'
+    TxtLow      = HC '#6B7280'
+    TxtOk       = HC '#34D399'
+    TxtErr      = HC '#F87171'
+    TxtWarn     = HC '#FBBF24'
+    BgSel       = HC '#4C1D95'
+}
+
+# ── Fonts ─────────────────────────────────────────────────────
+$script:FN = [System.Drawing.Font]::new("Segoe UI",  9)
+$script:FB = [System.Drawing.Font]::new("Segoe UI",  9,  [System.Drawing.FontStyle]::Bold)
+$script:FT = [System.Drawing.Font]::new("Segoe UI", 15, [System.Drawing.FontStyle]::Bold)
+$script:FS = [System.Drawing.Font]::new("Segoe UI",  8)
+
+# ── Layout constants ─────────────────────────────────────────
+$script:PAD   = 20
+$script:HDR_H = 54
+$script:FTR_H = 62
+$script:ROW_H = 54
+$script:BTN_W = 110
+$script:BTN_H = 26
+
+
+# ============================================================
+# MODULE: NTFS
+# ============================================================
+# ACLens - NTFS.psm1
+# NTFS permission scanning and comparison logic
 
 function Get-InheritanceFlagsDescription {
     param(
@@ -280,6 +321,14 @@ function Get-AllFolders {
     }
     return $allFolders.ToArray()
 }
+
+
+
+# ============================================================
+# MODULE: Report
+# ============================================================
+# ACLens - Report.psm1
+# HTML report generation for NTFS scans and diff reports
 
 function New-HTMLReport {
     param([array]$FolderData, [string]$RootPath, [string]$OutputPath)
@@ -854,19 +903,170 @@ function New-HTMLReport {
     [System.IO.File]::WriteAllText($OutputPath, $out.ToString(), [System.Text.UTF8Encoding]::new($true))
 }
 
-# ============================================================
-# GUI
-# ============================================================
-
-[System.Windows.Forms.Application]::EnableVisualStyles()
-
-function HC([string]$h) {
-    $h = $h.TrimStart('#')
-    [System.Drawing.Color]::FromArgb(
-        [Convert]::ToInt32($h.Substring(0,2),16),
-        [Convert]::ToInt32($h.Substring(2,2),16),
-        [Convert]::ToInt32($h.Substring(4,2),16))
+# ── Compare Scan Helper Functions ────────────────────────────
+function Load-JsonSnapshot {
+    param([string]$Path)
+    $raw = Get-Content -Path $Path -Raw -Encoding UTF8 | ConvertFrom-Json
+    $result = @{}
+    foreach ($item in $raw) {
+        $rules = @()
+        foreach ($r in $item.Rules) {
+            $rules += [PSCustomObject]@{
+                Identity         = $r.Identity
+                AccessType       = $r.AccessType
+                Rights           = $r.Rights
+                IsInherited      = $r.IsInherited
+                InheritanceFlags = $r.InheritanceFlags
+                PropagationFlags = $r.PropagationFlags
+            }
+        }
+        $result[$item.Path] = [PSCustomObject]@{
+            Path                    = $item.Path
+            Owner                   = $item.Owner
+            InheritanceEnabled      = $item.InheritanceEnabled
+            AreAccessRulesProtected = $item.AreAccessRulesProtected
+            Rules                   = $rules
+        }
+    }
+    return $result
 }
+
+function Get-RulesKey {
+    param([array]$Rules)
+    ($Rules | Sort-Object Identity, AccessType, Rights, InheritanceFlags, PropagationFlags |
+        ForEach-Object { "$($_.Identity)|$($_.AccessType)|$($_.Rights)|$($_.IsInherited)|$($_.InheritanceFlags)|$($_.PropagationFlags)" }) -join ";"
+}
+
+function New-CompareHTMLReport {
+    param([hashtable]$OldData, [hashtable]$NewData, [string]$OldLabel, [string]$NewLabel, [string]$OutputPath)
+
+    $reportDate = Get-Date -Format "dd.MM.yyyy HH:mm:ss"
+
+    $allPaths = @($OldData.Keys) + @($NewData.Keys) | Sort-Object -Unique
+
+    $addedFolders   = @()
+    $removedFolders = @()
+    $changedFolders = @()
+    $rows = [System.Text.StringBuilder]::new()
+
+    foreach ($path in $allPaths) {
+        $inOld = $OldData.ContainsKey($path)
+        $inNew = $NewData.ContainsKey($path)
+
+        if (-not $inOld -and $inNew) {
+            $addedFolders += $path
+            [void]$rows.Append("<tr class='row-added'>")
+            [void]$rows.Append("<td class='path-cell'>&#43; $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
+            [void]$rows.Append("<td><span class='diff-badge badge-added'>Added</span></td>")
+            [void]$rows.Append("<td colspan='2' class='diff-note'>New folder &mdash; not present in baseline</td>")
+            [void]$rows.Append("</tr>")
+        }
+        elseif ($inOld -and -not $inNew) {
+            $removedFolders += $path
+            [void]$rows.Append("<tr class='row-removed'>")
+            [void]$rows.Append("<td class='path-cell'>&#8722; $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
+            [void]$rows.Append("<td><span class='diff-badge badge-removed'>Removed</span></td>")
+            [void]$rows.Append("<td colspan='2' class='diff-note'>Folder removed &mdash; not present in current scan</td>")
+            [void]$rows.Append("</tr>")
+        }
+        else {
+            $old = $OldData[$path]
+            $new = $NewData[$path]
+            $oldKey = Get-RulesKey $old.Rules
+            $newKey = Get-RulesKey $new.Rules
+            $sameInherit = ($old.InheritanceEnabled -eq $new.InheritanceEnabled)
+
+            if ($oldKey -ne $newKey -or -not $sameInherit -or $old.Owner -ne $new.Owner) {
+                $changedFolders += $path
+
+                # Find added/removed rules
+                $oldRules = @{}; foreach ($r in $old.Rules) { $oldRules["$($r.Identity)|$($r.AccessType)|$($r.Rights)|$($r.InheritanceFlags)"] = $r }
+                $newRules = @{}; foreach ($r in $new.Rules) { $newRules["$($r.Identity)|$($r.AccessType)|$($r.Rights)|$($r.InheritanceFlags)"] = $r }
+
+                $addedRules   = $newRules.Keys | Where-Object { -not $oldRules.ContainsKey($_) }
+                $removedRules = $oldRules.Keys | Where-Object { -not $newRules.ContainsKey($_) }
+
+                [void]$rows.Append("<tr class='row-changed'>")
+                [void]$rows.Append("<td class='path-cell' rowspan='999'>&#9998; $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
+                [void]$rows.Append("<td><span class='diff-badge badge-changed'>Changed</span></td>")
+
+                $details = [System.Text.StringBuilder]::new()
+
+                if ($old.Owner -ne $new.Owner) {
+                    [void]$details.Append("<div class='diff-detail'><span class='diff-key'>Owner:</span> <span class='old-val'>$([System.Web.HttpUtility]::HtmlEncode($old.Owner))</span> &rarr; <span class='new-val'>$([System.Web.HttpUtility]::HtmlEncode($new.Owner))</span></div>")
+                }
+                if (-not $sameInherit) {
+                    $oldI = if ($old.InheritanceEnabled) { 'Active' } else { 'Disabled' }
+                    $newI = if ($new.InheritanceEnabled) { 'Active' } else { 'Disabled' }
+                    [void]$details.Append("<div class='diff-detail'><span class='diff-key'>Inheritance:</span> <span class='old-val'>$oldI</span> &rarr; <span class='new-val'>$newI</span></div>")
+                }
+                foreach ($k in $addedRules) {
+                    $r = $newRules[$k]
+                    [void]$details.Append("<div class='diff-detail added-rule'>&#43; $([System.Web.HttpUtility]::HtmlEncode($r.Identity)) &mdash; $($r.AccessType) &mdash; $($r.Rights)</div>")
+                }
+                foreach ($k in $removedRules) {
+                    $r = $oldRules[$k]
+                    [void]$details.Append("<div class='diff-detail removed-rule'>&#8722; $([System.Web.HttpUtility]::HtmlEncode($r.Identity)) &mdash; $($r.AccessType) &mdash; $($r.Rights)</div>")
+                }
+
+                [void]$rows.Append("<td colspan='2'>$($details.ToString())</td></tr>")
+            }
+        }
+    }
+
+    $totalChanged = $changedFolders.Count
+    $totalAdded   = $addedFolders.Count
+    $totalRemoved = $removedFolders.Count
+    $totalSame    = $allPaths.Count - $totalChanged - $totalAdded - $totalRemoved
+
+    $cssCompare = ':root{--bg:#1E1E2E;--bg2:#2D2D3F;--bg3:#1A1A2E;--bg4:#252535;--border:#4B5563;--border2:#374151;--text:#E2E8F0;--text2:#9CA3AF;--text3:#6B7280;--accent:#A78BFA;--green:#34D399;--red:#F87171;--yellow:#FBBF24;--font-mono:Consolas,monospace;--font-ui:"Segoe UI",system-ui,sans-serif;--radius:6px}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:13px;line-height:1.5}.header{background:linear-gradient(180deg,#2D2D3F,#1E1E2E);border-bottom:1px solid var(--border);padding:24px 32px 18px}.title{font-size:20px;font-weight:700;color:var(--accent);margin-bottom:6px}.subtitle{color:var(--text2);font-size:12px;margin-bottom:12px}.meta{display:flex;gap:24px;flex-wrap:wrap}.meta-item{display:flex;flex-direction:column;gap:2px}.meta-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}.meta-val{font-size:13px;font-weight:500}.stats{display:flex;gap:10px;padding:14px 32px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}.stat{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:9px 16px;display:flex;flex-direction:column;align-items:center;min-width:110px}.stat-num{font-size:22px;font-weight:700;line-height:1}.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}.s-changed .stat-num{color:var(--yellow)}.s-added .stat-num{color:var(--green)}.s-removed .stat-num{color:var(--red)}.s-same .stat-num{color:var(--text2)}.table-wrap{padding:16px 24px;overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}thead tr{background:var(--bg4)}th{text-align:left;padding:7px 10px;color:var(--text2);font-weight:500;font-size:11px;border-bottom:1px solid var(--border)}td{padding:7px 10px;border-bottom:1px solid var(--border2);vertical-align:top}.path-cell{font-family:var(--font-mono);font-size:11px;color:var(--text);min-width:260px}.row-added{background:rgba(52,211,153,.06)}.row-added .path-cell{color:var(--green)}.row-removed{background:rgba(241,113,113,.06)}.row-removed .path-cell{color:var(--red)}.row-changed{background:rgba(251,191,36,.05)}.row-changed .path-cell{color:var(--yellow)}.diff-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap}.badge-added{background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.4);color:var(--green)}.badge-removed{background:rgba(241,113,113,.15);border:1px solid rgba(241,113,113,.4);color:var(--red)}.badge-changed{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--yellow)}.diff-note{color:var(--text2)}.diff-detail{margin:2px 0;font-size:11px;color:var(--text2)}.diff-key{font-weight:600;color:var(--text);margin-right:4px}.old-val{color:var(--red);text-decoration:line-through;margin-right:4px}.new-val{color:var(--green)}.added-rule{color:var(--green)}.removed-rule{color:var(--red)}.footer{text-align:center;padding:16px;color:var(--text3);font-size:11px;border-top:1px solid var(--border2);background:var(--bg3)}.no-diff{padding:40px 32px;text-align:center;color:var(--text3);font-size:14px}'
+
+    $noRows = ($totalChanged + $totalAdded + $totalRemoved) -eq 0
+
+    $html  = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>ACLens Compare</title>"
+    $html += "<style>$cssCompare</style></head><body>"
+    $html += "<div class='header'>"
+    $html += "<div class='title'>&#128270; ACLens &mdash; Permission Diff</div>"
+    $html += "<div class='subtitle'>Baseline vs. Current Scan</div>"
+    $html += "<div class='meta'>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Baseline</span><span class='meta-val'>$([System.Web.HttpUtility]::HtmlEncode($OldLabel))</span></div>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Current Scan</span><span class='meta-val'>$([System.Web.HttpUtility]::HtmlEncode($NewLabel))</span></div>"
+    $html += "<div class='meta-item'><span class='meta-lbl'>Generated</span><span class='meta-val'>$reportDate</span></div>"
+    $html += "</div></div>"
+    $html += "<div class='stats'>"
+    $html += "<div class='stat s-changed'><span class='stat-num'>$totalChanged</span><span class='stat-lbl'>Permissions changed</span></div>"
+    $html += "<div class='stat s-added'><span class='stat-num'>$totalAdded</span><span class='stat-lbl'>Folders added</span></div>"
+    $html += "<div class='stat s-removed'><span class='stat-num'>$totalRemoved</span><span class='stat-lbl'>Folders removed</span></div>"
+    $html += "<div class='stat s-same'><span class='stat-num'>$totalSame</span><span class='stat-lbl'>Unchanged</span></div>"
+    $html += "</div>"
+
+    if ($noRows) {
+        $html += "<div class='no-diff'>&#10003; No differences found &mdash; permissions are identical.</div>"
+    } else {
+        $html += "<div class='table-wrap'><table>"
+        $html += "<thead><tr><th>Path</th><th>Status</th><th colspan='2'>Details</th></tr></thead><tbody>"
+        $html += $rows.ToString()
+        $html += "</tbody></table></div>"
+    }
+
+    $html += "<div class='footer'>ACLens Compare &bull; $reportDate</div>"
+    $html += "</body></html>"
+
+    [System.IO.File]::WriteAllText($OutputPath, $html, [System.Text.UTF8Encoding]::new($true))
+    return [PSCustomObject]@{ Changed=$totalChanged; Added=$totalAdded; Removed=$totalRemoved }
+}
+
+
+
+# ============================================================
+# MODULE: GUI
+# ============================================================
+# ACLens - GUI.psm1
+# Main application window and all UI logic
+
+function Start-ACLensGUI {
+
+    [System.Windows.Forms.Application]::EnableVisualStyles()
 
 # Farben
 $C_BG       = HC '#1E1E2E'
@@ -1734,4 +1934,12 @@ $btnCompare.add_Click({
     $cWin.ShowDialog($form) | Out-Null
 })
 
-[System.Windows.Forms.Application]::Run($form)
+
+    [System.Windows.Forms.Application]::Run($form)
+
+} # end Start-ACLensGUI
+
+
+
+# ── Launch ───────────────────────────────────────────────────
+Start-ACLensGUI
