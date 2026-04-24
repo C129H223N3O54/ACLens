@@ -35,7 +35,7 @@ Priorities may shift based on feedback and real-world usage.
 
 - [ ] **CSV / Excel export** — export permission lists directly to `.xlsx` for further analysis
 - [ ] **Recently scanned paths** — dropdown with last 5 paths per tab
-- [ ] **Dark / Light mode toggle** in HTML report
+- [x] **Dark / Light mode toggle** in HTML report
 - [ ] **Improved print / PDF output** — clean, paginated PDF directly from the tool
 - [ ] **DPI-aware GUI** — correct scaling on high-resolution displays
 - [ ] **Multi-select SharePoint sites** — scan multiple sites in one run

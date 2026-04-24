@@ -5,69 +5,93 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.4.0-beta] — 2026-04-16
+
+### GUI & UX
+
+#### Added
+- **DE/EN language toggle** — button in header, switches entire GUI and HTML reports between German and English
+- **Light mode** for main GUI — toggle button top right of header
+- Changelog window is now resizable and theme-aware (respects light/dark mode)
+- SharePoint Setup Wizard now respects light/dark mode
+- Placeholder text in manual setup fields clears on focus and restores on blur
+- Language-aware documentation links (DE → German guide, EN → English guide)
+
+#### Fixed
+- All footer buttons now correctly show white text (FlatStyle enum fix, UseVisualStyleBackColor)
+- Cancel button always visible — no longer disabled on startup
+- Duplicate `New-CompareHTMLReport` function removed
+- All `FlatStyle = "Flat"` string assignments replaced with proper enum throughout
+- Self-referencing entries in EN string table fixed (wizard was blank in EN)
+- Inline `if` expressions on property assignments replaced with variables (PS 5.1 fix)
+- Secondary buttons unified to consistent gray in both light and dark mode
+- SP Setup Wizard panel widths corrected to match window size
+- Footer buttons centered horizontally and vertically
+
+### HTML Report
+
+#### Added
+- **Dark/Light mode toggle** — button top right, preference saved in localStorage
+- **Paginated view** — 25/50/100/All folders per page with prev/next navigation
+- Only Root and Changed folders expanded by default
+- German translation of all report strings when DE mode active
+
+---
+
+## [0.3.1-alpha] — 2026-04-16
+
+### Fixed
+- `switch` statement spacing caused `UnexpectedToken` on PowerShell 5.1
+- Version label added to main window header
+- Report title corrected to "ACLens — NTFS Permission Report"
+
+---
+
+## [0.3.0-alpha] — 2026-04-16
+
+### HTML Report Redesign
+- Paginated view instead of infinite scroll
+- Dark/Light mode toggle with localStorage
+- Smarter default view (Root + Changed expanded, rest collapsed)
+- Expand/Collapse affects current page only
+- Improved permission table layout
+
+---
+
 ## [0.2.1-alpha] — 2026-03-27
 
 ### Fixed
-- `switch` statement spacing caused `UnexpectedToken` parse error on PowerShell 5.1 in `Get-SPExternalSharing`
-
-### Changed
-- Version label added to main window header (top left, next to "ACLens")
-- Subtitle updated to "NTFS & SharePoint Permission Analyzer"
+- `switch` statement spacing fix for PS 5.1
+- Version badge added to header
+- Subtitle updated
 
 ---
 
 ## [0.2.0-alpha] — 2026-03-27
 
-### SharePoint Online support
-
-#### Added
-- **SharePoint tab** in the main GUI alongside the NTFS tab
-- **Setup Wizard** with two modes:
-  - **Automatic** (Device Code Flow) — ACLens creates the Azure AD App Registration automatically; requires one-time sign-in with an Application Administrator account
-  - **Manual** — enter Tenant ID, Client ID and Client Secret from an existing App Registration
-- Encrypted credential storage in `sp_credentials.xml` using Windows DPAPI
-- **SharePoint scanner** via Microsoft Graph API:
-  - Site-level permissions
-  - Document Libraries and Lists
-  - Recursive folder tree with per-folder unique permission detection
-  - SharePoint Groups & Members
-  - External Sharing status
-- **SP HTML report** — source-badged, collapsible library/folder tree, unique vs. inherited permission detection, sharing link detection
-- **SP JSON snapshot** auto-saved alongside every SP HTML report
-- **Compare Scans** window extended with SharePoint Compare tab:
-  - Select SP baseline JSON + current site URL
-  - Runs a live scan and generates SP diff report
-  - Shows added/removed folders and exact permission changes per folder
-- [Manual SharePoint Setup Guide](docs/manual-sp-setup.md) added
-
-#### Changed
-- Main window now has NTFS / SharePoint tab bar
-- Start Analysis button routes to correct scanner based on active tab
-- Compare Scans window now has NTFS Compare / SharePoint Compare tabs
-- Subtitle updated to reflect SP support
+### SharePoint Online Support
+- SharePoint tab in main GUI
+- Setup Wizard: Device Code Flow (automatic App Registration)
+- Setup Wizard: Manual mode with Tenant ID / Client ID / Secret
+- Encrypted credential storage (DPAPI)
+- SP Scanner: Sites, Libraries, Folders, Groups, External Sharing
+- SP HTML report with collapsible library/folder tree
+- SP JSON snapshot auto-saved
+- Compare Scans extended: NTFS + SharePoint tabs
+- SP Diff report: added/removed folders, changed permissions
+- Manual SP setup guides added (EN + DE)
 
 ---
 
 ## [0.1.0-alpha] — 2026-03-14
 
-### Initial public alpha release
-
-#### Added
-- Recursive NTFS permission scan with configurable maximum depth
-- Change detection — highlights folders where permissions differ from parent
-- Interactive HTML report with filter, search, expand/collapse and print
-- Collapsible legend in HTML report explaining all status codes and permission types
-- Automatic JSON snapshot export alongside every HTML report
-- **Compare Scans** — NTFS diff showing added/removed folders and exact per-folder permission changes (added/removed rules, owner, inheritance)
-- Full Windows Forms GUI with progress bar, live status and cancel support
-- **Open Last Report** button — reopens last generated HTML report
-- **Changelog** button — shows version history in a modal dialog
-- **Compare Scans** button in footer
-- Admin privilege check on startup with custom-styled dialog and restart-as-admin option
-- Output files (HTML + JSON) saved to script folder (`$PSScriptRoot`) by default
-- Color scheme based on DiskLens palette (`#1E1E2E` base, `#7C3AED` accent)
-
-#### Known Issues at release
-- GUI not DPI-aware on very high-resolution displays
-- No CSV / Excel export
-- No scheduled scan support
+### Initial Release
+- Recursive NTFS permission scan with configurable depth
+- Change detection vs. parent folder
+- Interactive HTML report (filter, search, expand/collapse, print)
+- Collapsible legend
+- JSON snapshot export
+- Compare Scans (NTFS diff)
+- Windows Forms GUI with progress bar and cancel
+- Admin check on startup
+- Output saved to script folder

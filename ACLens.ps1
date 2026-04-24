@@ -7,7 +7,7 @@
     Entry point. Loads all modules and launches the GUI.
 
 .NOTES
-    Version:    0.2.1-alpha
+    Version:    0.4.0-beta
     Author:     ACLens Contributors
     Compatible: Windows 10/11, Server 2016-2025, PowerShell 5.1+
 #>
@@ -91,7 +91,7 @@ if (-not $isAdmin) {
 
     $aYes = [System.Windows.Forms.Button]::new()
     $aYes.Text = "Yes, restart as Admin"; $aYes.Size = [System.Drawing.Size]::new(180, 38)
-    $aYes.Location = [System.Drawing.Point]::new(18, 214); $aYes.FlatStyle = "Flat"
+    $aYes.Location = [System.Drawing.Point]::new(18, 214); $aYes.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $aYes.Font = [System.Drawing.Font]::new("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
     $aYes.BackColor = HAC '#7C3AED'; $aYes.ForeColor = [System.Drawing.Color]::White
     $aYes.Cursor = "Hand"; $aYes.FlatAppearance.BorderColor = HAC '#4C1D95'
@@ -101,7 +101,7 @@ if (-not $isAdmin) {
 
     $aNo = [System.Windows.Forms.Button]::new()
     $aNo.Text = "Continue without Admin"; $aNo.Size = [System.Drawing.Size]::new(180, 38)
-    $aNo.Location = [System.Drawing.Point]::new(208, 214); $aNo.FlatStyle = "Flat"
+    $aNo.Location = [System.Drawing.Point]::new(208, 214); $aNo.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $aNo.Font = [System.Drawing.Font]::new("Segoe UI", 9)
     $aNo.BackColor = HAC '#374151'; $aNo.ForeColor = HAC '#E2E8F0'
     $aNo.Cursor = "Hand"; $aNo.FlatAppearance.BorderColor = HAC '#4B5563'
@@ -121,6 +121,286 @@ if (-not $isAdmin) {
 }
 
 # ── Load assemblies ───────────────────────────────────────────
+
+# ============================================================
+# SPRACHE / LANGUAGE
+# ============================================================
+$script:lang = "EN"
+
+$script:STR = @{}
+
+function Set-Language($l) {
+    $script:lang = $l
+    if ($l -eq "DE") {
+        $script:STR = @{
+            # Header
+            AppSubtitle     = "NTFS & SharePoint Berechtigungsanalyse"
+            # Tabs
+            TabNTFS         = "  NTFS"
+            TabSP           = "  SharePoint"
+            # NTFS fields
+            LblPath         = "Startpfad:"
+            LblOutput       = "Ausgabedatei (HTML + JSON):"
+            LblDepth        = "Maximale Tiefe:"
+            LblUnlimited    = "  0 = unbegrenzt"
+            LblBrowse       = "Durchsuchen..."
+            LblSaveAs       = "Speichern..."
+            ChkBrowser      = "Bericht nach Erstellung im Browser öffnen"
+            LblReady        = "Bereit."
+            # SP fields
+            SpNotConfigured = "Nicht konfiguriert"
+            SpConnected     = "Verbunden"
+            SpConnectHint   = "Klicke 'Einrichten / Verbinden' um ACLens mit deinem Microsoft 365 Mandanten zu verbinden."
+            SpLblUrl        = "SharePoint-Website URL:"
+            SpLblDepth      = "Maximale Tiefe:"
+            SpChkBrowser    = "Bericht nach Erstellung im Browser öffnen"
+            SpBtnSetup      = "Einrichten / Verbinden"
+            # Footer buttons
+            BtnStart        = "Starten"
+            BtnCancel       = "Abbrechen"
+            BtnOpenLast     = "Letzter Bericht"
+            BtnChangelog    = "Changelog"
+            BtnCompare      = "Vergleichen"
+            BtnThemeLight   = "Hell"
+            BtnThemeDark    = "Dunkel"
+            BtnLang         = "DE"
+            # Status messages
+            StepScanFolders = "Schritt 1/3: Ordner werden gescannt..."
+            StepReadPerms   = "Schritt 2/3: NTFS-Berechtigungen werden gelesen"
+            StepGenReport   = "Schritt 3/3: HTML-Bericht wird erstellt..."
+            StepCancelled   = "Abgebrochen."
+            StepDone        = "Fertig! Bericht gespeichert:"
+            StepError       = "Fehler:"
+            MsgInvalidPath  = "Bitte einen gültigen Ordnerpfad angeben."
+            MsgInvalidPathT = "Ungültiger Pfad"
+            # Compare window
+            CmpTitle        = "ACLens - Scans vergleichen"
+            CmpNTFS         = "  NTFS-Vergleich"
+            CmpSP           = "  SharePoint-Vergleich"
+            CmpBaseline     = "Baseline (JSON):"
+            CmpScanPath     = "Aktueller Scanpfad:"
+            CmpSpBaseline   = "SharePoint Baseline-Snapshot (JSON):"
+            CmpSpUrl        = "Aktuelle SharePoint-Website URL:"
+            CmpSpNote       = "Hinweis: Es wird ein neuer SP-Scan durchgeführt und mit der Baseline verglichen."
+            CmpRun          = "Vergleich starten"
+            CmpReady        = "Bereit."
+            CmpLoading      = "Baseline wird geladen..."
+            CmpScanning     = "Schritt 2/2: Ordner werden gescannt..."
+            CmpGenerating   = "Diff-Bericht wird erstellt..."
+            CmpDone         = "Fertig!"
+            CmpMissingJson  = "Bitte eine gültige Baseline-JSON-Datei auswählen."
+            CmpMissingPath  = "Bitte einen gültigen Scanpfad angeben."
+            CmpMissingUrl   = "Bitte eine gültige SharePoint-Website URL angeben."
+            CmpMissingInput = "Fehlende Eingabe"
+            # SP Setup Wizard
+            WizTitle        = "ACLens — SharePoint Einrichtung"
+            WizSub          = "Mit Microsoft 365 verbinden"
+            WizAutoTab      = "Automatische Einrichtung"
+            WizManualTab    = "Manuelle Einrichtung"
+            WizAutoInfo     = "ACLens erstellt automatisch eine App-Registrierung in deinem Azure AD Mandanten über den Gerätecode-Flow. Du benötigst ein Konto mit der Rolle 'Anwendungsadministrator' oder 'Globaler Administrator'."
+            WizStep1        = "Schritt 1 — Klicke auf 'Gerätecode anfordern'"
+            WizStep2        = "Schritt 2 — Öffne den Link und gib den unten angezeigten Code ein"
+            WizStep3        = "Schritt 3 — Melde dich mit deinem Administratorkonto an — ACLens erledigt den Rest"
+            WizGetCode      = "Gerätecode anfordern"
+            WizOpenBrowser  = "microsoft.com/devicelogin öffnen"
+            WizWaiting      = "Warte auf Anmeldung..."
+            WizCreating     = "Angemeldet! App-Registrierung wird erstellt..."
+            WizDone         = "App-Registrierung erstellt!"
+            WizCancelled    = "Anmeldung abgebrochen oder abgelaufen. Bitte erneut versuchen."
+            WizManualInfo   = "Zugangsdaten einer vorhandenen Azure AD App-Registrierung manuell eingeben. Siehe Dokumentation für Einrichtungsanweisungen."
+            WizOpenDocs     = "Anleitung zur manuellen Einrichtung öffnen"
+            WizTenantId     = "Mandanten-ID"
+            WizClientId     = "Client-ID"
+            WizSecret       = "Geheimer Clientschlüssel"
+            WizSaveConnect  = "Speichern && verbinden"
+            WizMissingData  = "Bitte alle Felder ausfüllen."
+            WizSaved        = "Zugangsdaten erfolgreich gespeichert."
+            WizClose        = "Schließen"
+            # HTML Report
+            RptTitle        = "ACLens — NTFS-Berechtigungsbericht"
+            RptStatTotal    = "Ordner gesamt"
+            RptStatChanged  = "Geändert"
+            RptStatInherited= "Nur geerbt"
+            RptStatErrors   = "Fehler"
+            RptLegendBtn    = "📖 Legende & Referenz"
+            RptStatusRoot   = "Stamm"
+            RptStatusChanged= "Geändert"
+            RptStatusInherited = "Geerbt"
+            RptStatusError  = "Fehler"
+            RptFolderStatus = "Ordnerstatus"
+            RptPermTypes    = "Berechtigungstypen"
+            RptRuleTypes    = "Regeltypen"
+            RptFCDesc       = "Lesen, Schreiben, Berechtigungen ändern, Besitz übernehmen"
+            RptModifyDesc   = "Lesen, Schreiben, Dateien und Unterordner löschen"
+            RptRXDesc       = "Dateien anzeigen und ausführen"
+            RptReadDesc     = "Dateien und Ordnerinhalte anzeigen"
+            RptWriteDesc    = "Dateien und Unterordner erstellen"
+            RptExplicit     = "Explizit"
+            RptInherited    = "Geerbt"
+            RptAllow        = "Erlauben"
+            RptDeny         = "Verweigern"
+            RptExplicitSet  = "Direkt auf diesem Ordner gesetzt"
+            RptInheritedFrom= "Vom übergeordneten Ordner weitergegeben"
+            RptAllowDesc    = "Gewährt Zugriff — kann durch Verweigern überschrieben werden"
+            RptDenyDesc     = "Sperrt Zugriff — überschreibt immer Erlauben"
+            RptFilterAll    = "Alle"
+            RptFilterChanged= "Geändert"
+            RptFilterInh    = "Nur geerbt"
+            RptFilterErr    = "Fehler"
+            RptExpandPage   = "Seite aufklappen"
+            RptCollapsePage = "Seite zuklappen"
+            RptPrint        = "🖨 Drucken"
+            RptPrincipal    = "Konto / Gruppe"
+            RptType         = "Typ"
+            RptPermission   = "Berechtigung"
+            RptAppliesTo    = "Gilt für"
+            RptKind         = "Art"
+            RptSameAsParent = "✓ Wie übergeordneter Ordner — keine lokalen Änderungen"
+            RptNoRules      = "Keine Berechtigungsregeln gefunden."
+            RptFooter       = "ACLens v0.4.0-beta"
+            RptThemeLight   = "☀️ Hell"
+            RptThemeDark    = "🌙 Dunkel"
+            RptPerPage      = "pro Seite"
+            RptNoResults    = "Keine Ordner entsprechen diesem Filter."
+            RptOwner        = "Besitzer"
+            RptInheritance  = "Vererbung"
+            RptExplicitPerms= "Explizite Berechtigungen"
+            RptInheritedPerms="Geerbte Berechtigungen"
+        }
+    } else {
+        $script:STR = @{
+            AppSubtitle     = "NTFS & SharePoint Permission Analyzer"
+            TabNTFS         = "  NTFS"
+            TabSP           = "  SharePoint"
+            LblPath         = "Start Path:"
+            LblOutput       = "Output File (HTML + JSON):"
+            LblDepth        = "Maximum Depth:"
+            LblUnlimited    = "  0 = unlimited"
+            LblBrowse       = "Browse..."
+            LblSaveAs       = "Save as..."
+            ChkBrowser      = "Open report in browser after creation"
+            LblReady        = "Ready."
+            SpNotConfigured = "Not configured"
+            SpConnected     = "Connected"
+            SpConnectHint   = "Click 'Setup / Reconnect' to register ACLens with your Microsoft 365 tenant."
+            SpLblUrl        = "SharePoint Site URL:"
+            SpLblDepth      = "Maximum Depth:"
+            SpChkBrowser    = "Open report in browser after creation"
+            SpBtnSetup      = "Setup / Reconnect"
+            BtnStart        = "Start Analysis"
+            BtnCancel       = "Cancel"
+            BtnOpenLast     = "Open Last Report"
+            BtnChangelog    = "Changelog"
+            BtnCompare      = "Compare Scans"
+            BtnThemeLight   = "Light"
+            BtnThemeDark    = "Dark"
+            BtnLang         = "EN"
+            StepScanFolders = "Step 1/3: Scanning folders..."
+            StepReadPerms   = "Step 2/3: Reading NTFS permissions"
+            StepGenReport   = "Step 3/3: Generating HTML report..."
+            StepCancelled   = "Cancelled."
+            StepDone        = "Done!  Report saved to:"
+            StepError       = "Error:"
+            MsgInvalidPath  = "Please enter a valid folder path."
+            MsgInvalidPathT = "Invalid Path"
+            CmpTitle        = "ACLens - Compare Scans"
+            CmpNTFS         = "  NTFS Compare"
+            CmpSP           = "  SharePoint Compare"
+            CmpBaseline     = "Baseline (JSON):"
+            CmpScanPath     = "Current Scan Path:"
+            CmpSpBaseline   = "Baseline SP Snapshot (JSON):"
+            CmpSpUrl        = "Current SharePoint Site URL:"
+            CmpSpNote       = "Note: A new live SP scan will run and be compared against the baseline JSON."
+            CmpRun          = "Run Comparison"
+            CmpReady        = "Ready."
+            CmpLoading      = "Loading baseline..."
+            CmpScanning     = "Step 2/2: Scanning folders..."
+            CmpGenerating   = "Generating diff report..."
+            CmpDone         = "Done!"
+            CmpMissingJson  = "Please select a valid baseline JSON file."
+            CmpMissingPath  = "Please enter a valid scan path."
+            CmpMissingUrl   = "Please enter a valid SharePoint Site URL."
+            CmpMissingInput = "Missing input"
+            WizTitle        = "ACLens — SharePoint Setup"
+            WizSub          = "Connect ACLens to Microsoft 365"
+            WizAutoTab      = "Automatic Setup"
+            WizManualTab    = "Manual Setup"
+            WizAutoInfo     = "ACLens will automatically create an App Registration in your Azure AD tenant using the Device Code flow. You need an account with Application Administrator or Global Administrator role."
+            WizStep1        = "Step 1 — Click 'Get Device Code' below"
+            WizStep2        = "Step 2 — Open the link and enter the code shown below"
+            WizStep3        = "Step 3 — Sign in with your admin account — ACLens handles the rest"
+            WizGetCode      = "Get Device Code"
+            WizOpenBrowser  = "Open microsoft.com/devicelogin"
+            WizWaiting      = "Waiting for sign-in..."
+            WizCreating     = "Signed in! Creating App Registration..."
+            WizDone         = "App Registration created!"
+            WizCancelled    = "Sign-in cancelled or expired. Try again."
+            WizManualInfo   = "Manually enter credentials from an existing Azure AD App Registration. See the documentation for setup instructions."
+            WizOpenDocs     = "Open Manual Setup Guide"
+            WizTenantId     = "Tenant ID"
+            WizClientId     = "Client ID"
+            WizSecret       = "Client Secret"
+            WizSaveConnect  = "Save && Connect"
+            WizMissingData  = "Please fill in all fields."
+            WizSaved        = "Credentials saved successfully."
+            WizClose        = "Close"
+            RptTitle        = "ACLens — NTFS Permission Report"
+            RptStatTotal    = "Total folders"
+            RptStatChanged  = "Changed"
+            RptStatInherited= "Inherited only"
+            RptStatErrors   = "Errors"
+            RptLegendBtn    = "📖 Legend & Reference"
+            RptStatusRoot   = "Root"
+            RptStatusChanged= "Changed"
+            RptStatusInherited = "Inherited"
+            RptStatusError  = "Error"
+            RptFolderStatus = "Folder Status"
+            RptPermTypes    = "Permission Types"
+            RptRuleTypes    = "Rule Types"
+            RptFCDesc       = "Read, write, change permissions, take ownership"
+            RptModifyDesc   = "Read, write, delete files and subfolders"
+            RptRXDesc       = "View and run files"
+            RptReadDesc     = "View files and folder contents"
+            RptWriteDesc    = "Create files and subfolders"
+            RptExplicit     = "Explicit"
+            RptInherited    = "Inherited"
+            RptAllow        = "Allow"
+            RptDeny         = "Deny"
+            RptExplicitSet  = "Set directly on this folder"
+            RptInheritedFrom= "Passed down from a parent folder"
+            RptAllowDesc    = "Grants access — can be overridden by Deny"
+            RptDenyDesc     = "Blocks access — always overrides Allow"
+            RptFilterAll    = "All"
+            RptFilterChanged= "Changed"
+            RptFilterInh    = "Inherited only"
+            RptFilterErr    = "Errors"
+            RptExpandPage   = "Expand page"
+            RptCollapsePage = "Collapse page"
+            RptPrint        = "🖨 Print"
+            RptPrincipal    = "Principal"
+            RptType         = "Type"
+            RptPermission   = "Permission"
+            RptAppliesTo    = "Applies to"
+            RptKind         = "Kind"
+            RptSameAsParent = "✓ Same as parent folder — no local changes"
+            RptNoRules      = "No permission rules found."
+            RptFooter       = "ACLens v0.4.0-beta"
+            RptThemeLight   = "☀️ Light"
+            RptThemeDark    = "🌙 Dark"
+            RptPerPage      = "/ page"
+            RptNoResults    = "No folders match this filter."
+            RptOwner        = "Owner"
+            RptInheritance  = "Inheritance"
+            RptExplicitPerms= "Explicit Permissions"
+            RptInheritedPerms="Inherited Permissions"
+        }
+    }
+}
+
+# Initialize with English
+Set-Language "EN"
+
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Web
@@ -169,15 +449,16 @@ $script:COL = @{
 }
 
 # ── Fonts ─────────────────────────────────────────────────────
-$script:FN = [System.Drawing.Font]::new("Segoe UI",  9)
-$script:FB = [System.Drawing.Font]::new("Segoe UI",  9,  [System.Drawing.FontStyle]::Bold)
-$script:FT = [System.Drawing.Font]::new("Segoe UI", 15, [System.Drawing.FontStyle]::Bold)
-$script:FS = [System.Drawing.Font]::new("Segoe UI",  8)
+$script:FN  = [System.Drawing.Font]::new("Segoe UI",  9)
+$script:FB  = [System.Drawing.Font]::new("Segoe UI",  9,  [System.Drawing.FontStyle]::Bold)
+$script:FT  = [System.Drawing.Font]::new("Segoe UI", 15, [System.Drawing.FontStyle]::Bold)
+$script:FS  = [System.Drawing.Font]::new("Segoe UI",  8)
+$script:FBTN = [System.Drawing.Font]::new("Segoe UI", 9.5, [System.Drawing.FontStyle]::Bold)
 
 # ── Layout constants ─────────────────────────────────────────
 $script:PAD   = 20
 $script:HDR_H = 54
-$script:FTR_H = 62
+$script:FTR_H = 72
 $script:ROW_H = 54
 $script:BTN_W = 110
 $script:BTN_H = 26
@@ -337,605 +618,485 @@ function New-HTMLReport {
     $computerName = $env:COMPUTERNAME
     $currentUser  = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
     $totalFolders   = $FolderData.Count
-    $changedFolders = ($FolderData | Where-Object { $_.HasChanges   -eq $true }).Count
+    $changedFolders = ($FolderData | Where-Object { $_.HasChanges   -eq $true  }).Count
     $errorFolders   = ($FolderData | Where-Object { $null -ne $_.Error }).Count
     $inheritedOnly  = ($FolderData | Where-Object { $_.AllInherited -eq $true -and $_.HasChanges -eq $false }).Count
 
-    # CSS and JS decoded from Base64 - avoids ALL PowerShell string escaping issues
     $cssB64 = (
-        'OnJvb3R7LS1iZzojMUUxRTJFOy0tYmcyOiMyRDJEM0Y7LS1iZzM6IzFBMUEyRTstLWJnNDojMjUy' +
-
-        'NTM1Oy0tYm9yZGVyOiM0QjU1NjM7LS1ib3JkZXIyOiMzNzQxNTE7LS10ZXh0OiNFMkU4RjA7LS10' +
-
-        'ZXh0MjojOUNBM0FGOy0tdGV4dDM6IzZCNzI4MDstLWFjY2VudDojQTc4QkZBOy0tYWNjZW50Mjoj' +
-
-        'N0MzQUVEOy0tYWNjZW50MzojNEMxRDk1Oy0tZ3JlZW46IzM0RDM5OTstLXJlZDojRjg3MTcxOy0t' +
-
-        'eWVsbG93OiNGQkJGMjQ7LS1vcmFuZ2U6I0Y1OUUwQjstLWJsdWU6IzYwQTVGQTstLWZvbnQtbW9u' +
-
-        'bzonQ2FzY2FkaWEgQ29kZScsJ0NvbnNvbGFzJyxtb25vc3BhY2U7LS1mb250LXVpOidTZWdvZSBV' +
-
-        'SScsc3lzdGVtLXVpLHNhbnMtc2VyaWY7LS1yYWRpdXM6NnB4fQoqe2JveC1zaXppbmc6Ym9yZGVy' +
-
-        'LWJveDttYXJnaW46MDtwYWRkaW5nOjB9CmJvZHl7YmFja2dyb3VuZDp2YXIoLS1iZyk7Y29sb3I6' +
-
-        'dmFyKC0tdGV4dCk7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7Zm9udC1zaXplOjEzcHg7bGlu' +
-
-        'ZS1oZWlnaHQ6MS41fQoucmVwb3J0LWhlYWRlcntiYWNrZ3JvdW5kOmxpbmVhci1ncmFkaWVudCgx' +
-
-        'ODBkZWcsIzJEMkQzRiwjMUUxRTJFKTtib3JkZXItYm90dG9tOjFweCBzb2xpZCB2YXIoLS1ib3Jk' +
-
-        'ZXIpO3BhZGRpbmc6MjRweCAzMnB4IDE4cHh9Ci5yZXBvcnQtdGl0bGV7Zm9udC1zaXplOjIwcHg7' +
-
-        'Zm9udC13ZWlnaHQ6NzAwO2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjEwcHg7' +
-
-        'bWFyZ2luLWJvdHRvbTo0cHh9Ci5yZXBvcnQtdGl0bGUgLmljb257Y29sb3I6dmFyKC0tYWNjZW50' +
-
-        'KTtmb250LXNpemU6MjJweH0KLnJlcG9ydC1zdWJ0aXRsZXtjb2xvcjp2YXIoLS10ZXh0Mik7Zm9u' +
-
-        'dC1mYW1pbHk6dmFyKC0tZm9udC1tb25vKTtmb250LXNpemU6MTFweDttYXJnaW4tYm90dG9tOjE0' +
-
-        'cHg7d29yZC1icmVhazpicmVhay1hbGx9Ci5yZXBvcnQtbWV0YXtkaXNwbGF5OmZsZXg7ZmxleC13' +
-
-        'cmFwOndyYXA7Z2FwOjE4cHh9Ci5tZXRhLWl0ZW17ZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9u' +
-
-        'OmNvbHVtbjtnYXA6MnB4fQoubWV0YS1sYWJlbHtjb2xvcjp2YXIoLS10ZXh0Myk7Zm9udC1zaXpl' +
-
-        'OjEwcHg7dGV4dC10cmFuc2Zvcm06dXBwZXJjYXNlO2xldHRlci1zcGFjaW5nOi44cHh9Ci5tZXRh' +
-
-        'LXZhbHVle2NvbG9yOnZhcigtLXRleHQpO2ZvbnQtc2l6ZToxM3B4O2ZvbnQtd2VpZ2h0OjUwMH0K' +
-
-        'LnN0YXRzLWJhcntkaXNwbGF5OmZsZXg7Z2FwOjEwcHg7cGFkZGluZzoxNHB4IDMycHg7YmFja2dy' +
-
-        'b3VuZDp2YXIoLS1iZzIpO2JvcmRlci1ib3R0b206MXB4IHNvbGlkIHZhcigtLWJvcmRlcik7Zmxl' +
-
-        'eC13cmFwOndyYXB9Ci5zdGF0LWNhcmR7YmFja2dyb3VuZDp2YXIoLS1iZzQpO2JvcmRlcjoxcHgg' +
-
-        'c29saWQgdmFyKC0tYm9yZGVyKTtib3JkZXItcmFkaXVzOnZhcigtLXJhZGl1cyk7cGFkZGluZzo5' +
-
-        'cHggMTZweDtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2FsaWduLWl0ZW1zOmNl' +
-
-        'bnRlcjttaW4td2lkdGg6MTEwcHh9Ci5zdGF0LW51bWJlcntmb250LXNpemU6MjJweDtmb250LXdl' +
-
-        'aWdodDo3MDA7bGluZS1oZWlnaHQ6MX0KLnN0YXQtbGFiZWx7Zm9udC1zaXplOjExcHg7Y29sb3I6' +
-
-        'dmFyKC0tdGV4dDIpO21hcmdpbi10b3A6MnB4fQouc3RhdC10b3RhbCAuc3RhdC1udW1iZXJ7Y29s' +
-
-        'b3I6dmFyKC0tYWNjZW50KX0uc3RhdC1jaGFuZ2VkIC5zdGF0LW51bWJlcntjb2xvcjp2YXIoLS15' +
-
-        'ZWxsb3cpfS5zdGF0LWluaGVyaXRlZCAuc3RhdC1udW1iZXJ7Y29sb3I6dmFyKC0tZ3JlZW4pfS5z' +
-
-        'dGF0LWVycm9yIC5zdGF0LW51bWJlcntjb2xvcjp2YXIoLS1yZWQpfQouYWdlbmRhLWJhcntiYWNr' +
-
-        'Z3JvdW5kOnZhcigtLWJnMyk7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgdmFyKC0tYm9yZGVyKX0K' +
-
-        'LmFnZW5kYS10b2dnbGV7d2lkdGg6MTAwJTtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVy' +
-
-        'O2dhcDo4cHg7cGFkZGluZzoxMHB4IDMycHg7YmFja2dyb3VuZDpub25lO2JvcmRlcjpub25lO2Nv' +
-
-        'bG9yOnZhcigtLXRleHQyKTtmb250LXNpemU6MTJweDtmb250LWZhbWlseTp2YXIoLS1mb250LXVp' +
-
-        'KTtjdXJzb3I6cG9pbnRlcjt0ZXh0LWFsaWduOmxlZnR9Ci5hZ2VuZGEtdG9nZ2xlOmhvdmVye2Jh' +
-
-        'Y2tncm91bmQ6cmdiYSgxNjcsMTM5LDI1MCwuMDgpO2NvbG9yOnZhcigtLWFjY2VudCl9Ci5hZ2Vu' +
-
-        'ZGEtdG9nZ2xlLWljb257Zm9udC1zaXplOjlweDt0cmFuc2l0aW9uOnRyYW5zZm9ybSAuMnN9Ci5h' +
-
-        'Z2VuZGEtdG9nZ2xlLWhpbnR7bWFyZ2luLWxlZnQ6YXV0bztmb250LXNpemU6MTBweDtjb2xvcjp2' +
-
-        'YXIoLS10ZXh0Myl9Ci5hZ2VuZGEtY29udGVudHtwYWRkaW5nOjE2cHggMzJweCAyMHB4O2JvcmRl' +
-
-        'ci10b3A6MXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpO2JhY2tncm91bmQ6dmFyKC0tYmcpfQouYWdl' +
-
-        'bmRhLWdyaWR7ZGlzcGxheTpncmlkO2dyaWQtdGVtcGxhdGUtY29sdW1uczpyZXBlYXQoYXV0by1m' +
-
-        'aWxsLG1pbm1heCgzMDBweCwxZnIpKTtnYXA6MTJweH0KLmFnZW5kYS1zZWN0aW9ue2JhY2tncm91' +
-
-        'bmQ6dmFyKC0tYmc0KTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpO2JvcmRlci1yYWRp' +
-
-        'dXM6dmFyKC0tcmFkaXVzKTtwYWRkaW5nOjEycHggMTRweH0KLmFnZW5kYS1zZWN0aW9uLXRpdGxl' +
-
-        'e2ZvbnQtc2l6ZToxMHB4O2ZvbnQtd2VpZ2h0OjcwMDt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7' +
-
-        'bGV0dGVyLXNwYWNpbmc6LjhweDtjb2xvcjp2YXIoLS1hY2NlbnQpO21hcmdpbi1ib3R0b206OHB4' +
-
-        'O3BhZGRpbmctYm90dG9tOjVweDtib3JkZXItYm90dG9tOjFweCBzb2xpZCB2YXIoLS1ib3JkZXIy' +
-
-        'KX0KLmFnZW5kYS1yb3d7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmJhc2VsaW5lO2dhcDo3cHg7' +
-
-        'bWFyZ2luLWJvdHRvbTo1cHg7Zm9udC1zaXplOjExcHg7bGluZS1oZWlnaHQ6MS40fQouYWdlbmRh' +
-
-        'LXJvdzpsYXN0LWNoaWxke21hcmdpbi1ib3R0b206MH0KLmFnZW5kYS1kb3R7d2lkdGg6OHB4O2hl' +
-
-        'aWdodDo4cHg7Ym9yZGVyLXJhZGl1czoycHg7ZmxleC1zaHJpbms6MDttYXJnaW4tdG9wOjNweDtk' +
-
-        'aXNwbGF5OmlubGluZS1ibG9ja30KLmFnZW5kYS1sYWJlbHtjb2xvcjp2YXIoLS10ZXh0KTtmb250' +
-
-        'LXdlaWdodDo2MDA7d2hpdGUtc3BhY2U6bm93cmFwO2ZsZXgtc2hyaW5rOjB9Ci5hZ2VuZGEtcGVy' +
-
-        'bXtmb250LWZhbWlseTp2YXIoLS1mb250LW1vbm8pO2ZvbnQtc2l6ZToxMHB4O2NvbG9yOnZhcigt' +
-
-        'LXRleHQyKTtmb250LXdlaWdodDo1MDA7d2hpdGUtc3BhY2U6bm93cmFwO2ZsZXgtc2hyaW5rOjB9' +
-
-        'Ci5hZ2VuZGEtZGVzY3tjb2xvcjp2YXIoLS10ZXh0Mik7Zm9udC1zaXplOjExcHh9Ci5hZ2VuZGEt' +
-
-        'YmFkZ2V7ZmxleC1zaHJpbms6MH0KLnRvb2xiYXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNl' +
-
-        'bnRlcjtnYXA6OHB4O3BhZGRpbmc6MTBweCAzMnB4O2JhY2tncm91bmQ6dmFyKC0tYmczKTtib3Jk' +
-
-        'ZXItYm90dG9tOjFweCBzb2xpZCB2YXIoLS1ib3JkZXIyKTtmbGV4LXdyYXA6d3JhcH0KLnRvb2xi' +
-
-        'YXItbGFiZWx7Y29sb3I6dmFyKC0tdGV4dDIpO2ZvbnQtc2l6ZToxMnB4fQouYnRue2JhY2tncm91' +
-
-        'bmQ6dmFyKC0tYmcyKTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWJvcmRlcik7Ym9yZGVyLXJhZGl1' +
-
-        'czp2YXIoLS1yYWRpdXMpO2NvbG9yOnZhcigtLXRleHQpO2N1cnNvcjpwb2ludGVyO2ZvbnQtc2l6' +
-
-        'ZToxMnB4O3BhZGRpbmc6NXB4IDEycHg7dHJhbnNpdGlvbjpiYWNrZ3JvdW5kIC4xNXMsYm9yZGVy' +
-
-        'LWNvbG9yIC4xNXM7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSl9Ci5idG46aG92ZXJ7YmFja2dy' +
-
-        'b3VuZDp2YXIoLS1iZzQpO2JvcmRlci1jb2xvcjp2YXIoLS1hY2NlbnQpfQouYnRuLWFjY2VudHti' +
-
-        'YWNrZ3JvdW5kOnZhcigtLWFjY2VudDIpO2JvcmRlci1jb2xvcjp2YXIoLS1hY2NlbnQzKTtjb2xv' +
-
-        'cjp2YXIoLS10ZXh0KX0KLmJ0bi1hY2NlbnQ6aG92ZXJ7YmFja2dyb3VuZDp2YXIoLS1hY2NlbnQz' +
-
-        'KX0KLmZpbHRlci1ncm91cHtkaXNwbGF5OmZsZXg7Z2FwOjVweH0KLmZpbHRlci1idG57cGFkZGlu' +
-
-        'Zzo0cHggMTBweDtmb250LXNpemU6MTFweDtib3JkZXItcmFkaXVzOjIwcHh9Ci5maWx0ZXItYnRu' +
-
-        'LmFjdGl2ZXtiYWNrZ3JvdW5kOnZhcigtLWFjY2VudDIpO2JvcmRlci1jb2xvcjp2YXIoLS1hY2Nl' +
-
-        'bnQzKTtjb2xvcjp2YXIoLS10ZXh0KX0KLnNlYXJjaC1ib3h7YmFja2dyb3VuZDp2YXIoLS1iZzIp' +
-
-        'O2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTtib3JkZXItcmFkaXVzOnZhcigtLXJhZGl1' +
-
-        'cyk7Y29sb3I6dmFyKC0tdGV4dCk7Zm9udC1zaXplOjEycHg7cGFkZGluZzo1cHggMTBweDt3aWR0' +
-
-        'aDoyNDBweDtvdXRsaW5lOm5vbmU7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSl9Ci5zZWFyY2gt' +
-
-        'Ym94OmZvY3Vze2JvcmRlci1jb2xvcjp2YXIoLS1hY2NlbnQpfQouc2VhcmNoLWJveDo6cGxhY2Vo' +
-
-        'b2xkZXJ7Y29sb3I6dmFyKC0tdGV4dDMpfQouZm9sZGVyLWxpc3R7cGFkZGluZzoxMHB4IDE4cHh9' +
-
-        'Ci5mb2xkZXItcm93e2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyMik7Ym9yZGVyLXJhZGl1' +
-
-        'czp2YXIoLS1yYWRpdXMpO21hcmdpbi1ib3R0b206M3B4O292ZXJmbG93OmhpZGRlbn0KLmZvbGRl' +
-
-        'ci1yb3cuc3RhdHVzLXJvb3R7Ym9yZGVyLWxlZnQ6M3B4IHNvbGlkIHZhcigtLWFjY2VudCk7YmFj' +
-
-        'a2dyb3VuZDpyZ2JhKDE2NywxMzksMjUwLC4wNSl9Ci5mb2xkZXItcm93LnN0YXR1cy1jaGFuZ2Vk' +
-
-        'e2JvcmRlci1sZWZ0OjNweCBzb2xpZCB2YXIoLS15ZWxsb3cpO2JhY2tncm91bmQ6cmdiYSgyNTEs' +
-
-        'MTkxLDM2LC4wNSl9Ci5mb2xkZXItcm93LnN0YXR1cy1lcnJvcntib3JkZXItbGVmdDozcHggc29s' +
-
-        'aWQgdmFyKC0tcmVkKX0KLmZvbGRlci1yb3cuc3RhdHVzLWluaGVyaXRlZHtib3JkZXItbGVmdDoz' +
-
-        'cHggc29saWQgdmFyKC0tYm9yZGVyMil9Ci5mb2xkZXItaGVhZGVye2Rpc3BsYXk6ZmxleDthbGln' +
-
-        'bi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47cGFkZGluZzo3cHgg' +
-
-        'MTJweDtjdXJzb3I6cG9pbnRlcjt1c2VyLXNlbGVjdDpub25lO2dhcDo4cHh9Ci5mb2xkZXItaGVh' +
-
-        'ZGVyOmhvdmVye2JhY2tncm91bmQ6cmdiYSgxNjcsMTM5LDI1MCwuMDYpfQouZm9sZGVyLWxlZnR7' +
-
-        'ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6N3B4O2ZsZXg6MTttaW4td2lkdGg6' +
-
-        'MH0KLmZvbGRlci1yaWdodHtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo3cHg7' +
-
-        'ZmxleC1zaHJpbms6MH0KLnRvZ2dsZS1pY29ue2NvbG9yOnZhcigtLXRleHQzKTtmb250LXNpemU6' +
-
-        'MTBweDt0cmFuc2l0aW9uOnRyYW5zZm9ybSAuMnM7ZmxleC1zaHJpbms6MH0KLmZvbGRlci1pY29u' +
-
-        'e2ZvbnQtc2l6ZToxNHB4O2ZsZXgtc2hyaW5rOjB9Ci5mb2xkZXItcGF0aHtmb250LWZhbWlseTp2' +
-
-        'YXIoLS1mb250LW1vbm8pO2ZvbnQtc2l6ZToxMnB4O2NvbG9yOnZhcigtLXRleHQpO3doaXRlLXNw' +
-
-        'YWNlOm5vd3JhcDtvdmVyZmxvdzpoaWRkZW47dGV4dC1vdmVyZmxvdzplbGxpcHNpc30KLnN0YXR1' +
-
-        'cy1iYWRnZSwuaW5oZXJpdC1iYWRnZSwub3duZXItYmFkZ2V7Zm9udC1zaXplOjEwcHg7cGFkZGlu' +
-
-        'ZzoycHggOHB4O2JvcmRlci1yYWRpdXM6MTJweDt3aGl0ZS1zcGFjZTpub3dyYXA7Zm9udC13ZWln' +
-
-        'aHQ6NTAwfQoub3duZXItYmFkZ2V7YmFja2dyb3VuZDp2YXIoLS1iZzQpO2JvcmRlcjoxcHggc29s' +
-
-        'aWQgdmFyKC0tYm9yZGVyMik7Y29sb3I6dmFyKC0tdGV4dDIpfQouc3RhdHVzLWJhZGdlLnN0YXR1' +
-
-        'cy1yb290e2JhY2tncm91bmQ6cmdiYSgxNjcsMTM5LDI1MCwuMTUpO2JvcmRlcjoxcHggc29saWQg' +
-
-        'dmFyKC0tYWNjZW50Mik7Y29sb3I6dmFyKC0tYWNjZW50KX0KLnN0YXR1cy1iYWRnZS5zdGF0dXMt' +
-
-        'Y2hhbmdlZHtiYWNrZ3JvdW5kOnJnYmEoMjUxLDE5MSwzNiwuMTUpO2JvcmRlcjoxcHggc29saWQg' +
-
-        'dmFyKC0teWVsbG93KTtjb2xvcjp2YXIoLS15ZWxsb3cpfQouc3RhdHVzLWJhZGdlLnN0YXR1cy1l' +
-
-        'cnJvcntiYWNrZ3JvdW5kOnJnYmEoMjQxLDExMywxMTMsLjEyKTtib3JkZXI6MXB4IHNvbGlkIHZh' +
-
-        'cigtLXJlZCk7Y29sb3I6dmFyKC0tcmVkKX0KLnN0YXR1cy1iYWRnZS5zdGF0dXMtaW5oZXJpdGVk' +
-
-        'e2JhY2tncm91bmQ6cmdiYSg1MiwyMTEsMTUzLC4xMik7Ym9yZGVyOjFweCBzb2xpZCByZ2JhKDUy' +
-
-        'LDIxMSwxNTMsLjMpO2NvbG9yOnZhcigtLWdyZWVuKX0KLmluaGVyaXQteWVze2JhY2tncm91bmQ6' +
-
-        'cmdiYSg1MiwyMTEsMTUzLC4xMik7Ym9yZGVyOjFweCBzb2xpZCByZ2JhKDUyLDIxMSwxNTMsLjMp' +
-
-        'O2NvbG9yOnZhcigtLWdyZWVuKX0KLmluaGVyaXQtbm97YmFja2dyb3VuZDpyZ2JhKDI0MSwxMTMs' +
-
-        'MTEzLC4xMik7Ym9yZGVyOjFweCBzb2xpZCByZ2JhKDI0MSwxMTMsMTEzLC4zKTtjb2xvcjp2YXIo' +
-
-        'LS1yZWQpfQouZm9sZGVyLWRldGFpbHN7ZGlzcGxheTpub25lO3BhZGRpbmc6MTBweCAxOHB4IDE0' +
-
-        'cHg7Ym9yZGVyLXRvcDoxcHggc29saWQgdmFyKC0tYm9yZGVyMik7YmFja2dyb3VuZDp2YXIoLS1i' +
-
-        'ZzMpfQouZm9sZGVyLWRldGFpbHMub3BlbntkaXNwbGF5OmJsb2NrfQouZGV0YWlscy1tZXRhe2Rp' +
-
-        'c3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6MTRweDttYXJnaW4tYm90dG9tOjEycHg7cGFk' +
-
-        'ZGluZzo5cHggMTJweDtiYWNrZ3JvdW5kOnZhcigtLWJnNCk7Ym9yZGVyLXJhZGl1czp2YXIoLS1y' +
-
-        'YWRpdXMpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyMik7Zm9udC1zaXplOjEycHg7Y29s' +
-
-        'b3I6dmFyKC0tdGV4dDIpfQouZGV0YWlscy1tZXRhIHN0cm9uZ3tjb2xvcjp2YXIoLS10ZXh0KX0K' +
-
-        'LnNhbWUtYXMtcGFyZW50e2NvbG9yOnZhcigtLXRleHQzKTtmb250LXN0eWxlOml0YWxpYztmb250' +
-
-        'LXNpemU6MTJweDtwYWRkaW5nOjdweCAxMnB4O2JhY2tncm91bmQ6dmFyKC0tYmc0KTtib3JkZXIt' +
-
-        'cmFkaXVzOnZhcigtLXJhZGl1cyk7Ym9yZGVyOjFweCBkYXNoZWQgdmFyKC0tYm9yZGVyMil9Ci5l' +
-
-        'cnJvci1ib3h7YmFja2dyb3VuZDpyZ2JhKDI0MSwxMTMsMTEzLC4wNyk7Ym9yZGVyOjFweCBzb2xp' +
-
-        'ZCB2YXIoLS1yZWQpO2JvcmRlci1yYWRpdXM6dmFyKC0tcmFkaXVzKTtjb2xvcjp2YXIoLS1yZWQp' +
-
-        'O3BhZGRpbmc6OXB4IDEycHg7Zm9udC1zaXplOjEycHh9Ci5lcnJvci1ib3ggY29kZXtmb250LWZh' +
-
-        'bWlseTp2YXIoLS1mb250LW1vbm8pO2ZvbnQtc2l6ZToxMXB4fQoucnVsZXMtc2VjdGlvbnttYXJn' +
-
-        'aW4tYm90dG9tOjEwcHh9Ci5ydWxlcy1zZWN0aW9uLXRpdGxle2ZvbnQtc2l6ZToxMXB4O2ZvbnQt' +
-
-        'd2VpZ2h0OjYwMDt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjZweDtw' +
-
-        'YWRkaW5nOjNweCA5cHg7bWFyZ2luLWJvdHRvbTo1cHg7Ym9yZGVyLXJhZGl1czozcHg7ZGlzcGxh' +
-
-        'eTppbmxpbmUtYmxvY2t9Ci5leHBsaWNpdC10aXRsZXtjb2xvcjp2YXIoLS1hY2NlbnQpO2JhY2tn' +
-
-        'cm91bmQ6cmdiYSgxNjcsMTM5LDI1MCwuMTIpfQouaW5oZXJpdGVkLXRpdGxle2NvbG9yOnZhcigt' +
-
-        'LXRleHQzKTtiYWNrZ3JvdW5kOnZhcigtLWJnNCl9Ci5ydWxlcy10YWJsZXt3aWR0aDoxMDAlO2Jv' +
-
-        'cmRlci1jb2xsYXBzZTpjb2xsYXBzZTtmb250LXNpemU6MTJweH0KLnJ1bGVzLXRhYmxlIHRoZWFk' +
-
-        'IHRye2JhY2tncm91bmQ6dmFyKC0tYmc0KX0KLnJ1bGVzLXRhYmxlIHRoe3RleHQtYWxpZ246bGVm' +
-
-        'dDtwYWRkaW5nOjVweCA5cHg7Y29sb3I6dmFyKC0tdGV4dDIpO2ZvbnQtd2VpZ2h0OjUwMDtmb250' +
-
-        'LXNpemU6MTFweDtib3JkZXItYm90dG9tOjFweCBzb2xpZCB2YXIoLS1ib3JkZXIpfQoucnVsZXMt' +
-
-        'dGFibGUgdGR7cGFkZGluZzo1cHggOXB4O2JvcmRlci1ib3R0b206MXB4IHNvbGlkIHZhcigtLWJv' +
-
-        'cmRlcjIpO3ZlcnRpY2FsLWFsaWduOm1pZGRsZX0KLnJ1bGVzLXRhYmxlIHRib2R5IHRyOmhvdmVy' +
-
-        'e2JhY2tncm91bmQ6cmdiYSgxNjcsMTM5LDI1MCwuMDQpfQoucnVsZXMtdGFibGUgdGJvZHkgdHI6' +
-
-        'bGFzdC1jaGlsZCB0ZHtib3JkZXItYm90dG9tOm5vbmV9Ci5pbmhlcml0ZWQtdGFibGV7b3BhY2l0' +
-
-        'eTouNzJ9Ci5kZW55LXJ1bGV7YmFja2dyb3VuZDpyZ2JhKDI0MSwxMTMsMTEzLC4wNikhaW1wb3J0' +
-
-        'YW50fQouZGVueS1ydWxlIHRke2NvbG9yOnZhcigtLXJlZCkhaW1wb3J0YW50fQouaWRlbnRpdHl7' +
-
-        'Zm9udC1mYW1pbHk6dmFyKC0tZm9udC1tb25vKTtmb250LXNpemU6MTFweDtmb250LXdlaWdodDo1' +
-
-        'MDB9Ci5yaWdodHN7Y29sb3I6dmFyKC0tdGV4dCl9LnNjb3Ble2NvbG9yOnZhcigtLXRleHQyKTtm' +
-
-        'b250LXNpemU6MTFweH0KLm5vLXJ1bGVze2NvbG9yOnZhcigtLXRleHQzKTtmb250LXN0eWxlOml0' +
-
-        'YWxpYztmb250LXNpemU6MTJweDtwYWRkaW5nOjVweCA5cHh9Ci5iYWRnZXtkaXNwbGF5OmlubGlu' +
-
-        'ZS1ibG9jaztmb250LXNpemU6MTBweDtwYWRkaW5nOjJweCA3cHg7Ym9yZGVyLXJhZGl1czoxMHB4' +
-
-        'O2ZvbnQtd2VpZ2h0OjUwMDt3aGl0ZS1zcGFjZTpub3dyYXB9Ci5iYWRnZS1hbGxvd3tiYWNrZ3Jv' +
-
-        'dW5kOnJnYmEoNTIsMjExLDE1MywuMTIpO2JvcmRlcjoxcHggc29saWQgcmdiYSg1MiwyMTEsMTUz' +
-
-        'LC4zNSk7Y29sb3I6dmFyKC0tZ3JlZW4pfQouYmFkZ2UtZGVueXtiYWNrZ3JvdW5kOnJnYmEoMjQx' +
-
-        'LDExMywxMTMsLjEyKTtib3JkZXI6MXB4IHNvbGlkIHJnYmEoMjQxLDExMywxMTMsLjM1KTtjb2xv' +
-
-        'cjp2YXIoLS1yZWQpfQouYmFkZ2UtaW5oZXJpdGVke2JhY2tncm91bmQ6dmFyKC0tYmcyKTtib3Jk' +
-
-        'ZXI6MXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpO2NvbG9yOnZhcigtLXRleHQzKX0KLmJhZGdlLWV4' +
-
-        'cGxpY2l0e2JhY2tncm91bmQ6cmdiYSgxNjcsMTM5LDI1MCwuMTUpO2JvcmRlcjoxcHggc29saWQg' +
-
-        'cmdiYSgxNjcsMTM5LDI1MCwuMyk7Y29sb3I6dmFyKC0tYWNjZW50KX0KLnJlcG9ydC1mb290ZXJ7' +
-
-        'dGV4dC1hbGlnbjpjZW50ZXI7cGFkZGluZzoxNnB4O2NvbG9yOnZhcigtLXRleHQzKTtmb250LXNp' +
-
-        'emU6MTFweDtib3JkZXItdG9wOjFweCBzb2xpZCB2YXIoLS1ib3JkZXIyKTtiYWNrZ3JvdW5kOnZh' +
-
-        'cigtLWJnMyl9CkBtZWRpYSBwcmludHsudG9vbGJhciwuc3RhdHMtYmFye2Rpc3BsYXk6bm9uZX0u' +
-
-        'Zm9sZGVyLWRldGFpbHN7ZGlzcGxheTpibG9jayFpbXBvcnRhbnR9LmZvbGRlci1yb3d7YnJlYWst' +
-
-        'aW5zaWRlOmF2b2lkfX0='
+        'Cjpyb290IHsKICAtLWJnOiMxRTFFMkU7LS1iZzI6IzJEMkQzRjstLWJnMzojMUExQTJFOy0tYmc0OiMy' +
+        'NTI1MzU7CiAgLS1ib3JkZXI6IzRCNTU2MzstLWJvcmRlcjI6IzM3NDE1MTsKICAtLXRleHQ6I0UyRThG' +
+        'MDstLXRleHQyOiM5Q0EzQUY7LS10ZXh0MzojNkI3MjgwOwogIC0tYWNjZW50OiNBNzhCRkE7LS1hY2Nl' +
+        'bnQyOiM3QzNBRUQ7LS1hY2NlbnQzOiM0QzFEOTU7CiAgLS1ncmVlbjojMzREMzk5Oy0tcmVkOiNGODcx' +
+        'NzE7LS15ZWxsb3c6I0ZCQkYyNDstLW9yYW5nZTojRjU5RTBCOwogIC0tZm9udC1tb25vOidDYXNjYWRp' +
+        'YSBDb2RlJywnQ29uc29sYXMnLG1vbm9zcGFjZTsKICAtLWZvbnQtdWk6J1NlZ29lIFVJJyxzeXN0ZW0t' +
+        'dWksc2Fucy1zZXJpZjsKICAtLXJhZGl1czo2cHg7Cn0KYm9keS5saWdodCB7CiAgLS1iZzojRjlGQUZC' +
+        'Oy0tYmcyOiNGM0Y0RjY7LS1iZzM6I0U1RTdFQjstLWJnNDojRDFENURCOwogIC0tYm9yZGVyOiNEMUQ1' +
+        'REI7LS1ib3JkZXIyOiNFNUU3RUI7CiAgLS10ZXh0OiMxMTE4Mjc7LS10ZXh0MjojMzc0MTUxOy0tdGV4' +
+        'dDM6IzZCNzI4MDsKICAtLWFjY2VudDojN0MzQUVEOy0tYWNjZW50MjojNkQyOEQ5Oy0tYWNjZW50Mzoj' +
+        'NEMxRDk1Owp9Cip7Ym94LXNpemluZzpib3JkZXItYm94O21hcmdpbjowO3BhZGRpbmc6MH0KYm9keXti' +
+        'YWNrZ3JvdW5kOnZhcigtLWJnKTtjb2xvcjp2YXIoLS10ZXh0KTtmb250LWZhbWlseTp2YXIoLS1mb250' +
+        'LXVpKTtmb250LXNpemU6MTNweDtsaW5lLWhlaWdodDoxLjU7dHJhbnNpdGlvbjpiYWNrZ3JvdW5kIC4y' +
+        'cyxjb2xvciAuMnN9CgovKiDilIDilIAgSGVhZGVyIOKUgOKUgCAqLwoucmVwb3J0LWhlYWRlcntiYWNr' +
+        'Z3JvdW5kOnZhcigtLWJnMyk7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgdmFyKC0tYm9yZGVyKTtwYWRk' +
+        'aW5nOjIwcHggMzJweCAxNnB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1j' +
+        'b250ZW50OnNwYWNlLWJldHdlZW47ZmxleC13cmFwOndyYXA7Z2FwOjEycHg7cG9zaXRpb246c3RpY2t5' +
+        'O3RvcDowO3otaW5kZXg6MTAwfQouaGVhZGVyLWxlZnR7fQoucmVwb3J0LXRpdGxle2ZvbnQtc2l6ZTox' +
+        'OHB4O2ZvbnQtd2VpZ2h0OjcwMDtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo4cHg7' +
+        'bWFyZ2luLWJvdHRvbToycHh9Ci5yZXBvcnQtdGl0bGUgLmljb257Y29sb3I6dmFyKC0tYWNjZW50KX0K' +
+        'LnJlcG9ydC1zdWJ0aXRsZXtjb2xvcjp2YXIoLS10ZXh0Mik7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC1t' +
+        'b25vKTtmb250LXNpemU6MTFweH0KLmhlYWRlci1yaWdodHtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6' +
+        'Y2VudGVyO2dhcDoxMHB4O2ZsZXgtc2hyaW5rOjB9Ci50aGVtZS10b2dnbGV7YmFja2dyb3VuZDp2YXIo' +
+        'LS1iZzIpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTtib3JkZXItcmFkaXVzOjIwcHg7cGFk' +
+        'ZGluZzo0cHggMTJweDtjdXJzb3I6cG9pbnRlcjtmb250LXNpemU6MTFweDtjb2xvcjp2YXIoLS10ZXh0' +
+        'Mik7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6NnB4O3RyYW5zaXRpb246YWxsIC4x' +
+        'NXN9Ci50aGVtZS10b2dnbGU6aG92ZXJ7Ym9yZGVyLWNvbG9yOnZhcigtLWFjY2VudCk7Y29sb3I6dmFy' +
+        'KC0tYWNjZW50KX0KCi8qIOKUgOKUgCBTdGF0cyBiYXIg4pSA4pSAICovCi5zdGF0cy1iYXJ7ZGlzcGxh' +
+        'eTpmbGV4O2dhcDo4cHg7cGFkZGluZzoxMnB4IDMycHg7YmFja2dyb3VuZDp2YXIoLS1iZzIpO2JvcmRl' +
+        'ci1ib3R0b206MXB4IHNvbGlkIHZhcigtLWJvcmRlcik7ZmxleC13cmFwOndyYXB9Ci5zdGF0LWNhcmR7' +
+        'YmFja2dyb3VuZDp2YXIoLS1iZzQpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTtib3JkZXIt' +
+        'cmFkaXVzOnZhcigtLXJhZGl1cyk7cGFkZGluZzo4cHggMTZweDtkaXNwbGF5OmZsZXg7ZmxleC1kaXJl' +
+        'Y3Rpb246Y29sdW1uO2FsaWduLWl0ZW1zOmNlbnRlcjttaW4td2lkdGg6MTAwcHh9Ci5zdGF0LW51bWJl' +
+        'cntmb250LXNpemU6MjBweDtmb250LXdlaWdodDo3MDA7bGluZS1oZWlnaHQ6MX0KLnN0YXQtbGFiZWx7' +
+        'Zm9udC1zaXplOjEwcHg7Y29sb3I6dmFyKC0tdGV4dDIpO21hcmdpbi10b3A6MnB4fQouc3RhdC10b3Rh' +
+        'bCAuc3RhdC1udW1iZXJ7Y29sb3I6dmFyKC0tYWNjZW50KX0KLnN0YXQtY2hhbmdlZCAuc3RhdC1udW1i' +
+        'ZXJ7Y29sb3I6dmFyKC0teWVsbG93KX0KLnN0YXQtaW5oZXJpdGVkIC5zdGF0LW51bWJlcntjb2xvcjp2' +
+        'YXIoLS1ncmVlbil9Ci5zdGF0LWVycm9yIC5zdGF0LW51bWJlcntjb2xvcjp2YXIoLS1yZWQpfQoKLyog' +
+        '4pSA4pSAIFRvb2xiYXIg4pSA4pSAICovCi50b29sYmFye2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpj' +
+        'ZW50ZXI7Z2FwOjhweDtwYWRkaW5nOjEwcHggMzJweDtiYWNrZ3JvdW5kOnZhcigtLWJnMyk7Ym9yZGVy' +
+        'LWJvdHRvbToxcHggc29saWQgdmFyKC0tYm9yZGVyMik7ZmxleC13cmFwOndyYXA7cG9zaXRpb246c3Rp' +
+        'Y2t5O3RvcDo2MXB4O3otaW5kZXg6OTl9Ci5maWx0ZXItZ3JvdXB7ZGlzcGxheTpmbGV4O2dhcDo0cHh9' +
+        'Ci5idG57YmFja2dyb3VuZDp2YXIoLS1iZzIpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTti' +
+        'b3JkZXItcmFkaXVzOnZhcigtLXJhZGl1cyk7Y29sb3I6dmFyKC0tdGV4dCk7Y3Vyc29yOnBvaW50ZXI7' +
+        'Zm9udC1zaXplOjExcHg7cGFkZGluZzo0cHggMTJweDtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTt0' +
+        'cmFuc2l0aW9uOmFsbCAuMTVzfQouYnRuOmhvdmVye2JhY2tncm91bmQ6dmFyKC0tYmc0KTtib3JkZXIt' +
+        'Y29sb3I6dmFyKC0tYWNjZW50KX0KLmJ0bi1hY2NlbnR7YmFja2dyb3VuZDp2YXIoLS1hY2NlbnQyKTti' +
+        'b3JkZXItY29sb3I6dmFyKC0tYWNjZW50Myk7Y29sb3I6I2ZmZn0KLmJ0bi1hY2NlbnQ6aG92ZXJ7YmFj' +
+        'a2dyb3VuZDp2YXIoLS1hY2NlbnQzKX0KLmZpbHRlci1idG57cGFkZGluZzozcHggMTBweDtib3JkZXIt' +
+        'cmFkaXVzOjIwcHh9Ci5maWx0ZXItYnRuLmFjdGl2ZXtiYWNrZ3JvdW5kOnZhcigtLWFjY2VudDIpO2Jv' +
+        'cmRlci1jb2xvcjp2YXIoLS1hY2NlbnQzKTtjb2xvcjojZmZmfQouc2VhcmNoLWJveHtiYWNrZ3JvdW5k' +
+        'OnZhcigtLWJnMik7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1ib3JkZXIpO2JvcmRlci1yYWRpdXM6dmFy' +
+        'KC0tcmFkaXVzKTtjb2xvcjp2YXIoLS10ZXh0KTtmb250LXNpemU6MTFweDtwYWRkaW5nOjRweCAxMHB4' +
+        'O3dpZHRoOjIyMHB4O291dGxpbmU6bm9uZTtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKX0KLnNlYXJj' +
+        'aC1ib3g6Zm9jdXN7Ym9yZGVyLWNvbG9yOnZhcigtLWFjY2VudCl9Ci5zZWFyY2gtYm94OjpwbGFjZWhv' +
+        'bGRlcntjb2xvcjp2YXIoLS10ZXh0Myl9Ci50b29sYmFyLXNwYWNlcntmbGV4OjF9CgovKiDilIDilIAg' +
+        'UGFnZSBuYXZpZ2F0aW9uIOKUgOKUgCAqLwoucGFnZS1uYXZ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1z' +
+        'OmNlbnRlcjtnYXA6NnB4O3BhZGRpbmc6MTBweCAzMnB4O2JhY2tncm91bmQ6dmFyKC0tYmcpO2JvcmRl' +
+        'ci1ib3R0b206MXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpO2ZsZXgtd3JhcDp3cmFwfQoucGFnZS1uYXYt' +
+        'bGFiZWx7Zm9udC1zaXplOjExcHg7Y29sb3I6dmFyKC0tdGV4dDIpfQoucGFnZS1idG57YmFja2dyb3Vu' +
+        'ZDp2YXIoLS1iZzIpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTtib3JkZXItcmFkaXVzOjRw' +
+        'eDtjb2xvcjp2YXIoLS10ZXh0KTtjdXJzb3I6cG9pbnRlcjtmb250LXNpemU6MTFweDtwYWRkaW5nOjNw' +
+        'eCAxMHB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO21pbi13aWR0aDozMnB4O3RleHQtYWxpZ246' +
+        'Y2VudGVyfQoucGFnZS1idG46aG92ZXJ7Ym9yZGVyLWNvbG9yOnZhcigtLWFjY2VudCk7Y29sb3I6dmFy' +
+        'KC0tYWNjZW50KX0KLnBhZ2UtYnRuLmFjdGl2ZXtiYWNrZ3JvdW5kOnZhcigtLWFjY2VudDIpO2JvcmRl' +
+        'ci1jb2xvcjp2YXIoLS1hY2NlbnQzKTtjb2xvcjojZmZmfQoucGFnZS1idG46ZGlzYWJsZWR7b3BhY2l0' +
+        'eTouMztjdXJzb3I6ZGVmYXVsdH0KLnBhZ2Utc2l6ZS1zZWxlY3R7YmFja2dyb3VuZDp2YXIoLS1iZzIp' +
+        'O2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTtib3JkZXItcmFkaXVzOjRweDtjb2xvcjp2YXIo' +
+        'LS10ZXh0KTtmb250LXNpemU6MTFweDtwYWRkaW5nOjNweCA2cHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9u' +
+        'dC11aSl9Ci5wYWdlLWluZm97Zm9udC1zaXplOjExcHg7Y29sb3I6dmFyKC0tdGV4dDIpO21hcmdpbi1s' +
+        'ZWZ0OmF1dG99CgovKiDilIDilIAgRm9sZGVyIGxpc3Qg4pSA4pSAICovCi5mb2xkZXItbGlzdHtwYWRk' +
+        'aW5nOjEwcHggMjRweH0KCi8qIOKUgOKUgCBGb2xkZXIgcm93IOKUgOKUgCAqLwouZm9sZGVyLXJvd3ti' +
+        'b3JkZXI6MXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpO2JvcmRlci1yYWRpdXM6dmFyKC0tcmFkaXVzKTtt' +
+        'YXJnaW4tYm90dG9tOjNweDtvdmVyZmxvdzpoaWRkZW47dHJhbnNpdGlvbjpib3JkZXItY29sb3IgLjE1' +
+        'c30KLmZvbGRlci1yb3c6aG92ZXJ7Ym9yZGVyLWNvbG9yOnZhcigtLWJvcmRlcil9Ci5mb2xkZXItcm93' +
+        'LnN0YXR1cy1yb290e2JvcmRlci1sZWZ0OjNweCBzb2xpZCB2YXIoLS1hY2NlbnQpO2JhY2tncm91bmQ6' +
+        'cmdiYSgxNjcsMTM5LDI1MCwuMDQpfQouZm9sZGVyLXJvdy5zdGF0dXMtY2hhbmdlZHtib3JkZXItbGVm' +
+        'dDozcHggc29saWQgdmFyKC0teWVsbG93KTtiYWNrZ3JvdW5kOnJnYmEoMjUxLDE5MSwzNiwuMDQpfQou' +
+        'Zm9sZGVyLXJvdy5zdGF0dXMtZXJyb3J7Ym9yZGVyLWxlZnQ6M3B4IHNvbGlkIHZhcigtLXJlZCl9Ci5m' +
+        'b2xkZXItcm93LnN0YXR1cy1pbmhlcml0ZWR7Ym9yZGVyLWxlZnQ6M3B4IHNvbGlkIHZhcigtLWJvcmRl' +
+        'cjIpfQoKLmZvbGRlci1oZWFkZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5' +
+        'LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtwYWRkaW5nOjdweCAxNHB4O2N1cnNvcjpwb2ludGVyO3VzZXIt' +
+        'c2VsZWN0Om5vbmU7Z2FwOjhweH0KLmZvbGRlci1oZWFkZXI6aG92ZXJ7YmFja2dyb3VuZDpyZ2JhKDE2' +
+        'NywxMzksMjUwLC4wNSl9Ci5mb2xkZXItbGVmdHtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVy' +
+        'O2dhcDo3cHg7ZmxleDoxO21pbi13aWR0aDowfQouZm9sZGVyLXJpZ2h0e2Rpc3BsYXk6ZmxleDthbGln' +
+        'bi1pdGVtczpjZW50ZXI7Z2FwOjZweDtmbGV4LXNocmluazowfQoudG9nZ2xlLWljb257Y29sb3I6dmFy' +
+        'KC0tdGV4dDMpO2ZvbnQtc2l6ZToxMHB4O3RyYW5zaXRpb246dHJhbnNmb3JtIC4ycztmbGV4LXNocmlu' +
+        'azowfQouZm9sZGVyLWljb257Zm9udC1zaXplOjE0cHg7ZmxleC1zaHJpbms6MH0KLmZvbGRlci1wYXRo' +
+        'e2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbW9ubyk7Zm9udC1zaXplOjEycHg7d2hpdGUtc3BhY2U6bm93' +
+        'cmFwO292ZXJmbG93OmhpZGRlbjt0ZXh0LW92ZXJmbG93OmVsbGlwc2lzfQoKLnN0YXR1cy1iYWRnZSwu' +
+        'aW5oZXJpdC1iYWRnZSwub3duZXItYmFkZ2V7Zm9udC1zaXplOjEwcHg7cGFkZGluZzoycHggN3B4O2Jv' +
+        'cmRlci1yYWRpdXM6MTBweDt3aGl0ZS1zcGFjZTpub3dyYXA7Zm9udC13ZWlnaHQ6NTAwfQoub3duZXIt' +
+        'YmFkZ2V7YmFja2dyb3VuZDp2YXIoLS1iZzQpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyMik7' +
+        'Y29sb3I6dmFyKC0tdGV4dDIpfQouc3RhdHVzLWJhZGdlLnN0YXR1cy1yb290e2JhY2tncm91bmQ6cmdi' +
+        'YSgxNjcsMTM5LDI1MCwuMTUpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYWNjZW50Mik7Y29sb3I6dmFy' +
+        'KC0tYWNjZW50KX0KLnN0YXR1cy1iYWRnZS5zdGF0dXMtY2hhbmdlZHtiYWNrZ3JvdW5kOnJnYmEoMjUx' +
+        'LDE5MSwzNiwuMTUpO2JvcmRlcjoxcHggc29saWQgdmFyKC0teWVsbG93KTtjb2xvcjp2YXIoLS15ZWxs' +
+        'b3cpfQouc3RhdHVzLWJhZGdlLnN0YXR1cy1lcnJvcntiYWNrZ3JvdW5kOnJnYmEoMjQxLDExMywxMTMs' +
+        'LjEyKTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLXJlZCk7Y29sb3I6dmFyKC0tcmVkKX0KLnN0YXR1cy1i' +
+        'YWRnZS5zdGF0dXMtaW5oZXJpdGVke2JhY2tncm91bmQ6cmdiYSg1MiwyMTEsMTUzLC4xMik7Ym9yZGVy' +
+        'OjFweCBzb2xpZCByZ2JhKDUyLDIxMSwxNTMsLjMpO2NvbG9yOnZhcigtLWdyZWVuKX0KLmluaGVyaXQt' +
+        'eWVze2JhY2tncm91bmQ6cmdiYSg1MiwyMTEsMTUzLC4xMik7Ym9yZGVyOjFweCBzb2xpZCByZ2JhKDUy' +
+        'LDIxMSwxNTMsLjMpO2NvbG9yOnZhcigtLWdyZWVuKX0KLmluaGVyaXQtbm97YmFja2dyb3VuZDpyZ2Jh' +
+        'KDI0MSwxMTMsMTEzLC4xMik7Ym9yZGVyOjFweCBzb2xpZCByZ2JhKDI0MSwxMTMsMTEzLC4zKTtjb2xv' +
+        'cjp2YXIoLS1yZWQpfQoKLmZvbGRlci1kZXRhaWxze2Rpc3BsYXk6bm9uZTtwYWRkaW5nOjEwcHggMTZw' +
+        'eCAxNHB4O2JvcmRlci10b3A6MXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpO2JhY2tncm91bmQ6dmFyKC0t' +
+        'YmcpfQouZm9sZGVyLWRldGFpbHMub3BlbntkaXNwbGF5OmJsb2NrfQouZGV0YWlscy1tZXRhe2Rpc3Bs' +
+        'YXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6MTRweDttYXJnaW4tYm90dG9tOjEwcHg7cGFkZGluZzo4' +
+        'cHggMTJweDtiYWNrZ3JvdW5kOnZhcigtLWJnMik7Ym9yZGVyLXJhZGl1czp2YXIoLS1yYWRpdXMpO2Jv' +
+        'cmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyMik7Zm9udC1zaXplOjExcHg7Y29sb3I6dmFyKC0tdGV4' +
+        'dDIpfQouZGV0YWlscy1tZXRhIHN0cm9uZ3tjb2xvcjp2YXIoLS10ZXh0KX0KLnNhbWUtYXMtcGFyZW50' +
+        'e2NvbG9yOnZhcigtLXRleHQzKTtmb250LXN0eWxlOml0YWxpYztmb250LXNpemU6MTFweDtwYWRkaW5n' +
+        'OjZweCAxMHB4O2JhY2tncm91bmQ6dmFyKC0tYmcyKTtib3JkZXItcmFkaXVzOnZhcigtLXJhZGl1cyk7' +
+        'Ym9yZGVyOjFweCBkYXNoZWQgdmFyKC0tYm9yZGVyMil9Ci5lcnJvci1ib3h7YmFja2dyb3VuZDpyZ2Jh' +
+        'KDI0MSwxMTMsMTEzLC4wNyk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1yZWQpO2JvcmRlci1yYWRpdXM6' +
+        'dmFyKC0tcmFkaXVzKTtjb2xvcjp2YXIoLS1yZWQpO3BhZGRpbmc6OHB4IDEycHg7Zm9udC1zaXplOjEx' +
+        'cHh9CgoucnVsZXMtc2VjdGlvbnttYXJnaW4tYm90dG9tOjhweH0KLnJ1bGVzLXNlY3Rpb24tdGl0bGV7' +
+        'Zm9udC1zaXplOjEwcHg7Zm9udC13ZWlnaHQ6NzAwO3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtsZXR0' +
+        'ZXItc3BhY2luZzouNnB4O3BhZGRpbmc6MnB4IDhweDttYXJnaW4tYm90dG9tOjRweDtib3JkZXItcmFk' +
+        'aXVzOjNweDtkaXNwbGF5OmlubGluZS1ibG9ja30KLmV4cGxpY2l0LXRpdGxle2NvbG9yOnZhcigtLWFj' +
+        'Y2VudCk7YmFja2dyb3VuZDpyZ2JhKDE2NywxMzksMjUwLC4xMil9Ci5pbmhlcml0ZWQtdGl0bGV7Y29s' +
+        'b3I6dmFyKC0tdGV4dDMpO2JhY2tncm91bmQ6dmFyKC0tYmcyKX0KLnJ1bGVzLXRhYmxle3dpZHRoOjEw' +
+        'MCU7Ym9yZGVyLWNvbGxhcHNlOmNvbGxhcHNlO2ZvbnQtc2l6ZToxMXB4fQoucnVsZXMtdGFibGUgdGhl' +
+        'YWQgdHJ7YmFja2dyb3VuZDp2YXIoLS1iZzQpfQoucnVsZXMtdGFibGUgdGh7dGV4dC1hbGlnbjpsZWZ0' +
+        'O3BhZGRpbmc6NHB4IDhweDtjb2xvcjp2YXIoLS10ZXh0Mik7Zm9udC13ZWlnaHQ6NTAwO2ZvbnQtc2l6' +
+        'ZToxMHB4O2JvcmRlci1ib3R0b206MXB4IHNvbGlkIHZhcigtLWJvcmRlcil9Ci5ydWxlcy10YWJsZSB0' +
+        'ZHtwYWRkaW5nOjRweCA4cHg7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgdmFyKC0tYm9yZGVyMik7dmVy' +
+        'dGljYWwtYWxpZ246bWlkZGxlfQoucnVsZXMtdGFibGUgdGJvZHkgdHI6aG92ZXJ7YmFja2dyb3VuZDpy' +
+        'Z2JhKDE2NywxMzksMjUwLC4wNCl9Ci5ydWxlcy10YWJsZSB0Ym9keSB0cjpsYXN0LWNoaWxkIHRke2Jv' +
+        'cmRlci1ib3R0b206bm9uZX0KLmluaGVyaXRlZC10YWJsZXtvcGFjaXR5Oi43fQouZGVueS1ydWxle2Jh' +
+        'Y2tncm91bmQ6cmdiYSgyNDEsMTEzLDExMywuMDYpIWltcG9ydGFudH0KLmRlbnktcnVsZSB0ZHtjb2xv' +
+        'cjp2YXIoLS1yZWQpIWltcG9ydGFudH0KLmlkZW50aXR5e2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbW9u' +
+        'byk7Zm9udC1zaXplOjEwcHg7Zm9udC13ZWlnaHQ6NTAwfQouc2NvcGV7Y29sb3I6dmFyKC0tdGV4dDIp' +
+        'O2ZvbnQtc2l6ZToxMHB4fQoubm8tcnVsZXN7Y29sb3I6dmFyKC0tdGV4dDMpO2ZvbnQtc3R5bGU6aXRh' +
+        'bGljO2ZvbnQtc2l6ZToxMXB4O3BhZGRpbmc6NHB4IDhweH0KLmJhZGdle2Rpc3BsYXk6aW5saW5lLWJs' +
+        'b2NrO2ZvbnQtc2l6ZTo5cHg7cGFkZGluZzoxcHggNnB4O2JvcmRlci1yYWRpdXM6OHB4O2ZvbnQtd2Vp' +
+        'Z2h0OjUwMDt3aGl0ZS1zcGFjZTpub3dyYXB9Ci5iYWRnZS1hbGxvd3tiYWNrZ3JvdW5kOnJnYmEoNTIs' +
+        'MjExLDE1MywuMTIpO2JvcmRlcjoxcHggc29saWQgcmdiYSg1MiwyMTEsMTUzLC4zNSk7Y29sb3I6dmFy' +
+        'KC0tZ3JlZW4pfQouYmFkZ2UtZGVueXtiYWNrZ3JvdW5kOnJnYmEoMjQxLDExMywxMTMsLjEyKTtib3Jk' +
+        'ZXI6MXB4IHNvbGlkIHJnYmEoMjQxLDExMywxMTMsLjM1KTtjb2xvcjp2YXIoLS1yZWQpfQouYmFkZ2Ut' +
+        'aW5oZXJpdGVke2JhY2tncm91bmQ6dmFyKC0tYmcyKTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWJvcmRl' +
+        'cjIpO2NvbG9yOnZhcigtLXRleHQzKX0KLmJhZGdlLWV4cGxpY2l0e2JhY2tncm91bmQ6cmdiYSgxNjcs' +
+        'MTM5LDI1MCwuMTUpO2JvcmRlcjoxcHggc29saWQgcmdiYSgxNjcsMTM5LDI1MCwuMyk7Y29sb3I6dmFy' +
+        'KC0tYWNjZW50KX0KCi8qIOKUgOKUgCBBZ2VuZGEg4pSA4pSAICovCi5hZ2VuZGEtYmFye2JhY2tncm91' +
+        'bmQ6dmFyKC0tYmczKTtib3JkZXItYm90dG9tOjFweCBzb2xpZCB2YXIoLS1ib3JkZXIpfQouYWdlbmRh' +
+        'LXRvZ2dsZXt3aWR0aDoxMDAlO2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtw' +
+        'YWRkaW5nOjhweCAzMnB4O2JhY2tncm91bmQ6bm9uZTtib3JkZXI6bm9uZTtjb2xvcjp2YXIoLS10ZXh0' +
+        'Mik7Zm9udC1zaXplOjExcHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7Y3Vyc29yOnBvaW50ZXI7' +
+        'dGV4dC1hbGlnbjpsZWZ0fQouYWdlbmRhLXRvZ2dsZTpob3ZlcntiYWNrZ3JvdW5kOnJnYmEoMTY3LDEz' +
+        'OSwyNTAsLjA2KTtjb2xvcjp2YXIoLS1hY2NlbnQpfQouYWdlbmRhLXRvZ2dsZS1pY29ue2ZvbnQtc2l6' +
+        'ZTo5cHg7dHJhbnNpdGlvbjp0cmFuc2Zvcm0gLjJzfQouYWdlbmRhLXRvZ2dsZS1oaW50e21hcmdpbi1s' +
+        'ZWZ0OmF1dG87Zm9udC1zaXplOjEwcHg7Y29sb3I6dmFyKC0tdGV4dDMpfQouYWdlbmRhLWNvbnRlbnR7' +
+        'cGFkZGluZzoxNHB4IDMycHggMThweDtib3JkZXItdG9wOjFweCBzb2xpZCB2YXIoLS1ib3JkZXIyKTti' +
+        'YWNrZ3JvdW5kOnZhcigtLWJnKX0KLmFnZW5kYS1ncmlke2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRl' +
+        'LWNvbHVtbnM6cmVwZWF0KGF1dG8tZmlsbCxtaW5tYXgoMjgwcHgsMWZyKSk7Z2FwOjEwcHh9Ci5hZ2Vu' +
+        'ZGEtc2VjdGlvbntiYWNrZ3JvdW5kOnZhcigtLWJnNCk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1ib3Jk' +
+        'ZXIyKTtib3JkZXItcmFkaXVzOnZhcigtLXJhZGl1cyk7cGFkZGluZzoxMHB4IDEycHh9Ci5hZ2VuZGEt' +
+        'c2VjdGlvbi10aXRsZXtmb250LXNpemU6OXB4O2ZvbnQtd2VpZ2h0OjcwMDt0ZXh0LXRyYW5zZm9ybTp1' +
+        'cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjhweDtjb2xvcjp2YXIoLS1hY2NlbnQpO21hcmdpbi1ib3R0' +
+        'b206NnB4O3BhZGRpbmctYm90dG9tOjRweDtib3JkZXItYm90dG9tOjFweCBzb2xpZCB2YXIoLS1ib3Jk' +
+        'ZXIyKX0KLmFnZW5kYS1yb3d7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmJhc2VsaW5lO2dhcDo2cHg7' +
+        'bWFyZ2luLWJvdHRvbTo0cHg7Zm9udC1zaXplOjEwcHg7bGluZS1oZWlnaHQ6MS40fQouYWdlbmRhLXJv' +
+        'dzpsYXN0LWNoaWxke21hcmdpbi1ib3R0b206MH0KLmFnZW5kYS1kb3R7d2lkdGg6N3B4O2hlaWdodDo3' +
+        'cHg7Ym9yZGVyLXJhZGl1czoycHg7ZmxleC1zaHJpbms6MDttYXJnaW4tdG9wOjNweDtkaXNwbGF5Omlu' +
+        'bGluZS1ibG9ja30KLmFnZW5kYS1sYWJlbHtjb2xvcjp2YXIoLS10ZXh0KTtmb250LXdlaWdodDo2MDA7' +
+        'd2hpdGUtc3BhY2U6bm93cmFwO2ZsZXgtc2hyaW5rOjB9Ci5hZ2VuZGEtcGVybXtmb250LWZhbWlseTp2' +
+        'YXIoLS1mb250LW1vbm8pO2ZvbnQtc2l6ZTo5cHg7Y29sb3I6dmFyKC0tdGV4dDIpO2ZvbnQtd2VpZ2h0' +
+        'OjUwMDt3aGl0ZS1zcGFjZTpub3dyYXA7ZmxleC1zaHJpbms6MH0KLmFnZW5kYS1kZXNje2NvbG9yOnZh' +
+        'cigtLXRleHQyKTtmb250LXNpemU6MTBweH0KLmFnZW5kYS1iYWRnZXtmbGV4LXNocmluazowfQoKLyog' +
+        '4pSA4pSAIEZvb3RlciDilIDilIAgKi8KLnJlcG9ydC1mb290ZXJ7dGV4dC1hbGlnbjpjZW50ZXI7cGFk' +
+        'ZGluZzoxNHB4O2NvbG9yOnZhcigtLXRleHQzKTtmb250LXNpemU6MTBweDtib3JkZXItdG9wOjFweCBz' +
+        'b2xpZCB2YXIoLS1ib3JkZXIyKTtiYWNrZ3JvdW5kOnZhcigtLWJnMyk7bWFyZ2luLXRvcDoxNnB4fQoK' +
+        'Lyog4pSA4pSAIEVtcHR5IHN0YXRlIOKUgOKUgCAqLwouZW1wdHktcGFnZXtwYWRkaW5nOjYwcHggMzJw' +
+        'eDt0ZXh0LWFsaWduOmNlbnRlcjtjb2xvcjp2YXIoLS10ZXh0Myl9Ci5lbXB0eS1wYWdlIC5pY29ue2Zv' +
+        'bnQtc2l6ZTo0OHB4O21hcmdpbi1ib3R0b206MTJweH0KLmVtcHR5LXBhZ2UgcHtmb250LXNpemU6MTRw' +
+        'eH0KCkBtZWRpYSBwcmludHsudG9vbGJhciwucGFnZS1uYXYsLnN0YXRzLWJhciwuYWdlbmRhLWJhciwu' +
+        'dGhlbWUtdG9nZ2xle2Rpc3BsYXk6bm9uZX0uZm9sZGVyLWRldGFpbHN7ZGlzcGxheTpibG9jayFpbXBv' +
+        'cnRhbnR9LmZvbGRlci1yb3d7YnJlYWstaW5zaWRlOmF2b2lkfX0K'
     )
     $jsB64 = (
-        'ZnVuY3Rpb24gdG9nZ2xlQWdlbmRhKGJ0bil7dmFyIGM9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQo' +
-
-        'J2FnZW5kYUNvbnRlbnQnKSxpYz1idG4ucXVlcnlTZWxlY3RvcignLmFnZW5kYS10b2dnbGUtaWNv' +
-
-        'bicpLGhpbnQ9YnRuLnF1ZXJ5U2VsZWN0b3IoJy5hZ2VuZGEtdG9nZ2xlLWhpbnQnKSxoaWRkZW49' +
-
-        'Yy5zdHlsZS5kaXNwbGF5PT09J25vbmUnfHxjLnN0eWxlLmRpc3BsYXk9PT0nJztjLnN0eWxlLmRp' +
-
-        'c3BsYXk9aGlkZGVuPydibG9jayc6J25vbmUnO2ljLnN0eWxlLnRyYW5zZm9ybT1oaWRkZW4/J3Jv' +
-
-        'dGF0ZSg5MGRlZyknOicnO2hpbnQudGV4dENvbnRlbnQ9aGlkZGVuPydjbGljayB0byBjb2xsYXBz' +
-
-        'ZSc6J2NsaWNrIHRvIGV4cGFuZCc7fQpmdW5jdGlvbiB0b2dnbGUoaWQsaGRyKXt2YXIgZD1kb2N1' +
-
-        'bWVudC5nZXRFbGVtZW50QnlJZChpZCksaWM9aGRyLnF1ZXJ5U2VsZWN0b3IoJy50b2dnbGUtaWNv' +
-
-        'bicpO2lmKGQuY2xhc3NMaXN0LmNvbnRhaW5zKCdvcGVuJykpe2QuY2xhc3NMaXN0LnJlbW92ZSgn' +
-
-        'b3BlbicpO2ljLnN0eWxlLnRyYW5zZm9ybT0nJzt9ZWxzZXtkLmNsYXNzTGlzdC5hZGQoJ29wZW4n' +
-
-        'KTtpYy5zdHlsZS50cmFuc2Zvcm09J3JvdGF0ZSg5MGRlZyknO319CmZ1bmN0aW9uIGV4cGFuZEFs' +
-
-        'bCgpe2RvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJy5mb2xkZXItZGV0YWlscycpLmZvckVhY2go' +
-
-        'ZnVuY3Rpb24oZCl7ZC5jbGFzc0xpc3QuYWRkKCdvcGVuJyk7fSk7ZG9jdW1lbnQucXVlcnlTZWxl' +
-
-        'Y3RvckFsbCgnLnRvZ2dsZS1pY29uJykuZm9yRWFjaChmdW5jdGlvbihpKXtpLnN0eWxlLnRyYW5z' +
-
-        'Zm9ybT0ncm90YXRlKDkwZGVnKSc7fSl9CmZ1bmN0aW9uIGNvbGxhcHNlQWxsKCl7ZG9jdW1lbnQu' +
-
-        'cXVlcnlTZWxlY3RvckFsbCgnLmZvbGRlci1kZXRhaWxzJykuZm9yRWFjaChmdW5jdGlvbihkKXtk' +
-
-        'LmNsYXNzTGlzdC5yZW1vdmUoJ29wZW4nKTt9KTtkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCcu' +
-
-        'dG9nZ2xlLWljb24nKS5mb3JFYWNoKGZ1bmN0aW9uKGkpe2kuc3R5bGUudHJhbnNmb3JtPScnO30p' +
-
-        'fQp2YXIgX2Y9J2FsbCcsX3M9Jyc7CmZ1bmN0aW9uIGZpbHRlclJvd3MoZixidG4pe19mPWY7ZG9j' +
-
-        'dW1lbnQucXVlcnlTZWxlY3RvckFsbCgnLmZpbHRlci1idG4nKS5mb3JFYWNoKGZ1bmN0aW9uKGIp' +
-
-        'e2IuY2xhc3NMaXN0LnJlbW92ZSgnYWN0aXZlJyk7fSk7YnRuLmNsYXNzTGlzdC5hZGQoJ2FjdGl2' +
-
-        'ZScpO2FwcGx5VmlzKCk7fQpmdW5jdGlvbiBzZWFyY2hSb3dzKHYpe19zPXYudG9Mb3dlckNhc2Uo' +
-
-        'KTthcHBseVZpcygpO30KZnVuY3Rpb24gYXBwbHlWaXMoKXtkb2N1bWVudC5xdWVyeVNlbGVjdG9y' +
-
-        'QWxsKCcuZm9sZGVyLXJvdycpLmZvckVhY2goZnVuY3Rpb24ocm93KXt2YXIgc2hvdz10cnVlO2lm' +
-
-        'KF9mPT09J2NoYW5nZWQnJiYhcm93LmNsYXNzTGlzdC5jb250YWlucygnc3RhdHVzLWNoYW5nZWQn' +
-
-        'KSlzaG93PWZhbHNlO2lmKF9mPT09J2luaGVyaXRlZCcmJiFyb3cuY2xhc3NMaXN0LmNvbnRhaW5z' +
-
-        'KCdzdGF0dXMtaW5oZXJpdGVkJykpc2hvdz1mYWxzZTtpZihfZj09PSdlcnJvcicmJiFyb3cuY2xh' +
-
-        'c3NMaXN0LmNvbnRhaW5zKCdzdGF0dXMtZXJyb3InKSlzaG93PWZhbHNlO2lmKHNob3cmJl9zJiZy' +
-
-        'b3cudGV4dENvbnRlbnQudG9Mb3dlckNhc2UoKS5pbmRleE9mKF9zKTwwKXNob3c9ZmFsc2U7cm93' +
-
-        'LnN0eWxlLmRpc3BsYXk9c2hvdz8nJzonbm9uZSc7fSk7fQpkb2N1bWVudC5xdWVyeVNlbGVjdG9y' +
-
-        'QWxsKCcuZm9sZGVyLXJvdy5zdGF0dXMtY2hhbmdlZCwuZm9sZGVyLXJvdy5zdGF0dXMtcm9vdCcp' +
-
-        'LmZvckVhY2goZnVuY3Rpb24ocm93KXt2YXIgZD1yb3cucXVlcnlTZWxlY3RvcignLmZvbGRlci1k' +
-
-        'ZXRhaWxzJyksaWM9cm93LnF1ZXJ5U2VsZWN0b3IoJy50b2dnbGUtaWNvbicpO2lmKGQpZC5jbGFz' +
-
-        'c0xpc3QuYWRkKCdvcGVuJyk7aWYoaWMpaWMuc3R5bGUudHJhbnNmb3JtPSdyb3RhdGUoOTBkZWcp' +
-
-        'Jzt9KTs='
+        'Ci8vIFRoZW1lIHRvZ2dsZQpmdW5jdGlvbiB0b2dnbGVUaGVtZSgpewogIGRvY3VtZW50LmJvZHkuY2xh' +
+        'c3NMaXN0LnRvZ2dsZSgnbGlnaHQnKTsKICB2YXIgYnRuPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd0' +
+        'aGVtZUJ0bicpOwogIGJ0bi50ZXh0Q29udGVudD1kb2N1bWVudC5ib2R5LmNsYXNzTGlzdC5jb250YWlu' +
+        'cygnbGlnaHQnKT8n8J+MmSBEYXJrJzon4piA77iPIExpZ2h0JzsKICBsb2NhbFN0b3JhZ2Uuc2V0SXRl' +
+        'bSgnYWNsLXRoZW1lJyxkb2N1bWVudC5ib2R5LmNsYXNzTGlzdC5jb250YWlucygnbGlnaHQnKT8nbGln' +
+        'aHQnOidkYXJrJyk7Cn0KKGZ1bmN0aW9uKCl7CiAgdmFyIHQ9bG9jYWxTdG9yYWdlLmdldEl0ZW0oJ2Fj' +
+        'bC10aGVtZScpOwogIGlmKHQ9PT0nbGlnaHQnKXtkb2N1bWVudC5ib2R5LmNsYXNzTGlzdC5hZGQoJ2xp' +
+        'Z2h0Jyk7dmFyIGI9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RoZW1lQnRuJyk7aWYoYiliLnRleHRD' +
+        'b250ZW50PSfwn4yZIERhcmsnO30KfSkoKTsKCi8vIEFnZW5kYQpmdW5jdGlvbiB0b2dnbGVBZ2VuZGEo' +
+        'YnRuKXsKICB2YXIgYz1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYWdlbmRhQ29udGVudCcpLGljPWJ0' +
+        'bi5xdWVyeVNlbGVjdG9yKCcuYWdlbmRhLXRvZ2dsZS1pY29uJyksaGludD1idG4ucXVlcnlTZWxlY3Rv' +
+        'cignLmFnZW5kYS10b2dnbGUtaGludCcpLGhpZGRlbj1jLnN0eWxlLmRpc3BsYXk9PT0nJ3x8Yy5zdHls' +
+        'ZS5kaXNwbGF5PT09J25vbmUnOwogIGMuc3R5bGUuZGlzcGxheT1oaWRkZW4/J2Jsb2NrJzonbm9uZSc7' +
+        'CiAgaWMuc3R5bGUudHJhbnNmb3JtPWhpZGRlbj8ncm90YXRlKDkwZGVnKSc6Jyc7CiAgaGludC50ZXh0' +
+        'Q29udGVudD1oaWRkZW4/J2NsaWNrIHRvIGNvbGxhcHNlJzonY2xpY2sgdG8gZXhwYW5kJzsKfQoKLy8g' +
+        'Rm9sZGVyIHRvZ2dsZQpmdW5jdGlvbiB0b2dnbGUoaWQsaGRyKXsKICB2YXIgZD1kb2N1bWVudC5nZXRF' +
+        'bGVtZW50QnlJZChpZCksaWM9aGRyLnF1ZXJ5U2VsZWN0b3IoJy50b2dnbGUtaWNvbicpOwogIGlmKGQu' +
+        'Y2xhc3NMaXN0LmNvbnRhaW5zKCdvcGVuJykpe2QuY2xhc3NMaXN0LnJlbW92ZSgnb3BlbicpO2ljLnN0' +
+        'eWxlLnRyYW5zZm9ybT0nJzt9CiAgZWxzZXtkLmNsYXNzTGlzdC5hZGQoJ29wZW4nKTtpYy5zdHlsZS50' +
+        'cmFuc2Zvcm09J3JvdGF0ZSg5MGRlZyknO30KfQoKLy8g4pSA4pSAIFBhZ2luYXRpb24gZW5naW5lIOKU' +
+        'gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKU' +
+        'gOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgAp2YXIgX2Fs' +
+        'bFJvd3M9W107CnZhciBfZmlsdGVyZWQ9W107CnZhciBfcGFnZT0xOwp2YXIgX3BhZ2VTaXplPTI1Owp2' +
+        'YXIgX2ZpbHRlcj0nYWxsJzsKdmFyIF9zZWFyY2g9Jyc7CgpmdW5jdGlvbiBpbml0KCl7CiAgX2FsbFJv' +
+        'd3M9QXJyYXkuZnJvbShkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCcuZm9sZGVyLXJvdycpKTsKICBy' +
+        'ZW5kZXJQYWdlQnV0dG9ucygpOwogIHNob3dQYWdlKDEpOwp9CgpmdW5jdGlvbiBmaWx0ZXJSb3dzKGYs' +
+        'YnRuKXsKICBfZmlsdGVyPWY7CiAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnLmZpbHRlci1idG4n' +
+        'KS5mb3JFYWNoKGZ1bmN0aW9uKGIpe2IuY2xhc3NMaXN0LnJlbW92ZSgnYWN0aXZlJyk7fSk7CiAgYnRu' +
+        'LmNsYXNzTGlzdC5hZGQoJ2FjdGl2ZScpOwogIF9wYWdlPTE7CiAgYXBwbHlGaWx0ZXIoKTsKfQoKZnVu' +
+        'Y3Rpb24gc2VhcmNoUm93cyh2KXsKICBfc2VhcmNoPXYudG9Mb3dlckNhc2UoKTsKICBfcGFnZT0xOwog' +
+        'IGFwcGx5RmlsdGVyKCk7Cn0KCmZ1bmN0aW9uIGFwcGx5RmlsdGVyKCl7CiAgX2ZpbHRlcmVkPV9hbGxS' +
+        'b3dzLmZpbHRlcihmdW5jdGlvbihyb3cpewogICAgdmFyIG1hdGNoRmlsdGVyPXRydWU7CiAgICBpZihf' +
+        'ZmlsdGVyPT09J2NoYW5nZWQnKSAgIG1hdGNoRmlsdGVyPXJvdy5jbGFzc0xpc3QuY29udGFpbnMoJ3N0' +
+        'YXR1cy1jaGFuZ2VkJyk7CiAgICBpZihfZmlsdGVyPT09J2luaGVyaXRlZCcpIG1hdGNoRmlsdGVyPXJv' +
+        'dy5jbGFzc0xpc3QuY29udGFpbnMoJ3N0YXR1cy1pbmhlcml0ZWQnKTsKICAgIGlmKF9maWx0ZXI9PT0n' +
+        'ZXJyb3InKSAgICAgbWF0Y2hGaWx0ZXI9cm93LmNsYXNzTGlzdC5jb250YWlucygnc3RhdHVzLWVycm9y' +
+        'Jyk7CiAgICB2YXIgbWF0Y2hTZWFyY2g9IV9zZWFyY2h8fHJvdy50ZXh0Q29udGVudC50b0xvd2VyQ2Fz' +
+        'ZSgpLmluZGV4T2YoX3NlYXJjaCk+PTA7CiAgICByZXR1cm4gbWF0Y2hGaWx0ZXImJm1hdGNoU2VhcmNo' +
+        'OwogIH0pOwogIHJlbmRlclBhZ2VCdXR0b25zKCk7CiAgc2hvd1BhZ2UoMSk7Cn0KCmZ1bmN0aW9uIHNl' +
+        'dFBhZ2VTaXplKHZhbCl7CiAgX3BhZ2VTaXplPXBhcnNlSW50KHZhbCk7CiAgX3BhZ2U9MTsKICByZW5k' +
+        'ZXJQYWdlQnV0dG9ucygpOwogIHNob3dQYWdlKDEpOwp9CgpmdW5jdGlvbiBzaG93UGFnZShwKXsKICBf' +
+        'cGFnZT1wOwogIHZhciB0b3RhbD1NYXRoLmNlaWwoX2ZpbHRlcmVkLmxlbmd0aC9fcGFnZVNpemUpfHwx' +
+        'OwogIGlmKF9wYWdlPDEpX3BhZ2U9MTsKICBpZihfcGFnZT50b3RhbClfcGFnZT10b3RhbDsKCiAgLy8g' +
+        'SGlkZSBhbGwgcm93cyBmaXJzdAogIF9hbGxSb3dzLmZvckVhY2goZnVuY3Rpb24ocil7ci5zdHlsZS5k' +
+        'aXNwbGF5PSdub25lJzt9KTsKCiAgLy8gU2hvdyBjdXJyZW50IHBhZ2Ugc2xpY2UKICB2YXIgc3RhcnQ9' +
+        'KF9wYWdlLTEpKl9wYWdlU2l6ZTsKICB2YXIgZW5kPU1hdGgubWluKHN0YXJ0K19wYWdlU2l6ZSxfZmls' +
+        'dGVyZWQubGVuZ3RoKTsKICBmb3IodmFyIGk9c3RhcnQ7aTxlbmQ7aSsrKXtfZmlsdGVyZWRbaV0uc3R5' +
+        'bGUuZGlzcGxheT0nJzt9CgogIC8vIFVwZGF0ZSBwYWdlIGluZm8KICB2YXIgaW5mbz1kb2N1bWVudC5n' +
+        'ZXRFbGVtZW50QnlJZCgncGFnZUluZm8nKTsKICBpZihpbmZvKXsKICAgIGlmKF9maWx0ZXJlZC5sZW5n' +
+        'dGg9PT0wKXtpbmZvLnRleHRDb250ZW50PSdObyByZXN1bHRzJzt9CiAgICBlbHNle2luZm8udGV4dENv' +
+        'bnRlbnQ9J1Nob3dpbmcgJysoc3RhcnQrMSkrJ+KAkycrZW5kKycgb2YgJytfZmlsdGVyZWQubGVuZ3Ro' +
+        'KycgZm9sZGVycyc7fQogIH0KCiAgLy8gVXBkYXRlIHByZXYvbmV4dAogIGRvY3VtZW50LmdldEVsZW1l' +
+        'bnRCeUlkKCdidG5QcmV2JykuZGlzYWJsZWQ9KF9wYWdlPD0xKTsKICBkb2N1bWVudC5nZXRFbGVtZW50' +
+        'QnlJZCgnYnRuTmV4dCcpLmRpc2FibGVkPShfcGFnZT49dG90YWwpOwoKICAvLyBVcGRhdGUgcGFnZSBu' +
+        'dW1iZXIgYnV0dG9ucwogIHJlbmRlclBhZ2VCdXR0b25zKCk7CgogIC8vIEVtcHR5IHN0YXRlCiAgdmFy' +
+        'IGVsPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdlbXB0eVN0YXRlJyk7CiAgaWYoZWwpZWwuc3R5bGUu' +
+        'ZGlzcGxheT0oX2ZpbHRlcmVkLmxlbmd0aD09PTApPydibG9jayc6J25vbmUnOwp9CgpmdW5jdGlvbiBy' +
+        'ZW5kZXJQYWdlQnV0dG9ucygpewogIHZhciB0b3RhbD1NYXRoLmNlaWwoX2ZpbHRlcmVkLmxlbmd0aC9f' +
+        'cGFnZVNpemUpfHwxOwogIHZhciBjb250YWluZXI9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3BhZ2VC' +
+        'dXR0b25zJyk7CiAgaWYoIWNvbnRhaW5lcilyZXR1cm47CiAgY29udGFpbmVyLmlubmVySFRNTD0nJzsK' +
+        'CiAgdmFyIG1heEJ0bnM9NzsKICB2YXIgc3RhcnQ9TWF0aC5tYXgoMSxfcGFnZS1NYXRoLmZsb29yKG1h' +
+        'eEJ0bnMvMikpOwogIHZhciBlbmQ9TWF0aC5taW4odG90YWwsc3RhcnQrbWF4QnRucy0xKTsKICBpZihl' +
+        'bmQtc3RhcnQ8bWF4QnRucy0xKXN0YXJ0PU1hdGgubWF4KDEsZW5kLW1heEJ0bnMrMSk7CgogIGlmKHN0' +
+        'YXJ0PjEpewogICAgdmFyIGI9bWFrZVBhZ2VCdG4oMSk7Y29udGFpbmVyLmFwcGVuZENoaWxkKGIpOwog' +
+        'ICAgaWYoc3RhcnQ+Mil7dmFyIGU9ZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnc3BhbicpO2UudGV4dENv' +
+        'bnRlbnQ9J+KApic7ZS5zdHlsZS5jc3NUZXh0PSdjb2xvcjp2YXIoLS10ZXh0Myk7cGFkZGluZzowIDRw' +
+        'eDtmb250LXNpemU6MTFweCc7Y29udGFpbmVyLmFwcGVuZENoaWxkKGUpO30KICB9CiAgZm9yKHZhciBp' +
+        'PXN0YXJ0O2k8PWVuZDtpKyspe2NvbnRhaW5lci5hcHBlbmRDaGlsZChtYWtlUGFnZUJ0bihpKSk7fQog' +
+        'IGlmKGVuZDx0b3RhbCl7CiAgICBpZihlbmQ8dG90YWwtMSl7dmFyIGUyPWRvY3VtZW50LmNyZWF0ZUVs' +
+        'ZW1lbnQoJ3NwYW4nKTtlMi50ZXh0Q29udGVudD0n4oCmJztlMi5zdHlsZS5jc3NUZXh0PSdjb2xvcjp2' +
+        'YXIoLS10ZXh0Myk7cGFkZGluZzowIDRweDtmb250LXNpemU6MTFweCc7Y29udGFpbmVyLmFwcGVuZENo' +
+        'aWxkKGUyKTt9CiAgICBjb250YWluZXIuYXBwZW5kQ2hpbGQobWFrZVBhZ2VCdG4odG90YWwpKTsKICB9' +
+        'Cn0KCmZ1bmN0aW9uIG1ha2VQYWdlQnRuKG4pewogIHZhciBiPWRvY3VtZW50LmNyZWF0ZUVsZW1lbnQo' +
+        'J2J1dHRvbicpOwogIGIudGV4dENvbnRlbnQ9bjsKICBiLmNsYXNzTmFtZT0ncGFnZS1idG4nKyhuPT09' +
+        'X3BhZ2U/JyBhY3RpdmUnOicnKTsKICBiLm9uY2xpY2s9KGZ1bmN0aW9uKHBnKXtyZXR1cm4gZnVuY3Rp' +
+        'b24oKXtzaG93UGFnZShwZyk7fTt9KShuKTsKICByZXR1cm4gYjsKfQoKZnVuY3Rpb24gZXhwYW5kQWxs' +
+        'KCl7CiAgdmFyIHN0YXJ0PShfcGFnZS0xKSpfcGFnZVNpemU7CiAgdmFyIGVuZD1NYXRoLm1pbihzdGFy' +
+        'dCtfcGFnZVNpemUsX2ZpbHRlcmVkLmxlbmd0aCk7CiAgZm9yKHZhciBpPXN0YXJ0O2k8ZW5kO2krKyl7' +
+        'CiAgICB2YXIgZD1fZmlsdGVyZWRbaV0ucXVlcnlTZWxlY3RvcignLmZvbGRlci1kZXRhaWxzJyk7CiAg' +
+        'ICB2YXIgaWM9X2ZpbHRlcmVkW2ldLnF1ZXJ5U2VsZWN0b3IoJy50b2dnbGUtaWNvbicpOwogICAgaWYo' +
+        'ZCl7ZC5jbGFzc0xpc3QuYWRkKCdvcGVuJyk7fQogICAgaWYoaWMpe2ljLnN0eWxlLnRyYW5zZm9ybT0n' +
+        'cm90YXRlKDkwZGVnKSc7fQogIH0KfQoKZnVuY3Rpb24gY29sbGFwc2VBbGwoKXsKICB2YXIgc3RhcnQ9' +
+        'KF9wYWdlLTEpKl9wYWdlU2l6ZTsKICB2YXIgZW5kPU1hdGgubWluKHN0YXJ0K19wYWdlU2l6ZSxfZmls' +
+        'dGVyZWQubGVuZ3RoKTsKICBmb3IodmFyIGk9c3RhcnQ7aTxlbmQ7aSsrKXsKICAgIHZhciBkPV9maWx0' +
+        'ZXJlZFtpXS5xdWVyeVNlbGVjdG9yKCcuZm9sZGVyLWRldGFpbHMnKTsKICAgIHZhciBpYz1fZmlsdGVy' +
+        'ZWRbaV0ucXVlcnlTZWxlY3RvcignLnRvZ2dsZS1pY29uJyk7CiAgICBpZihkKXtkLmNsYXNzTGlzdC5y' +
+        'ZW1vdmUoJ29wZW4nKTt9CiAgICBpZihpYyl7aWMuc3R5bGUudHJhbnNmb3JtPScnO30KICB9Cn0KCmRv' +
+        'Y3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ0RPTUNvbnRlbnRMb2FkZWQnLGZ1bmN0aW9uKCl7aW5pdCgp' +
+        'O30pOwo='
     )
+
     $css = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($cssB64))
-    $js  = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($jsB64))
+    $jsB64decoded = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($jsB64))
+    $js = $jsB64decoded
 
-    # ── Build folder rows ────────────────────────────────────
+    # ── Build folder rows ─────────────────────────────────────
     $rows = [System.Text.StringBuilder]::new()
-    $rowIndex = 0
-    foreach ($folder in $FolderData) {
-        $rowIndex++
-        $depth       = $folder.Depth
-        $isRoot      = ($depth -eq 0)
-        $nbsp        = [string]::new([char]0x00A0, $depth * 4)
-        $displayPath = if ($isRoot) { $folder.Path } else { $folder.Path.Replace($RootPath, '') }
 
-        if ($null -ne $folder.Error) {
-            $sClass = 'status-error';     $sIcon = '&#9888;';   $sTxt = 'Error'
-        } elseif ($isRoot) {
-            $sClass = 'status-root';      $sIcon = '&#127968;'; $sTxt = 'Root'
-        } elseif ($folder.HasChanges) {
-            $sClass = 'status-changed';   $sIcon = '&#9888;';   $sTxt = 'Changed'
-        } else {
-            $sClass = 'status-inherited'; $sIcon = '&#8595;';   $sTxt = 'Inherited'
-        }
+    foreach ($fd in $FolderData) {
+        $path    = $fd.Path
+        $relPath = $fd.Path.Substring([Math]::Min($RootPath.TrimEnd('\').Length + 1, $fd.Path.Length))
+        if ($relPath -eq "") { $relPath = $fd.Path }
 
-        $iIcon  = if ($folder.InheritanceEnabled) { '&#10003;' } else { '&#10007;' }
-        $iClass = if ($folder.InheritanceEnabled) { 'inherit-yes' } else { 'inherit-no' }
-        $iTxt   = if ($folder.InheritanceEnabled) { 'Inheritance active' } else { 'Inheritance disabled' }
-        $prot   = if ($folder.AreAccessRulesProtected) { 'Yes (inheritance broken)' } else { 'No' }
-        $ownerE = [System.Web.HttpUtility]::HtmlEncode($folder.Owner)
-        $pathE  = [System.Web.HttpUtility]::HtmlEncode($displayPath)
-        $fullE  = [System.Web.HttpUtility]::HtmlEncode($folder.Path)
-        $ownerH = if ($folder.Owner) { "<span class='owner-badge'>&#128100; $ownerE</span>" } else { '' }
-        $openCl = if ($isRoot -or $folder.HasChanges) { ' open' } else { '' }
-        $iconRt = if ($isRoot -or $folder.HasChanges) { " style='transform:rotate(90deg)'" } else { '' }
+        $statusClass = if ($fd.Depth -eq 0)              { "status-root" }
+                       elseif ($null -ne $fd.Error)       { "status-error" }
+                       elseif ($fd.HasChanges)             { "status-changed" }
+                       else                                { "status-inherited" }
 
-        [void]$rows.Append("<div class='folder-row depth-$depth $sClass'>")
-        [void]$rows.Append("<div class='folder-header' onclick='toggle(`"details-$rowIndex`",this)'>")
-        [void]$rows.Append("<div class='folder-left'><span class='toggle-icon'$iconRt>&#9658;</span>")
+        $statusLabel = if ($fd.Depth -eq 0)              { "Root" }
+                       elseif ($null -ne $fd.Error)       { "Error" }
+                       elseif ($fd.HasChanges)             { "Changed" }
+                       else                                { "Inherited" }
+
+        $inheritText  = if ($fd.InheritanceEnabled) { "Inherited" } else { "Protected" }
+        $inheritClass = if ($fd.InheritanceEnabled) { "inherit-yes" } else { "inherit-no" }
+        $ownerEnc     = [System.Web.HttpUtility]::HtmlEncode($fd.Owner)
+        $pathEnc      = [System.Web.HttpUtility]::HtmlEncode($relPath)
+        $rowId        = "row_$([Math]::Abs($path.GetHashCode()))"
+
+        # Open/collapsed state - expanded by default only for root+changed
+        $openClass = if ($fd.Depth -eq 0 -or $fd.HasChanges) { " open" } else { "" }
+        $iconRot   = if ($fd.Depth -eq 0 -or $fd.HasChanges) { " style='transform:rotate(90deg)'" } else { "" }
+
+        [void]$rows.Append("<div class='folder-row $statusClass'>")
+        [void]$rows.Append("<div class='folder-header' onclick='toggle(""$rowId"",this)'>")
+        [void]$rows.Append("<div class='folder-left'>")
+        [void]$rows.Append("<span class='toggle-icon'$iconRot>&#9658;</span>")
         [void]$rows.Append("<span class='folder-icon'>&#128193;</span>")
-        [void]$rows.Append("<span class='folder-path'>$nbsp$pathE</span></div>")
-        [void]$rows.Append("<div class='folder-right'>$ownerH")
-        [void]$rows.Append("<span class='inherit-badge $iClass'>$iIcon $iTxt</span>")
-        [void]$rows.Append("<span class='status-badge $sClass'>$sIcon $sTxt</span>")
-        [void]$rows.Append("</div></div>")
-        [void]$rows.Append("<div class='folder-details$openCl' id='details-$rowIndex'>")
-        [void]$rows.Append("<div class='details-meta'>")
-        [void]$rows.Append("<span><strong>Path:</strong> $fullE</span>")
-        [void]$rows.Append("<span><strong>Owner:</strong> $ownerE</span>")
-        [void]$rows.Append("<span><strong>Inheritance:</strong> $iTxt</span>")
-        [void]$rows.Append("<span><strong>Rules protected:</strong> $prot</span>")
+        [void]$rows.Append("<span class='folder-path' title='$pathEnc'>$pathEnc</span>")
         [void]$rows.Append("</div>")
+        [void]$rows.Append("<div class='folder-right'>")
+        [void]$rows.Append("<span class='owner-badge'>$ownerEnc</span>")
+        [void]$rows.Append("<span class='inherit-badge $inheritClass'>$inheritText</span>")
+        [void]$rows.Append("<span class='status-badge $statusClass'>$statusLabel</span>")
+        [void]$rows.Append("</div></div>")
 
-        if ($null -ne $folder.Error) {
-            $errE = [System.Web.HttpUtility]::HtmlEncode($folder.Error)
-            [void]$rows.Append("<div class='error-box'>&#9888; Error: <code>$errE</code></div>")
-        } elseif ($isRoot -or $folder.HasChanges) {
-            $explicit  = @($folder.Rules | Where-Object { -not $_.IsInherited })
-            $inherited = @($folder.Rules | Where-Object { $_.IsInherited })
-            if ($explicit.Count -gt 0 -or (-not $folder.InheritanceEnabled)) {
-                [void]$rows.Append("<div class='rules-section'><div class='rules-section-title explicit-title'>&#128274; Explicit Permissions</div>")
-                if ($explicit.Count -gt 0) {
-                    [void]$rows.Append("<table class='rules-table'><thead><tr><th>Principal</th><th>Type</th><th>Permission</th><th>Applies to</th><th>Kind</th></tr></thead><tbody>")
-                    foreach ($r in $explicit) {
-                        $idE = [System.Web.HttpUtility]::HtmlEncode($r.Identity)
-                        $dc  = if ($r.AccessType -eq 'Deny') { " class='deny-rule'" } else { '' }
-                        $tl  = if ($r.AccessType -eq 'Deny') { "<span class='badge badge-deny'>Deny</span>" } else { "<span class='badge badge-allow'>Allow</span>" }
-                        [void]$rows.Append("<tr$dc><td class='identity'>$idE</td><td>$tl</td><td class='rights'>$($r.RightsSimple)</td><td class='scope'>$($r.InheritanceDesc)</td><td><span class='badge badge-explicit'>Explicit</span></td></tr>")
-                    }
-                    [void]$rows.Append("</tbody></table>")
-                } else {
-                    [void]$rows.Append("<div class='no-rules'>No explicit permissions</div>")
-                }
-                [void]$rows.Append("</div>")
+        # ── Detail panel ─────────────────────────────────────
+        [void]$rows.Append("<div class='folder-details$openClass' id='$rowId'>")
+
+        if ($null -ne $fd.Error) {
+            [void]$rows.Append("<div class='error-box'>&#10060; $([System.Web.HttpUtility]::HtmlEncode($fd.Error))</div>")
+        } else {
+            # Meta info row
+            [void]$rows.Append("<div class='details-meta'>")
+            [void]$rows.Append("<span><strong>Path:</strong> $([System.Web.HttpUtility]::HtmlEncode($path))</span>")
+            [void]$rows.Append("<span><strong>Owner:</strong> $ownerEnc</span>")
+            [void]$rows.Append("<span><strong>Inheritance:</strong> $inheritText</span>")
+            [void]$rows.Append("</div>")
+
+            $explicit  = @($fd.Rules | Where-Object { -not $_.IsInherited })
+            $inherited = @($fd.Rules | Where-Object { $_.IsInherited })
+
+            if ($fd.Depth -gt 0 -and -not $fd.HasChanges) {
+                [void]$rows.Append("<div class='same-as-parent'>&#10003; Same as parent folder — no local changes</div>")
             }
-            if ($inherited.Count -gt 0) {
-                [void]$rows.Append("<div class='rules-section'><div class='rules-section-title inherited-title'>&#128275; Inherited Permissions</div>")
-                [void]$rows.Append("<table class='rules-table inherited-table'><thead><tr><th>Principal</th><th>Type</th><th>Permission</th><th>Applies to</th><th>Kind</th></tr></thead><tbody>")
-                foreach ($r in $inherited) {
-                    $idE = [System.Web.HttpUtility]::HtmlEncode($r.Identity)
-                    $dc  = if ($r.AccessType -eq 'Deny') { " class='deny-rule'" } else { '' }
-                    $tl  = if ($r.AccessType -eq 'Deny') { "<span class='badge badge-deny'>Deny</span>" } else { "<span class='badge badge-allow'>Allow</span>" }
-                    [void]$rows.Append("<tr$dc><td class='identity'>$idE</td><td>$tl</td><td class='rights'>$($r.RightsSimple)</td><td class='scope'>$($r.InheritanceDesc)</td><td><span class='badge badge-inherited'>Inherited</span></td></tr>")
+
+            # Explicit rules
+            if ($explicit.Count -gt 0) {
+                [void]$rows.Append("<div class='rules-section'>")
+                [void]$rows.Append("<div class='rules-section-title explicit-title'>Explicit Permissions</div>")
+                [void]$rows.Append("<table class='rules-table'><thead><tr><th>Principal</th><th>Type</th><th>Permission</th><th>Applies to</th><th>Kind</th></tr></thead><tbody>")
+                foreach ($rule in $explicit) {
+                    $rowClass = if ($rule.AccessType -eq "Deny") { " class='deny-rule'" } else { "" }
+                    $typeBadge = if ($rule.AccessType -eq "Deny") { "<span class='badge badge-deny'>Deny</span>" } else { "<span class='badge badge-allow'>Allow</span>" }
+                    [void]$rows.Append("<tr$rowClass><td class='identity'>$([System.Web.HttpUtility]::HtmlEncode($rule.Identity))</td>")
+                    [void]$rows.Append("<td>$typeBadge</td>")
+                    [void]$rows.Append("<td>$([System.Web.HttpUtility]::HtmlEncode($rule.RightsSimple))</td>")
+                    [void]$rows.Append("<td class='scope'>$([System.Web.HttpUtility]::HtmlEncode($rule.InheritanceDesc))</td>")
+                    [void]$rows.Append("<td><span class='badge badge-explicit'>Explicit</span></td></tr>")
                 }
                 [void]$rows.Append("</tbody></table></div>")
             }
-        } else {
-            [void]$rows.Append("<div class='same-as-parent'>Permissions identical to parent folder &#8593;</div>")
+
+            # Inherited rules
+            if ($inherited.Count -gt 0) {
+                [void]$rows.Append("<div class='rules-section'>")
+                [void]$rows.Append("<div class='rules-section-title inherited-title'>Inherited Permissions</div>")
+                [void]$rows.Append("<table class='rules-table inherited-table'><thead><tr><th>Principal</th><th>Type</th><th>Permission</th><th>Applies to</th><th>Kind</th></tr></thead><tbody>")
+                foreach ($rule in $inherited) {
+                    $rowClass  = if ($rule.AccessType -eq "Deny") { " class='deny-rule'" } else { "" }
+                    $typeBadge = if ($rule.AccessType -eq "Deny") { "<span class='badge badge-deny'>Deny</span>" } else { "<span class='badge badge-allow'>Allow</span>" }
+                    [void]$rows.Append("<tr$rowClass><td class='identity'>$([System.Web.HttpUtility]::HtmlEncode($rule.Identity))</td>")
+                    [void]$rows.Append("<td>$typeBadge</td>")
+                    [void]$rows.Append("<td>$([System.Web.HttpUtility]::HtmlEncode($rule.RightsSimple))</td>")
+                    [void]$rows.Append("<td class='scope'>$([System.Web.HttpUtility]::HtmlEncode($rule.InheritanceDesc))</td>")
+                    [void]$rows.Append("<td><span class='badge badge-inherited'>Inherited</span></td></tr>")
+                }
+                [void]$rows.Append("</tbody></table></div>")
+            }
+
+            if ($explicit.Count -eq 0 -and $inherited.Count -eq 0) {
+                [void]$rows.Append("<div class='no-rules'>No permission rules found.</div>")
+            }
         }
-        [void]$rows.Append("</div></div>`n")
+        [void]$rows.Append("</div></div>")
     }
 
-    # ── Agenda ───────────────────────────────────────────────
-    $agenda  = "<div class='agenda-bar'>"
-    $agenda += "<button class='agenda-toggle' onclick='toggleAgenda(this)'>"
-    $agenda += "<span class='agenda-toggle-icon'>&#9658;</span> &#128218; Legend &amp; Reference "
-    $agenda += "<span class='agenda-toggle-hint'>click to expand</span></button>"
-    $agenda += "<div class='agenda-content' id='agendaContent' style='display:none'><div class='agenda-grid'>"
-    $agenda += "<div class='agenda-section'><div class='agenda-section-title'>Folder Status</div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-dot' style='background:var(--accent)'></span><span class='agenda-label'>Root</span><span class='agenda-desc'>The start folder of the analysis.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-dot' style='background:var(--yellow)'></span><span class='agenda-label'>Changed</span><span class='agenda-desc'>Permissions differ from parent &mdash; rules or inheritance modified.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-dot' style='background:var(--green)'></span><span class='agenda-label'>Inherited only</span><span class='agenda-desc'>All permissions inherited. No local changes.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-dot' style='background:var(--red)'></span><span class='agenda-label'>Error</span><span class='agenda-desc'>Could not read permissions &mdash; access denied.</span></div></div>"
-    $agenda += "<div class='agenda-section'><div class='agenda-section-title'>Permission Types</div>"
-    $agenda += "<div class='agenda-row'><span class='badge badge-allow agenda-badge'>Allow</span><span class='agenda-desc'>Grants the right to the principal.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='badge badge-deny agenda-badge'>Deny</span><span class='agenda-desc'>Blocks the right. Deny always overrides Allow.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='badge badge-explicit agenda-badge'>Explicit</span><span class='agenda-desc'>Set directly on this folder.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='badge badge-inherited agenda-badge'>Inherited</span><span class='agenda-desc'>Passed down from a parent folder.</span></div></div>"
-    $agenda += "<div class='agenda-section'><div class='agenda-section-title'>Permission Levels</div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>Full Control</span><span class='agenda-desc'>Read, write, delete, change permissions, take ownership.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>Modify</span><span class='agenda-desc'>Read, write, delete. Cannot change permissions.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>Read &amp; Execute</span><span class='agenda-desc'>View and run files.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>Read</span><span class='agenda-desc'>View folder contents only.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>Write</span><span class='agenda-desc'>Create files and subfolders.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>Special</span><span class='agenda-desc'>Custom combination of rights.</span></div></div>"
-    $agenda += "<div class='agenda-section'><div class='agenda-section-title'>Scope</div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>This folder, subfolders and files</span><span class='agenda-desc'>Applies everywhere below.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>This folder and subfolders</span><span class='agenda-desc'>Not files directly.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>This folder only</span><span class='agenda-desc'>Only this specific folder.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>Subfolders and files</span><span class='agenda-desc'>Contents only, not the folder itself.</span></div></div>"
-    $agenda += "<div class='agenda-section'><div class='agenda-section-title'>Inheritance</div>"
-    $agenda += "<div class='agenda-row'><span class='inherit-badge inherit-yes agenda-badge'>&#10003; Active</span><span class='agenda-desc'>Inherits permissions from parent.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='inherit-badge inherit-no agenda-badge'>&#10007; Disabled</span><span class='agenda-desc'>Managed independently &mdash; inheritance broken.</span></div>"
-    $agenda += "<div class='agenda-row'><span class='agenda-perm'>Rules protected: Yes</span><span class='agenda-desc'>Inherited rules converted to explicit.</span></div></div>"
-    $agenda += "</div></div></div>"
-
-    # ── Toolbar ──────────────────────────────────────────────
-    $toolbar  = "<div class='toolbar'><span class='toolbar-label'>Filter:</span><div class='filter-group'>"
-    $toolbar += "<button class='btn filter-btn active' onclick='filterRows(`"all`",this)'>All</button>"
-    $toolbar += "<button class='btn filter-btn' onclick='filterRows(`"changed`",this)' style='border-color:var(--yellow);color:var(--yellow)'>Changed</button>"
-    $toolbar += "<button class='btn filter-btn' onclick='filterRows(`"inherited`",this)' style='border-color:rgba(52,211,153,.3);color:var(--green)'>Inherited only</button>"
-    $toolbar += "<button class='btn filter-btn' onclick='filterRows(`"error`",this)' style='border-color:var(--red);color:var(--red)'>Errors</button>"
-    $toolbar += "</div><input class='search-box' type='text' placeholder='Search path or user...' oninput='searchRows(this.value)'>"
-    $toolbar += "<button class='btn btn-accent' onclick='expandAll()'>Expand all</button>"
-    $toolbar += "<button class='btn' onclick='collapseAll()'>Collapse all</button>"
-    $toolbar += "<button class='btn' onclick='window.print()'>Print</button></div>"
-
-    # ── Assemble HTML ────────────────────────────────────────
-    $encodedRoot = [System.Web.HttpUtility]::HtmlEncode($RootPath)
-    $encodedUser = [System.Web.HttpUtility]::HtmlEncode($currentUser)
+    $rootEnc = [System.Web.HttpUtility]::HtmlEncode($RootPath)
+    $userEnc = [System.Web.HttpUtility]::HtmlEncode($currentUser)
 
     $out = [System.Text.StringBuilder]::new()
-    [void]$out.Append("<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>")
-    [void]$out.Append("<meta name='viewport' content='width=device-width,initial-scale=1.0'>")
-    [void]$out.Append("<title>ACLens - $encodedRoot</title>")
-    [void]$out.Append("<style>$css</style></head><body>")
+    [void]$out.Append("<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>")
+    [void]$out.Append("<title>ACLens Report</title>")
+    [void]$out.Append("<style>$css</style></head>")
+    [void]$out.Append("<body>")
+
+    # Header
     [void]$out.Append("<div class='report-header'>")
-    [void]$out.Append("<div class='report-title'><span class='icon'>&#128274;</span>ACLens - NTFS Permission Report</div>")
-    [void]$out.Append("<div class='report-subtitle'>$encodedRoot</div>")
-    [void]$out.Append("<div class='report-meta'>")
-    [void]$out.Append("<div class='meta-item'><span class='meta-label'>Created on</span><span class='meta-value'>$reportDate</span></div>")
-    [void]$out.Append("<div class='meta-item'><span class='meta-label'>Computer</span><span class='meta-value'>$computerName</span></div>")
-    [void]$out.Append("<div class='meta-item'><span class='meta-label'>User</span><span class='meta-value'>$encodedUser</span></div>")
-    [void]$out.Append("<div class='meta-item'><span class='meta-label'>Total folders</span><span class='meta-value'>$totalFolders</span></div>")
+    [void]$out.Append("<div class='header-left'>")
+    [void]$out.Append("<div class='report-title'><span class='icon'>&#128274;</span> ACLens &mdash; NTFS Permission Report</div>")
+    [void]$out.Append("<div class='report-subtitle'>$rootEnc</div>")
+    [void]$out.Append("</div>")
+    [void]$out.Append("<div class='header-right'>")
+    [void]$out.Append("<div class='report-subtitle'>$reportDate &bull; $computerName &bull; $userEnc</div>")
+    [void]$out.Append("<button id='themeBtn' class='theme-toggle' onclick='toggleTheme()'>&#9728;&#65039; Light</button>")
     [void]$out.Append("</div></div>")
+
+    # Stats bar
     [void]$out.Append("<div class='stats-bar'>")
     [void]$out.Append("<div class='stat-card stat-total'><span class='stat-number'>$totalFolders</span><span class='stat-label'>Total folders</span></div>")
-    [void]$out.Append("<div class='stat-card stat-changed'><span class='stat-number'>$changedFolders</span><span class='stat-label'>Permissions changed</span></div>")
+    [void]$out.Append("<div class='stat-card stat-changed'><span class='stat-number'>$changedFolders</span><span class='stat-label'>Changed</span></div>")
     [void]$out.Append("<div class='stat-card stat-inherited'><span class='stat-number'>$inheritedOnly</span><span class='stat-label'>Inherited only</span></div>")
     [void]$out.Append("<div class='stat-card stat-error'><span class='stat-number'>$errorFolders</span><span class='stat-label'>Errors</span></div>")
     [void]$out.Append("</div>")
-    [void]$out.Append($agenda)
-    [void]$out.Append($toolbar)
+
+    # Agenda (collapsible legend)
+    [void]$out.Append("<div class='agenda-bar'><button class='agenda-toggle' onclick='toggleAgenda(this)'>")
+    [void]$out.Append("<span class='agenda-toggle-icon'>&#9658;</span> &#128218; Legend &amp; Reference ")
+    [void]$out.Append("<span class='agenda-toggle-hint'>click to expand</span></button>")
+    [void]$out.Append("<div class='agenda-content' id='agendaContent' style='display:none'>")
+    [void]$out.Append("<div class='agenda-grid'>")
+    [void]$out.Append("<div class='agenda-section'><div class='agenda-section-title'>Folder Status</div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-dot' style='background:#A78BFA'></span><span class='agenda-label'>Root</span><span class='agenda-desc'>The start folder of the analysis</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-dot' style='background:#FBBF24'></span><span class='agenda-label'>Changed</span><span class='agenda-desc'>Permissions differ from parent folder</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-dot' style='background:#34D399'></span><span class='agenda-label'>Inherited</span><span class='agenda-desc'>All permissions passed down from parent</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-dot' style='background:#F87171'></span><span class='agenda-label'>Error</span><span class='agenda-desc'>Could not read permissions</span></div>")
+    [void]$out.Append("</div>")
+    [void]$out.Append("<div class='agenda-section'><div class='agenda-section-title'>Permission Types</div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-perm'>Full Control</span><span class='agenda-desc'>Read, write, change permissions, take ownership</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-perm'>Modify</span><span class='agenda-desc'>Read, write, delete files and subfolders</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-perm'>Read &amp; Execute</span><span class='agenda-desc'>View and run files</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-perm'>Read</span><span class='agenda-desc'>View files and folder contents</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-perm'>Write</span><span class='agenda-desc'>Create files and subfolders</span></div>")
+    [void]$out.Append("</div>")
+    [void]$out.Append("<div class='agenda-section'><div class='agenda-section-title'>Rule Types</div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-dot' style='background:#A78BFA'></span><span class='agenda-label'>Explicit</span><span class='agenda-desc'>Set directly on this folder</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-dot' style='background:#4B5563'></span><span class='agenda-label'>Inherited</span><span class='agenda-desc'>Passed down from a parent folder</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-dot' style='background:#34D399'></span><span class='agenda-label'>Allow</span><span class='agenda-desc'>Grants access — can be overridden by Deny</span></div>")
+    [void]$out.Append("<div class='agenda-row'><span class='agenda-dot' style='background:#F87171'></span><span class='agenda-label'>Deny</span><span class='agenda-desc'>Blocks access — always overrides Allow</span></div>")
+    [void]$out.Append("</div></div></div></div>")
+
+    # Toolbar
+    [void]$out.Append("<div class='toolbar'>")
+    [void]$out.Append("<span class='filter-group'>")
+    [void]$out.Append("<button class='btn filter-btn active' onclick='filterRows(""all"",this)'>All</button>")
+    [void]$out.Append("<button class='btn filter-btn' onclick='filterRows(""changed"",this)'>Changed</button>")
+    [void]$out.Append("<button class='btn filter-btn' onclick='filterRows(""inherited"",this)'>Inherited only</button>")
+    [void]$out.Append("<button class='btn filter-btn' onclick='filterRows(""error"",this)'>Errors</button>")
+    [void]$out.Append("</span>")
+    [void]$out.Append("<input class='search-box' type='text' placeholder='Search path or user...' oninput='searchRows(this.value)'>")
+    [void]$out.Append("<div class='toolbar-spacer'></div>")
+    [void]$out.Append("<button class='btn' onclick='expandAll()'>Expand page</button>")
+    [void]$out.Append("<button class='btn' onclick='collapseAll()'>Collapse page</button>")
+    [void]$out.Append("<button class='btn' onclick='window.print()'>&#128438; Print</button>")
+    [void]$out.Append("</div>")
+
+    # Page nav
+    [void]$out.Append("<div class='page-nav'>")
+    [void]$out.Append("<button id='btnPrev' class='page-btn' onclick='showPage(_page-1)'>&#8592;</button>")
+    [void]$out.Append("<span id='pageButtons' style='display:flex;align-items:center;gap:3px'></span>")
+    [void]$out.Append("<button id='btnNext' class='page-btn' onclick='showPage(_page+1)'>&#8594;</button>")
+    [void]$out.Append("<select class='page-size-select' onchange='setPageSize(this.value)'>")
+    [void]$out.Append("<option value='25'>25 / page</option>")
+    [void]$out.Append("<option value='50'>50 / page</option>")
+    [void]$out.Append("<option value='100'>100 / page</option>")
+    [void]$out.Append("<option value='9999'>All</option>")
+    [void]$out.Append("</select>")
+    [void]$out.Append("<span id='pageInfo' class='page-info'></span>")
+    [void]$out.Append("</div>")
+
+    # Folder list
     [void]$out.Append("<div class='folder-list'>")
     [void]$out.Append($rows.ToString())
+    [void]$out.Append("<div id='emptyState' class='empty-page' style='display:none'><div class='icon'>&#128269;</div><p>No folders match this filter.</p></div>")
     [void]$out.Append("</div>")
-    [void]$out.Append("<div class='report-footer'>ACLens &bull; $reportDate &bull; $computerName</div>")
+
+    # Footer
+    [void]$out.Append("<div class='report-footer'>ACLens v0.4.0-beta &bull; $reportDate &bull; $computerName &bull; $userEnc</div>")
     [void]$out.Append("<script>$js</script>")
     [void]$out.Append("</body></html>")
 
     [System.IO.File]::WriteAllText($OutputPath, $out.ToString(), [System.Text.UTF8Encoding]::new($true))
 }
 
-# ── Compare Scan Helper Functions ────────────────────────────
-function Load-JsonSnapshot {
-    param([string]$Path)
-    $raw = Get-Content -Path $Path -Raw -Encoding UTF8 | ConvertFrom-Json
-    $result = @{}
-    foreach ($item in $raw) {
-        $rules = @()
-        foreach ($r in $item.Rules) {
-            $rules += [PSCustomObject]@{
-                Identity         = $r.Identity
-                AccessType       = $r.AccessType
-                Rights           = $r.Rights
-                IsInherited      = $r.IsInherited
-                InheritanceFlags = $r.InheritanceFlags
-                PropagationFlags = $r.PropagationFlags
-            }
-        }
-        $result[$item.Path] = [PSCustomObject]@{
-            Path                    = $item.Path
-            Owner                   = $item.Owner
-            InheritanceEnabled      = $item.InheritanceEnabled
-            AreAccessRulesProtected = $item.AreAccessRulesProtected
-            Rules                   = $rules
-        }
-    }
-    return $result
-}
-
-function Get-RulesKey {
-    param([array]$Rules)
-    ($Rules | Sort-Object Identity, AccessType, Rights, InheritanceFlags, PropagationFlags |
-        ForEach-Object { "$($_.Identity)|$($_.AccessType)|$($_.Rights)|$($_.IsInherited)|$($_.InheritanceFlags)|$($_.PropagationFlags)" }) -join ";"
-}
 
 function New-CompareHTMLReport {
     param([hashtable]$OldData, [hashtable]$NewData, [string]$OldLabel, [string]$NewLabel, [string]$OutputPath)
@@ -1078,8 +1239,8 @@ $C_BORD2    = HC '#374151'
 $C_BTN      = HC '#374151'
 $C_PRIMARY  = HC '#7C3AED'
 $C_PRIM2    = HC '#4C1D95'
-$C_CANCEL   = HC '#991B1B'
-$C_CANC2    = HC '#7F1D1D'
+$C_CANCEL   = HC '#DC2626'
+$C_CANC2    = HC '#B91C1C'
 $C_TXT      = HC '#E2E8F0'
 $C_ACCENT   = HC '#A78BFA'
 $C_MID      = HC '#9CA3AF'
@@ -1106,11 +1267,12 @@ $BTN_H  = 26   # Höhe Browse/Save Buttons
 $form = [System.Windows.Forms.Form]::new()
 $form.Text            = "ACLens"
 $form.Size            = [System.Drawing.Size]::new(760, 480)
-$form.MinimumSize     = [System.Drawing.Size]::new(700, 440)
+$form.MinimumSize     = [System.Drawing.Size]::new(820, 440)
 $form.StartPosition   = "CenterScreen"
 $form.FormBorderStyle = "Sizable"
 $form.MaximizeBox     = $true
 $form.BackColor       = $C_BG
+$form.ForeColor       = HC "#E2E8F0"
 $form.Font            = $FN
 
 # ── Header ───────────────────────────────────────────────────
@@ -1132,7 +1294,7 @@ $pnlHdr.Controls.Add($lblTitle)
 # Version badge next to title
 # Version badge — same style as title, inline
 $lblVersion = [System.Windows.Forms.Label]::new()
-$lblVersion.Text      = "v0.2.1-alpha"
+$lblVersion.Text      = "v0.4.0-beta"
 $lblVersion.Font      = [System.Drawing.Font]::new("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
 $lblVersion.ForeColor = HC '#A78BFA'
 $lblVersion.BackColor = [System.Drawing.Color]::Transparent
@@ -1140,9 +1302,193 @@ $lblVersion.AutoSize  = $true
 $lblVersion.Location  = [System.Drawing.Point]::new(100, 14)   # will be adjusted after lblTitle loads
 $pnlHdr.Controls.Add($lblVersion)
 
+# ── Light mode toggle button ──────────────────────────────────
+$script:lightMode = $false
+$btnTheme = [System.Windows.Forms.Button]::new()
+$btnTheme.Text      = $script:STR.BtnThemeLight
+$btnTheme.Size      = [System.Drawing.Size]::new(72, 24)
+$btnTheme.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnTheme.Font      = $FS
+$btnTheme.Cursor    = "Hand"
+$btnTheme.BackColor = HC "#2D2D3F"
+$btnTheme.ForeColor = HC "#9CA3AF"
+$btnTheme.FlatAppearance.BorderSize  = 1
+    $btnTheme.UseVisualStyleBackColor = $false
+$btnTheme.FlatAppearance.BorderColor = HC "#4B5563"
+$pnlHdr.Controls.Add($btnTheme)
+
+function Apply-Theme {
+    if ($script:lightMode) {
+        $form.BackColor       = HC "#F5F5F5"
+        $pnlHdr.BackColor     = HC "#ECECEC"
+        $pnlTabs.BackColor    = HC "#E2E2E2"
+        $tabLine.BackColor    = HC "#7C3AED"
+        $tabSep.BackColor     = HC "#CCCCCC"
+        $pnlIn.BackColor      = HC "#F5F5F5"
+        $pnlSP.BackColor      = HC "#F5F5F5"
+        $pnlFtr.BackColor     = HC "#E2E2E2"
+        $sepFtr.BackColor     = HC "#BBBBBB"
+        $sepHdr.BackColor     = HC "#BBBBBB"
+        $sepMid.BackColor     = HC "#CCCCCC"
+        $lblTitle.ForeColor   = HC "#7C3AED"
+        $lblVersion.ForeColor = HC "#7C3AED"
+        $lblVersion.BackColor = HC "#EDE9FE"
+        $lblSub.ForeColor     = HC "#555555"
+        $lblStatus.ForeColor  = HC "#333333"
+        $lblStats.ForeColor   = HC "#333333"
+        $tbPath.BackColor     = HC "#FFFFFF"
+        $tbPath.ForeColor     = HC "#111111"
+        $tbOut.BackColor      = HC "#FFFFFF"
+        $tbOut.ForeColor      = HC "#555555"
+        $numDepth.BackColor   = HC "#FFFFFF"
+        $numDepth.ForeColor   = HC "#111111"
+        $lblPath.ForeColor    = HC "#111111"
+        $lblOut.ForeColor     = HC "#111111"
+        $lblDepth.ForeColor   = HC "#111111"
+        $lblUnlim.ForeColor   = HC "#555555"
+        $chk.ForeColor        = HC "#222222"
+        $btnTheme.Text        = $script:STR.BtnThemeDark
+        $btnTheme.BackColor   = HC "#E0E0E0"
+        $btnTheme.ForeColor   = HC "#111111"
+        $btnTheme.FlatAppearance.BorderColor = HC "#AAAAAA"
+        # Footer buttons - keep colors, ensure white text
+        $btnStart.ForeColor    = [System.Drawing.Color]::White
+        $btnCancel.ForeColor   = [System.Drawing.Color]::White
+        $btnOpenLast.ForeColor = [System.Drawing.Color]::White
+$btnOpenLast.Font      = $FBTN
+        $btnChangelog.ForeColor= [System.Drawing.Color]::White
+        $btnCompare.ForeColor  = [System.Drawing.Color]::White
+        # SP tab controls
+        $spLblConnFg1 = if ($spLblConn.Text -eq "Connected") { HC "#059669" } else { HC "#DC2626" }
+        $spLblConn.ForeColor = $spLblConnFg1
+        $spLblConnDetail.ForeColor = HC "#444444"
+        $spLblUrl.ForeColor        = HC "#111111"
+        $spTbUrl.BackColor         = HC "#FFFFFF"
+        $spTbUrl.ForeColor         = HC "#111111"
+        $spLblDepth.ForeColor      = HC "#111111"
+        $spNumDepth.BackColor      = HC "#FFFFFF"
+        $spNumDepth.ForeColor      = HC "#111111"
+        $spLblUnlim.ForeColor      = HC "#555555"
+        $spChk.ForeColor           = HC "#222222"
+    } else {
+        $form.BackColor       = HC "#1E1E2E"
+        $pnlHdr.BackColor     = HC "#1A1A2E"
+        $pnlTabs.BackColor    = HC "#1A1A2E"
+        $tabLine.BackColor    = HC "#7C3AED"
+        $tabSep.BackColor     = HC "#4B5563"
+        $pnlIn.BackColor      = HC "#1E1E2E"
+        $pnlSP.BackColor      = HC "#1E1E2E"
+        $pnlFtr.BackColor     = HC "#111827"
+        $sepFtr.BackColor     = HC "#4B5563"
+        $sepHdr.BackColor     = HC "#4B5563"
+        $sepMid.BackColor     = HC "#4B5563"
+        $lblTitle.ForeColor   = HC "#A78BFA"
+        $lblVersion.ForeColor = HC "#A78BFA"
+        $lblVersion.BackColor = HC "#2D1B69"
+        $lblSub.ForeColor     = HC "#6B7280"
+        $lblStatus.ForeColor  = HC "#9CA3AF"
+        $lblStats.ForeColor   = HC "#9CA3AF"
+        $btnBrowse.BackColor  = HC "#374151"
+        $btnBrowse.ForeColor  = HC "#E2E8F0"
+        $btnSave.BackColor    = HC "#374151"
+        $btnSave.ForeColor    = HC "#E2E8F0"
+        $btnSPSetup.BackColor = HC "#7C3AED"
+        $btnSPSetup.ForeColor = [System.Drawing.Color]::White
+        $tbPath.BackColor     = HC "#2D2D3F"
+        $tbPath.ForeColor     = HC "#E2E8F0"
+        $tbOut.BackColor      = HC "#2D2D3F"
+        $tbOut.ForeColor      = HC "#6B7280"
+        $numDepth.BackColor   = HC "#2D2D3F"
+        $numDepth.ForeColor   = HC "#E2E8F0"
+        $lblPath.ForeColor    = HC "#E2E8F0"
+        $lblOut.ForeColor     = HC "#E2E8F0"
+        $lblDepth.ForeColor   = HC "#E2E8F0"
+        $lblUnlim.ForeColor   = HC "#6B7280"
+        $chk.ForeColor        = HC "#9CA3AF"
+        $btnTheme.Text        = $script:STR.BtnThemeLight
+        $btnTheme.BackColor   = HC "#2D2D3F"
+        $btnTheme.ForeColor   = HC "#9CA3AF"
+        $btnTheme.FlatAppearance.BorderColor = HC "#4B5563"
+        $btnStart.ForeColor    = [System.Drawing.Color]::White
+        $btnCancel.ForeColor   = [System.Drawing.Color]::White
+        $btnOpenLast.ForeColor = [System.Drawing.Color]::White
+$btnOpenLast.Font      = $FBTN
+        $btnChangelog.ForeColor= [System.Drawing.Color]::White
+        $btnCompare.ForeColor  = [System.Drawing.Color]::White
+        $spLblConnFg2 = if ($spLblConn.Text -eq "Connected") { HC "#34D399" } else { HC "#F87171" }
+        $spLblConn.ForeColor = $spLblConnFg2
+        $spLblConnDetail.ForeColor = HC "#9CA3AF"
+        $spLblUrl.ForeColor        = HC "#E2E8F0"
+        $spTbUrl.BackColor         = HC "#2D2D3F"
+        $spTbUrl.ForeColor         = HC "#6B7280"
+        $spLblDepth.ForeColor      = HC "#E2E8F0"
+        $spNumDepth.BackColor      = HC "#2D2D3F"
+        $spNumDepth.ForeColor      = HC "#E2E8F0"
+        $spLblUnlim.ForeColor      = HC "#6B7280"
+        $spChk.ForeColor           = HC "#9CA3AF"
+    }
+    # Re-apply active tab colors
+    Set-ActiveTab $script:activeTab
+}
+
+$btnTheme.add_Click({
+    $script:lightMode = -not $script:lightMode
+    Apply-Theme
+})
+
+# Language toggle button
+$btnLang = [System.Windows.Forms.Button]::new()
+$btnLang.Text      = "DE"
+$btnLang.Size      = [System.Drawing.Size]::new(38, 24)
+$btnLang.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnLang.Font      = $FS
+$btnLang.Cursor    = "Hand"
+$btnLang.BackColor = HC "#2D2D3F"
+$btnLang.ForeColor = HC "#9CA3AF"
+$btnLang.FlatAppearance.BorderSize  = 1
+    $btnLang.UseVisualStyleBackColor = $false
+$btnLang.FlatAppearance.BorderColor = HC "#4B5563"
+$pnlHdr.Controls.Add($btnLang)
+
+function Apply-Language {
+    $lblSub.Text        = $script:STR.AppSubtitle
+    $lblPath.Text       = $script:STR.LblPath
+    $lblOut.Text        = $script:STR.LblOutput
+    $lblDepth.Text      = $script:STR.LblDepth
+    $lblUnlim.Text      = $script:STR.LblUnlimited
+    $btnBrowse.Text     = $script:STR.LblBrowse
+    $btnSave.Text       = $script:STR.LblSaveAs
+    $chk.Text           = $script:STR.ChkBrowser
+    $lblStatus.Text     = $script:STR.LblReady
+    $btnStart.Text      = $script:STR.BtnStart
+    $btnCancel.Text     = $script:STR.BtnCancel
+    $btnOpenLast.Text   = $script:STR.BtnOpenLast
+    $btnChangelog.Text  = $script:STR.BtnChangelog
+    $btnCompare.Text    = $script:STR.BtnCompare
+    $spLblUrl.Text      = $script:STR.SpLblUrl
+    $spLblDepth.Text    = $script:STR.SpLblDepth
+    $spLblUnlim.Text    = $script:STR.LblUnlimited
+    $spChk.Text         = $script:STR.SpChkBrowser
+    $btnSPSetup.Text    = $script:STR.SpBtnSetup
+    $tabNTFS.Text       = $script:STR.TabNTFS
+    $tabSP.Text         = $script:STR.TabSP
+    $btnLang.Text       = if ($script:lang -eq "EN") { "DE" } else { "EN" }
+    if ($script:lightMode) {
+        $btnTheme.Text  = $script:STR.BtnThemeDark
+    } else {
+        $btnTheme.Text  = $script:STR.BtnThemeLight
+    }
+    Update-SPStatus
+}
+
+$btnLang.add_Click({
+    if ($script:lang -eq "EN") { Set-Language "DE" } else { Set-Language "EN" }
+    Apply-Language
+})
+
 # Subtitle — right of version badge
 $lblSub = [System.Windows.Forms.Label]::new()
-$lblSub.Text      = "NTFS & SharePoint Permission Analyzer"
+$lblSub.Text      = $script:STR.AppSubtitle
 $lblSub.Font      = $FS
 $lblSub.ForeColor = HC '#6B7280'
 $lblSub.BackColor = [System.Drawing.Color]::Transparent
@@ -1159,6 +1505,7 @@ $form.Controls.Add($sepHdr)
 # ── Footer ───────────────────────────────────────────────────
 $pnlFtr = [System.Windows.Forms.Panel]::new()
 $pnlFtr.BackColor = $C_FOOTER
+$pnlFtr.ForeColor = [System.Drawing.Color]::White
 $pnlFtr.Anchor    = "Bottom,Left,Right"
 $form.Controls.Add($pnlFtr)
 
@@ -1168,40 +1515,43 @@ $sepFtr.Anchor    = "Bottom,Left,Right"
 $form.Controls.Add($sepFtr)
 
 $btnStart = [System.Windows.Forms.Button]::new()
-$btnStart.Text      = "Start Analysis"
-$btnStart.Size      = [System.Drawing.Size]::new(148, 36)
+$btnStart.Text      = $script:STR.BtnStart
+$btnStart.Size      = [System.Drawing.Size]::new(160, 36)
 $btnStart.Location  = [System.Drawing.Point]::new(16, 13)
-$btnStart.FlatStyle = "Flat"
-$btnStart.Font      = $FB
+$btnStart.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnStart.Font      = $FBTN
 $btnStart.BackColor = $C_PRIMARY
-$btnStart.ForeColor = $C_TXT
+$btnStart.ForeColor = [System.Drawing.Color]::White
+$btnStart.UseVisualStyleBackColor = $false
 $btnStart.Cursor    = "Hand"
 $btnStart.FlatAppearance.BorderColor = $C_PRIM2
 $btnStart.FlatAppearance.BorderSize  = 1
 $pnlFtr.Controls.Add($btnStart)
 
 $btnCancel = [System.Windows.Forms.Button]::new()
-$btnCancel.Text      = "Cancel"
-$btnCancel.Size      = [System.Drawing.Size]::new(88, 36)
-$btnCancel.Location  = [System.Drawing.Point]::new(172, 13)
-$btnCancel.FlatStyle = "Flat"
-$btnCancel.Font      = $FB
+$btnCancel.Text      = $script:STR.BtnCancel
+$btnCancel.Size      = [System.Drawing.Size]::new(96, 36)
+$btnCancel.Location  = [System.Drawing.Point]::new(168, 13)
+$btnCancel.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnCancel.Font      = $FBTN
 $btnCancel.BackColor = $C_CANCEL
 $btnCancel.ForeColor = [System.Drawing.Color]::White
+$btnCancel.UseVisualStyleBackColor = $false
 $btnCancel.Cursor    = "Hand"
-$btnCancel.Enabled   = $false
 $btnCancel.FlatAppearance.BorderColor = $C_CANC2
 $btnCancel.FlatAppearance.BorderSize  = 1
 $pnlFtr.Controls.Add($btnCancel)
 
 $btnOpenLast = [System.Windows.Forms.Button]::new()
-$btnOpenLast.Text      = "Open Last Report"
-$btnOpenLast.Size      = [System.Drawing.Size]::new(130, 36)
-$btnOpenLast.Location  = [System.Drawing.Point]::new(270, 13)
-$btnOpenLast.FlatStyle = "Flat"
-$btnOpenLast.Font      = $FN
-$btnOpenLast.BackColor = HC '#1D4ED8'
+$btnOpenLast.Text      = $script:STR.BtnOpenLast
+$btnOpenLast.Size      = [System.Drawing.Size]::new(162, 36)
+$btnOpenLast.Location  = [System.Drawing.Point]::new(272, 13)
+$btnOpenLast.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnOpenLast.Font      = $FBTN
+$btnOpenLast.BackColor = HC '#2563EB'
 $btnOpenLast.ForeColor = [System.Drawing.Color]::White
+$btnOpenLast.UseVisualStyleBackColor = $false
+$btnOpenLast.Font      = $FBTN
 $btnOpenLast.Cursor    = "Hand"
 $btnOpenLast.Enabled   = $false
 $btnOpenLast.FlatAppearance.BorderColor = HC '#1E40AF'
@@ -1209,26 +1559,32 @@ $btnOpenLast.FlatAppearance.BorderSize  = 1
 $pnlFtr.Controls.Add($btnOpenLast)
 
 $btnChangelog = [System.Windows.Forms.Button]::new()
-$btnChangelog.Text      = "Changelog"
-$btnChangelog.Size      = [System.Drawing.Size]::new(100, 36)
-$btnChangelog.Location  = [System.Drawing.Point]::new(418, 13)
-$btnChangelog.FlatStyle = "Flat"
-$btnChangelog.Font      = $FN
+$btnChangelog.Text      = $script:STR.BtnChangelog
+$btnChangelog.Size      = [System.Drawing.Size]::new(140, 36)
+$btnChangelog.Location  = [System.Drawing.Point]::new(442, 13)
+$btnChangelog.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnChangelog.Font      = $FBTN
+$btnChangelog.ForeColor = [System.Drawing.Color]::White
+$btnChangelog.UseVisualStyleBackColor = $false
 $btnChangelog.BackColor = HC '#7C3AED'
 $btnChangelog.ForeColor = [System.Drawing.Color]::White
+$btnChangelog.Font      = $FBTN
 $btnChangelog.Cursor    = "Hand"
 $btnChangelog.FlatAppearance.BorderColor = HC '#4C1D95'
 $btnChangelog.FlatAppearance.BorderSize  = 1
 $pnlFtr.Controls.Add($btnChangelog)
 
 $btnCompare = [System.Windows.Forms.Button]::new()
-$btnCompare.Text      = "Compare Scans"
-$btnCompare.Size      = [System.Drawing.Size]::new(120, 36)
-$btnCompare.Location  = [System.Drawing.Point]::new(526, 13)
-$btnCompare.FlatStyle = "Flat"
-$btnCompare.Font      = $FN
-$btnCompare.BackColor = HC '#1D4ED8'
+$btnCompare.Text      = $script:STR.BtnCompare
+$btnCompare.Size      = [System.Drawing.Size]::new(148, 36)
+$btnCompare.Location  = [System.Drawing.Point]::new(590, 13)
+$btnCompare.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnCompare.Font      = $FBTN
 $btnCompare.ForeColor = [System.Drawing.Color]::White
+$btnCompare.UseVisualStyleBackColor = $false
+$btnCompare.BackColor = HC '#2563EB'
+$btnCompare.ForeColor = [System.Drawing.Color]::White
+$btnCompare.Font      = $FBTN
 $btnCompare.Cursor    = "Hand"
 $btnCompare.FlatAppearance.BorderColor = HC '#1E40AF'
 $btnCompare.FlatAppearance.BorderSize  = 1
@@ -1243,14 +1599,14 @@ $form.Controls.Add($pnlTabs)
 
 $tabNTFS = [System.Windows.Forms.Button]::new()
 $tabNTFS.Text = "  NTFS"; $tabNTFS.Size = [System.Drawing.Size]::new(120, 36)
-$tabNTFS.FlatStyle = "Flat"; $tabNTFS.Font = $FB; $tabNTFS.Cursor = "Hand"
+$tabNTFS.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat; $tabNTFS.Font = $FB; $tabNTFS.Cursor = "Hand"
 $tabNTFS.BackColor = HC '#1E1E2E'; $tabNTFS.ForeColor = HC '#A78BFA'; $tabNTFS.FlatAppearance.BorderSize = 0
 $tabNTFS.FlatAppearance.BorderSize = 0
 $pnlTabs.Controls.Add($tabNTFS)
 
 $tabSP = [System.Windows.Forms.Button]::new()
 $tabSP.Text = "  SharePoint"; $tabSP.Size = [System.Drawing.Size]::new(140, 36)
-$tabSP.FlatStyle = "Flat"; $tabSP.Font = $FB; $tabSP.Cursor = "Hand"
+$tabSP.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat; $tabSP.Font = $FB; $tabSP.Cursor = "Hand"
 $tabSP.BackColor = HC '#1A1A2E'; $tabSP.ForeColor = HC '#6B7280'
 $tabSP.FlatAppearance.BorderSize = 0
 $pnlTabs.Controls.Add($tabSP)
@@ -1278,13 +1634,20 @@ $form.Controls.Add($pnlSP)
 
 function Set-ActiveTab($tab) {
     $script:activeTab = $tab
+    if ($script:lightMode) {
+        $aBg = HC '#F5F5F5'; $aFg = HC '#7C3AED'
+        $iBg = HC '#E2E2E2'; $iFg = HC '#555555'
+    } else {
+        $aBg = HC '#1E1E2E'; $aFg = HC '#A78BFA'
+        $iBg = HC '#1A1A2E'; $iFg = HC '#6B7280'
+    }
     if ($tab -eq "NTFS") {
-        $tabNTFS.BackColor = HC '#1E1E2E'; $tabNTFS.ForeColor = HC '#A78BFA'; $tabNTFS.FlatAppearance.BorderSize = 0
-        $tabSP.BackColor   = HC '#1A1A2E'; $tabSP.ForeColor   = HC '#6B7280'
+        $tabNTFS.BackColor = $aBg; $tabNTFS.ForeColor = $aFg; $tabNTFS.FlatAppearance.BorderSize = 0
+        $tabSP.BackColor   = $iBg; $tabSP.ForeColor   = $iFg
         $pnlIn.Visible = $true;  $pnlSP.Visible = $false
     } else {
-        $tabSP.BackColor   = HC '#1E1E2E'; $tabSP.ForeColor   = HC '#A78BFA'
-        $tabNTFS.BackColor = HC '#1A1A2E'; $tabNTFS.ForeColor = HC '#6B7280'
+        $tabSP.BackColor   = $aBg; $tabSP.ForeColor   = $aFg
+        $tabNTFS.BackColor = $iBg; $tabNTFS.ForeColor = $iFg; $tabNTFS.FlatAppearance.BorderSize = 0
         $pnlIn.Visible = $false; $pnlSP.Visible = $true
     }
     Do-Layout
@@ -1323,7 +1686,7 @@ function New-Btn($text) {
     $b = [System.Windows.Forms.Button]::new()
     $b.Text      = $text
     $b.Size      = [System.Drawing.Size]::new($BTN_W, $BTN_H)
-    $b.FlatStyle = "Flat"
+    $b.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $b.Font      = $FN
     $b.BackColor = $C_BTN
     $b.ForeColor = $C_TXT
@@ -1334,23 +1697,23 @@ function New-Btn($text) {
 }
 
 # Zeile 1: Start Path
-$lblPath   = New-Label "Start Path:" $true
+$lblPath   = New-Label $script:STR.LblPath $true
 $tbPath    = New-TB $null
-$btnBrowse = New-Btn "Browse..."
+$btnBrowse = New-Btn $script:STR.LblBrowse
 $pnlIn.Controls.Add($lblPath)
 $pnlIn.Controls.Add($tbPath)
 $pnlIn.Controls.Add($btnBrowse)
 
 # Zeile 2: Output File
-$lblOut  = New-Label "Output File (HTML + JSON):" $true
+$lblOut  = New-Label $script:STR.LblOutput $true
 $tbOut   = New-TB "(automatic — saved to script folder)"
-$btnSave = New-Btn "Save as..."
+$btnSave = New-Btn $script:STR.LblSaveAs
 $pnlIn.Controls.Add($lblOut)
 $pnlIn.Controls.Add($tbOut)
 $pnlIn.Controls.Add($btnSave)
 
 # Zeile 3: Depth
-$lblDepth = New-Label "Maximum Depth:" $true
+$lblDepth = New-Label $script:STR.LblDepth $true
 $pnlIn.Controls.Add($lblDepth)
 
 $numDepth = [System.Windows.Forms.NumericUpDown]::new()
@@ -1369,7 +1732,7 @@ $pnlIn.Controls.Add($lblUnlim)
 
 # Checkbox
 $chk = [System.Windows.Forms.CheckBox]::new()
-$chk.Text      = "Open report in browser after creation"
+$chk.Text      = $script:STR.ChkBrowser
 $chk.Font      = $FN
 $chk.ForeColor = $C_MID
 $chk.BackColor = [System.Drawing.Color]::Transparent
@@ -1384,7 +1747,7 @@ $pnlIn.Controls.Add($sepMid)
 
 # ── Progress ─────────────────────────────────────────────────
 $lblStatus = [System.Windows.Forms.Label]::new()
-$lblStatus.Text      = "Ready."
+$lblStatus.Text      = $script:STR.LblReady
 $lblStatus.Font      = $FN
 $lblStatus.ForeColor = $C_MID
 $lblStatus.BackColor = [System.Drawing.Color]::Transparent
@@ -1414,6 +1777,8 @@ function Do-Layout {
 
     # Header & Tab-Bar
     $pnlHdr.SetBounds(0, 0, $cw, $HDR_H)
+    if ($btnTheme) { $btnTheme.Location = [System.Drawing.Point]::new($cw - $btnTheme.Width - 14, [int](($HDR_H - $btnTheme.Height) / 2)) }
+    if ($btnLang)  { $btnLang.Location  = [System.Drawing.Point]::new($cw - $btnTheme.Width - $btnLang.Width - 22, [int](($HDR_H - $btnLang.Height) / 2)) }
     $sepHdr.SetBounds(0, $HDR_H, $cw, 1)
     $pnlTabs.SetBounds(0, $HDR_H + 1, $cw, 36)
     $tabNTFS.Location  = [System.Drawing.Point]::new(0, 0)
@@ -1441,6 +1806,17 @@ function Do-Layout {
     # Footer & Trennlinie (von unten)
     $sepFtr.SetBounds(0, $ch - $FTR_H - 1, $cw, 1)
     $pnlFtr.SetBounds(0, $ch - $FTR_H, $cw, $FTR_H)
+    # Auto-layout footer buttons left to right
+    $fGap = 8
+    $fX   = 16
+    $fBtnY = [int](($FTR_H - 36) / 2)
+    $fBtns = @($btnStart, $btnCancel, $btnOpenLast, $btnChangelog, $btnCompare)
+    $fTotalW = ($fBtns | Measure-Object -Property Width -Sum).Sum + $fGap * ($fBtns.Count - 1)
+    $fX = [int](($cw - $fTotalW) / 2)
+    foreach ($fb in $fBtns) {
+        $fb.Location = [System.Drawing.Point]::new($fX, $fBtnY)
+        $fX += $fb.Width + $fGap
+    }
 
 
     # Inhaltsbereich Y-Start — NTFS panel is now self-contained, Y starts at 0
@@ -1514,7 +1890,7 @@ $btnSave.add_Click({
 
 $script:cancelFlag = $false
     $script:lastReport  = ""
-$btnCancel.add_Click({ $script:cancelFlag = $true })
+$btnCancel.add_Click({ if ($script:scanning) { $script:cancelFlag = $true } })
 
 $btnStart.add_Click({
     # Route to correct scanner based on active tab
@@ -1532,7 +1908,6 @@ $btnStart.add_Click({
         $ts      = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
         $outFile = Join-Path $PSScriptRoot "ACLens_SP_Report_$ts.html"
         $btnStart.Enabled  = $false
-        $btnCancel.Enabled = $true
         $progBar.Value     = 0
         $lblStats.Text     = ""
         try {
@@ -1547,7 +1922,6 @@ $btnStart.add_Click({
             $lblStatus.ForeColor = $C_ERR
         } finally {
             $btnStart.Enabled  = $true
-            $btnCancel.Enabled = $false
         }
         return
     }
@@ -1555,7 +1929,7 @@ $btnStart.add_Click({
     $rootPath = $tbPath.Text.Trim()
     if ([string]::IsNullOrEmpty($rootPath) -or -not (Test-Path $rootPath -PathType Container)) {
         [System.Windows.Forms.MessageBox]::Show(
-            "Please enter a valid folder path.", "Invalid Path", "OK", "Warning") | Out-Null
+            $script:STR.MsgInvalidPath, $script:STR.MsgInvalidPathT, "OK", "Warning") | Out-Null
         return
     }
 
@@ -1570,14 +1944,13 @@ $btnStart.add_Click({
 
     $maxDepth          = [int]$numDepth.Value
     $btnStart.Enabled  = $false
-    $btnCancel.Enabled = $true
     $script:cancelFlag = $false
     $progBar.Value     = 0
     $lblStats.Text     = ""
     $lblStatus.ForeColor = $C_MID
 
     try {
-        $lblStatus.Text = "Step 1/3: Scanning folders..."
+        $lblStatus.Text = $script:STR.StepScanFolders
         $form.Refresh()
 
         $allFolders = Get-AllFolders -RootPath $rootPath -MaxDepth $maxDepth
@@ -1593,11 +1966,10 @@ $btnStart.add_Click({
 
         foreach ($folderPath in $allFolders) {
             if ($script:cancelFlag) {
-                $lblStatus.Text      = "Cancelled."
+                $lblStatus.Text      = $script:STR.StepCancelled
                 $lblStatus.ForeColor = $C_WARN
                 $progBar.Value       = 0
                 $btnStart.Enabled    = $true
-                $btnCancel.Enabled   = $false
                 return
             }
 
@@ -1638,7 +2010,7 @@ $btnStart.add_Click({
             $prevAcl = $aclData
         }
 
-        $lblStatus.Text = "Step 3/3: Generating HTML report..."
+        $lblStatus.Text = $script:STR.StepGenReport
         $progBar.Value  = 99
         $form.Refresh()
 
@@ -1671,7 +2043,6 @@ $btnStart.add_Click({
         $lblStatus.ForeColor = $C_ERR
     } finally {
         $btnStart.Enabled  = $true
-        $btnCancel.Enabled = $false
     }
 })
 
@@ -1718,7 +2089,7 @@ $pnlSP.Controls.Add($spLblConnDetail)
 
 # SP: Site URL
 $spLblUrl = [System.Windows.Forms.Label]::new()
-$spLblUrl.Text = "SharePoint Site URL:"; $spLblUrl.Font = $FB
+$spLblUrl.Text = $script:STR.SpLblUrl; $spLblUrl.Font = $FB
 $spLblUrl.ForeColor = HC '#E2E8F0'; $spLblUrl.BackColor = [System.Drawing.Color]::Transparent; $spLblUrl.AutoSize = $true
 $pnlSP.Controls.Add($spLblUrl)
 
@@ -1730,7 +2101,7 @@ $pnlSP.Controls.Add($spTbUrl)
 
 # SP: Depth
 $spLblDepth = [System.Windows.Forms.Label]::new()
-$spLblDepth.Text = "Maximum Depth:"; $spLblDepth.Font = $FB
+$spLblDepth.Text = $script:STR.SpLblDepth; $spLblDepth.Font = $FB
 $spLblDepth.ForeColor = HC '#E2E8F0'; $spLblDepth.BackColor = [System.Drawing.Color]::Transparent; $spLblDepth.AutoSize = $true
 $pnlSP.Controls.Add($spLblDepth)
 
@@ -1740,35 +2111,36 @@ $spNumDepth.BackColor = HC '#2D2D3F'; $spNumDepth.ForeColor = HC '#E2E8F0'; $spN
 $pnlSP.Controls.Add($spNumDepth)
 
 $spLblUnlim = [System.Windows.Forms.Label]::new()
-$spLblUnlim.Text = "  0 = unlimited"; $spLblUnlim.Font = $FS
+$spLblUnlim.Text = $script:STR.LblUnlimited; $spLblUnlim.Font = $FS
 $spLblUnlim.ForeColor = HC '#6B7280'; $spLblUnlim.BackColor = [System.Drawing.Color]::Transparent; $spLblUnlim.AutoSize = $true
 $pnlSP.Controls.Add($spLblUnlim)
 
 # SP: Checkbox
 $spChk = [System.Windows.Forms.CheckBox]::new()
-$spChk.Text = "Open report in browser after creation"; $spChk.Font = $FN
+$spChk.Text = $script:STR.SpChkBrowser; $spChk.Font = $FN
 $spChk.ForeColor = HC '#9CA3AF'; $spChk.BackColor = [System.Drawing.Color]::Transparent
 $spChk.Checked = $true; $spChk.AutoSize = $true
 $pnlSP.Controls.Add($spChk)
 
 # SP: Setup button
 $btnSPSetup = [System.Windows.Forms.Button]::new()
-$btnSPSetup.Text = "Setup / Reconnect"; $btnSPSetup.Size = [System.Drawing.Size]::new(160, 26)
-$btnSPSetup.FlatStyle = "Flat"; $btnSPSetup.Font = $FN
+$btnSPSetup.Text = $script:STR.SpBtnSetup; $btnSPSetup.Size = [System.Drawing.Size]::new(160, 26)
+$btnSPSetup.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat; $btnSPSetup.Font = $FN
 $btnSPSetup.BackColor = HC '#7C3AED'; $btnSPSetup.ForeColor = [System.Drawing.Color]::White; $btnSPSetup.Cursor = "Hand"
 $btnSPSetup.FlatAppearance.BorderColor = HC '#4C1D95'; $btnSPSetup.FlatAppearance.BorderSize = 1
+    $btnSPSetup.UseVisualStyleBackColor = $false
 $pnlSP.Controls.Add($btnSPSetup)
 
 function Update-SPStatus {
     $creds = Get-SPCredentials
     if ($creds.IsConfigured) {
-        $spLblConn.Text      = "Connected"
+        $spLblConn.Text      = $script:STR.SpConnected
         $spLblConn.ForeColor = HC '#34D399'
         $spLblConnDetail.Text = "Tenant: $($creds.TenantId)  |  Client: $($creds.ClientId)"
     } else {
-        $spLblConn.Text      = "Not configured"
+        $spLblConn.Text      = $script:STR.SpNotConfigured
         $spLblConn.ForeColor = HC '#F87171'
-        $spLblConnDetail.Text = "Click 'Setup / Reconnect' to register ACLens with your Microsoft 365 tenant."
+        $spLblConnDetail.Text = $script:STR.SpConnectHint
     }
 }
 
@@ -2076,164 +2448,204 @@ function Start-SPScan {
 
 function Show-SPSetupWizard {
     $wiz = [System.Windows.Forms.Form]::new()
-    $wiz.Text            = "ACLens — SharePoint Setup"
-    $wiz.ClientSize      = [System.Drawing.Size]::new(620, 480)
+    $wiz.Text            = $script:STR.WizTitle
+    $wiz.ClientSize      = [System.Drawing.Size]::new(660, 480)
     $wiz.StartPosition   = "CenterParent"
     $wiz.FormBorderStyle = "FixedDialog"
     $wiz.MaximizeBox     = $false
-    $wiz.BackColor       = HC '#1E1E2E'
-    $wiz.Font            = $FN
+    $wizBg  = if ($script:lightMode) { HC '#F5F5F5' } else { HC '#1E1E2E' }
+    $wizHdr = if ($script:lightMode) { HC '#ECECEC' } else { HC '#1A1A2E' }
+    $wizSep = if ($script:lightMode) { HC '#CCCCCC' } else { HC '#4B5563' }
+    $wizPnl = if ($script:lightMode) { HC '#F5F5F5' } else { HC '#1E1E2E' }
+    $wizTxt = if ($script:lightMode) { HC '#111111' } else { HC '#E2E8F0' }
+    $wizMid = if ($script:lightMode) { HC '#555555' } else { HC '#9CA3AF' }
+    $wizLow = if ($script:lightMode) { HC '#6B7280' } else { HC '#6B7280' }
+    $wiz.BackColor = $wizBg
+    $wiz.Font      = $FN
 
     # Header
     $wHdr = [System.Windows.Forms.Panel]::new()
-    $wHdr.SetBounds(0, 0, 620, 56); $wHdr.BackColor = HC '#1A1A2E'
+    $wHdr.SetBounds(0, 0, 660, 64); $wHdr.BackColor = $wizHdr
     $wiz.Controls.Add($wHdr)
 
     $wTitle = [System.Windows.Forms.Label]::new()
-    $wTitle.Text = "SharePoint Setup"; $wTitle.Font = [System.Drawing.Font]::new("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
-    $wTitle.ForeColor = HC '#A78BFA'; $wTitle.BackColor = [System.Drawing.Color]::Transparent
+    $wTitle.Text = if ($script:lang -eq "DE") { "SharePoint Einrichtung" } else { "SharePoint Setup" }; $wTitle.Font = [System.Drawing.Font]::new("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
+    $wTitle.ForeColor = HC '#7C3AED'; $wTitle.BackColor = [System.Drawing.Color]::Transparent
     $wTitle.AutoSize = $true; $wTitle.Location = [System.Drawing.Point]::new(16, 13)
     $wHdr.Controls.Add($wTitle)
 
     $wSub = [System.Windows.Forms.Label]::new()
-    $wSub.Text = "Connect ACLens to Microsoft 365"
-    $wSub.Font = $FS; $wSub.ForeColor = HC '#6B7280'
+    $wSub.Text = $script:STR.WizSub
+    $wSub.Font = $FS; $wSub.ForeColor = $wizLow
     $wSub.BackColor = [System.Drawing.Color]::Transparent; $wSub.AutoSize = $true
     $wSub.Location = [System.Drawing.Point]::new(190, 21)
     $wHdr.Controls.Add($wSub)
 
     $wSepHdr = [System.Windows.Forms.Panel]::new()
-    $wSepHdr.SetBounds(0, 56, 620, 1); $wSepHdr.BackColor = HC '#4B5563'
+    $wSepHdr.SetBounds(0, 64, 660, 1); $wSepHdr.BackColor = $wizSep
     $wiz.Controls.Add($wSepHdr)
 
     # Tab buttons: Auto (Device Code) | Manual
     $wTabAuto = [System.Windows.Forms.Button]::new()
-    $wTabAuto.Text = "  ⚡  Automatic Setup"; $wTabAuto.Size = [System.Drawing.Size]::new(200, 34)
-    $wTabAuto.Location = [System.Drawing.Point]::new(16, 68); $wTabAuto.FlatStyle = "Flat"
-    $wTabAuto.Font = $FB; $wTabAuto.BackColor = HC '#7C3AED'; $wTabAuto.ForeColor = [System.Drawing.Color]::White
+    $wTabAuto.Text = $script:STR.WizAutoTab; $wTabAuto.Size = [System.Drawing.Size]::new(220, 34)
+    $wTabAuto.Location = [System.Drawing.Point]::new(16, 76); $wTabAuto.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $wTabAuto.Font = $FN; $wTabAuto.BackColor = HC '#7C3AED'; $wTabAuto.ForeColor = [System.Drawing.Color]::White
     $wTabAuto.Cursor = "Hand"; $wTabAuto.FlatAppearance.BorderColor = HC '#4C1D95'; $wTabAuto.FlatAppearance.BorderSize = 1
     $wiz.Controls.Add($wTabAuto)
 
     $wTabManual = [System.Windows.Forms.Button]::new()
-    $wTabManual.Text = "  📋  Manual Setup"; $wTabManual.Size = [System.Drawing.Size]::new(180, 34)
-    $wTabManual.Location = [System.Drawing.Point]::new(224, 68); $wTabManual.FlatStyle = "Flat"
-    $wTabManual.Font = $FB; $wTabManual.BackColor = HC '#374151'; $wTabManual.ForeColor = HC '#9CA3AF'
+    $wTabManual.Text = $script:STR.WizManualTab; $wTabManual.Size = [System.Drawing.Size]::new(220, 34)
+    $wTabManual.Location = [System.Drawing.Point]::new(248, 76); $wTabManual.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $wTabManual.Font = $FN; $wTabManual.BackColor = HC '#374151'; $wTabManual.ForeColor = HC '#9CA3AF'
     $wTabManual.Cursor = "Hand"; $wTabManual.FlatAppearance.BorderColor = HC '#4B5563'; $wTabManual.FlatAppearance.BorderSize = 1
     $wiz.Controls.Add($wTabManual)
 
     $wSepTab = [System.Windows.Forms.Panel]::new()
-    $wSepTab.SetBounds(0, 103, 620, 1); $wSepTab.BackColor = HC '#374151'
+    $wSepTab.SetBounds(0, 111, 660, 1); $wSepTab.BackColor = $wizSep
     $wiz.Controls.Add($wSepTab)
 
     # ── Auto panel ───────────────────────────────────────────
     $pAuto = [System.Windows.Forms.Panel]::new()
-    $pAuto.SetBounds(0, 104, 620, 316); $pAuto.BackColor = HC '#1E1E2E'
+    $pAuto.SetBounds(0, 112, 660, 308); $pAuto.BackColor = $wizPnl
     $wiz.Controls.Add($pAuto)
 
     $aInfo = [System.Windows.Forms.Label]::new()
-    $aInfo.Text = "ACLens will automatically create an App Registration in your Azure AD tenant using the Device Code flow. You need an account with Application Administrator or Global Administrator role."
-    $aInfo.Font = $FN; $aInfo.ForeColor = HC '#9CA3AF'; $aInfo.BackColor = [System.Drawing.Color]::Transparent
-    $aInfo.Size = [System.Drawing.Size]::new(580, 52); $aInfo.Location = [System.Drawing.Point]::new(20, 14)
+    $aInfo.Text = $script:STR.WizAutoInfo
+    $aInfo.Font = $FN; $aInfo.ForeColor = $wizMid; $aInfo.BackColor = [System.Drawing.Color]::Transparent
+    $aInfo.Size = [System.Drawing.Size]::new(630, 60); $aInfo.Location = [System.Drawing.Point]::new(20, 14)
     $pAuto.Controls.Add($aInfo)
 
     $aStep1 = [System.Windows.Forms.Label]::new()
-    $aStep1.Text = "Step 1 — Click 'Get Device Code' below"
-    $aStep1.Font = $FB; $aStep1.ForeColor = HC '#E2E8F0'; $aStep1.BackColor = [System.Drawing.Color]::Transparent
+    $aStep1.Text = $script:STR.WizStep1
+    $aStep1.Font = $FB; $aStep1.ForeColor = $wizTxt; $aStep1.BackColor = [System.Drawing.Color]::Transparent
     $aStep1.AutoSize = $true; $aStep1.Location = [System.Drawing.Point]::new(20, 74)
     $pAuto.Controls.Add($aStep1)
 
     $aStep2 = [System.Windows.Forms.Label]::new()
-    $aStep2.Text = "Step 2 — Open the link and enter the code shown below"
-    $aStep2.Font = $FB; $aStep2.ForeColor = HC '#E2E8F0'; $aStep2.BackColor = [System.Drawing.Color]::Transparent
+    $aStep2.Text = $script:STR.WizStep2
+    $aStep2.Font = $FB; $aStep2.ForeColor = $wizTxt; $aStep2.BackColor = [System.Drawing.Color]::Transparent
     $aStep2.AutoSize = $true; $aStep2.Location = [System.Drawing.Point]::new(20, 98)
     $pAuto.Controls.Add($aStep2)
 
     $aStep3 = [System.Windows.Forms.Label]::new()
-    $aStep3.Text = "Step 3 — Sign in with your admin account — ACLens handles the rest"
-    $aStep3.Font = $FB; $aStep3.ForeColor = HC '#E2E8F0'; $aStep3.BackColor = [System.Drawing.Color]::Transparent
+    $aStep3.Text = $script:STR.WizStep3
+    $aStep3.Font = $FB; $aStep3.ForeColor = $wizTxt; $aStep3.BackColor = [System.Drawing.Color]::Transparent
     $aStep3.AutoSize = $true; $aStep3.Location = [System.Drawing.Point]::new(20, 122)
     $pAuto.Controls.Add($aStep3)
 
     # Device code box
     $aCodeBox = [System.Windows.Forms.Panel]::new()
-    $aCodeBox.SetBounds(20, 152, 580, 64); $aCodeBox.BackColor = HC '#1A1A2E'
+    $aCodeBoxBg = if ($script:lightMode) { HC "#EDE9FE" } else { HC "#1A1A2E" }
+    $aCodeBox.SetBounds(20, 152, 620, 72); $aCodeBox.BackColor = $aCodeBoxBg
     $pAuto.Controls.Add($aCodeBox)
 
     $aCodeLabel = [System.Windows.Forms.Label]::new()
-    $aCodeLabel.Text = "Click 'Get Device Code' to start"
+    $aCodeLabelInit = if ($script:lang -eq "DE") { "Klicke auf 'Gerätecode anfordern'" } else { "Click 'Get Device Code' to start" }
+    $aCodeLabel.Text = $aCodeLabelInit
     $aCodeLabel.Font = [System.Drawing.Font]::new("Consolas", 14, [System.Drawing.FontStyle]::Bold)
-    $aCodeLabel.ForeColor = HC '#FBBF24'; $aCodeLabel.BackColor = [System.Drawing.Color]::Transparent
-    $aCodeLabel.AutoSize = $true; $aCodeLabel.Location = [System.Drawing.Point]::new(16, 18)
+    $aCodeLabelFg = if ($script:lightMode) { HC "#6D28D9" } else { HC "#FBBF24" }
+    $aCodeLabel.ForeColor = $aCodeLabelFg
+    $aCodeLabel.BackColor = [System.Drawing.Color]::Transparent
+    $aCodeLabel.AutoSize = $true; $aCodeLabel.Location = [System.Drawing.Point]::new(16, 14)
     $aCodeBox.Controls.Add($aCodeLabel)
 
     $aUrlLabel = [System.Windows.Forms.Label]::new()
-    $aUrlLabel.Text = ""; $aUrlLabel.Font = $FS
-    $aUrlLabel.ForeColor = HC '#60A5FA'; $aUrlLabel.BackColor = [System.Drawing.Color]::Transparent
-    $aUrlLabel.AutoSize = $true; $aUrlLabel.Location = [System.Drawing.Point]::new(16, 42)
+    $aUrlLabel.Text = ""; $aUrlLabel.Font = $FN
+    $aUrlLabelFg = if ($script:lightMode) { HC '#1D4ED8' } else { HC '#93C5FD' }
+    $aUrlLabel.ForeColor = $aUrlLabelFg; $aUrlLabel.BackColor = [System.Drawing.Color]::Transparent
+    $aUrlLabel.Size = [System.Drawing.Size]::new(540, 20)
+    $aUrlLabel.Location = [System.Drawing.Point]::new(16, 40)
     $aCodeBox.Controls.Add($aUrlLabel)
 
     $aStatusLabel = [System.Windows.Forms.Label]::new()
     $aStatusLabel.Text = ""; $aStatusLabel.Font = $FN
-    $aStatusLabel.ForeColor = HC '#9CA3AF'; $aStatusLabel.BackColor = [System.Drawing.Color]::Transparent
-    $aStatusLabel.Size = [System.Drawing.Size]::new(580, 20); $aStatusLabel.Location = [System.Drawing.Point]::new(20, 226)
+    $aStatusFg = if ($script:lightMode) { HC "#92400E" } else { HC "#FBBF24" }
+    $aStatusLabel.ForeColor = $aStatusFg; $aStatusLabel.BackColor = [System.Drawing.Color]::Transparent
+    $aStatusLabel.Size = [System.Drawing.Size]::new(620, 20); $aStatusLabel.Location = [System.Drawing.Point]::new(20, 226)
     $pAuto.Controls.Add($aStatusLabel)
 
     $aBtnGetCode = [System.Windows.Forms.Button]::new()
-    $aBtnGetCode.Text = "Get Device Code"; $aBtnGetCode.Size = [System.Drawing.Size]::new(160, 34)
-    $aBtnGetCode.Location = [System.Drawing.Point]::new(20, 254); $aBtnGetCode.FlatStyle = "Flat"
+    $aBtnGetCode.Text = $script:STR.WizGetCode; $aBtnGetCode.Size = [System.Drawing.Size]::new(160, 34)
+    $aBtnGetCode.Location = [System.Drawing.Point]::new(20, 254); $aBtnGetCode.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $aBtnGetCode.Font = $FB; $aBtnGetCode.BackColor = HC '#7C3AED'; $aBtnGetCode.ForeColor = [System.Drawing.Color]::White
     $aBtnGetCode.Cursor = "Hand"; $aBtnGetCode.FlatAppearance.BorderColor = HC '#4C1D95'; $aBtnGetCode.FlatAppearance.BorderSize = 1
+    $aBtnGetCode.UseVisualStyleBackColor = $false
     $pAuto.Controls.Add($aBtnGetCode)
 
     $aBtnOpenBrowser = [System.Windows.Forms.Button]::new()
-    $aBtnOpenBrowser.Text = "Open microsoft.com/devicelogin"; $aBtnOpenBrowser.Size = [System.Drawing.Size]::new(240, 34)
-    $aBtnOpenBrowser.Location = [System.Drawing.Point]::new(190, 254); $aBtnOpenBrowser.FlatStyle = "Flat"
+    $aBtnOpenBrowser.Text = $script:STR.WizOpenBrowser; $aBtnOpenBrowser.Size = [System.Drawing.Size]::new(240, 34)
+    $aBtnOpenBrowser.Location = [System.Drawing.Point]::new(190, 254); $aBtnOpenBrowser.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $aBtnOpenBrowser.Font = $FN; $aBtnOpenBrowser.BackColor = HC '#1D4ED8'; $aBtnOpenBrowser.ForeColor = [System.Drawing.Color]::White
     $aBtnOpenBrowser.Cursor = "Hand"; $aBtnOpenBrowser.Enabled = $false
     $aBtnOpenBrowser.FlatAppearance.BorderColor = HC '#1E40AF'; $aBtnOpenBrowser.FlatAppearance.BorderSize = 1
+    $aBtnOpenBrowser.UseVisualStyleBackColor = $false
     $pAuto.Controls.Add($aBtnOpenBrowser)
 
     # ── Manual panel ─────────────────────────────────────────
     $pManual = [System.Windows.Forms.Panel]::new()
-    $pManual.SetBounds(0, 104, 620, 316); $pManual.BackColor = HC '#1E1E2E'; $pManual.Visible = $false
+    $pManual.SetBounds(0, 112, 660, 308); $pManual.BackColor = $wizPnl; $pManual.Visible = $false
     $wiz.Controls.Add($pManual)
 
     $mInfo = [System.Windows.Forms.Label]::new()
-    $mInfo.Text = "Manually enter credentials from an existing Azure AD App Registration. See the documentation for setup instructions."
-    $mInfo.Font = $FN; $mInfo.ForeColor = HC '#9CA3AF'; $mInfo.BackColor = [System.Drawing.Color]::Transparent
-    $mInfo.Size = [System.Drawing.Size]::new(580, 36); $mInfo.Location = [System.Drawing.Point]::new(20, 14)
+    $mInfo.Text = $script:STR.WizManualInfo
+    $mInfo.Font = $FN; $mInfo.ForeColor = $wizMid; $mInfo.BackColor = [System.Drawing.Color]::Transparent
+    $mInfo.Size = [System.Drawing.Size]::new(620, 42); $mInfo.Location = [System.Drawing.Point]::new(20, 14)
     $pManual.Controls.Add($mInfo)
 
-    $mBtnDocs = [System.Windows.Forms.Button]::new()
-    $mBtnDocs.Text = "Open Manual Setup Guide"; $mBtnDocs.Size = [System.Drawing.Size]::new(200, 28)
-    $mBtnDocs.Location = [System.Drawing.Point]::new(20, 52); $mBtnDocs.FlatStyle = "Flat"
-    $mBtnDocs.Font = $FS; $mBtnDocs.BackColor = HC '#374151'; $mBtnDocs.ForeColor = HC '#60A5FA'
-    $mBtnDocs.Cursor = "Hand"; $mBtnDocs.FlatAppearance.BorderColor = HC '#4B5563'; $mBtnDocs.FlatAppearance.BorderSize = 1
-    $mBtnDocs.add_Click({ Start-Process "https://github.com/jemil/ACLens/blob/main/docs/manual-sp-setup.md" })
+    $mBtnDocs = [System.Windows.Forms.Label]::new()
+    $mBtnDocs.Text      = $script:STR.WizOpenDocs
+    $mBtnDocs.AutoSize  = $true
+    $mBtnDocs.Location  = [System.Drawing.Point]::new(20, 52)
+    $mBtnDocs.Font      = $FN
+    $mDocsFg = if ($script:lightMode) { HC "#1D4ED8" } else { HC "#93C5FD" }
+    $mBtnDocs.ForeColor = $mDocsFg
+    $mBtnDocs.BackColor = [System.Drawing.Color]::Transparent
+    $mBtnDocs.Cursor    = "Hand"
+        $mBtnDocs.add_Click({ if ($script:lang -eq "DE") { Start-Process "https://github.com/C129H223N3O54/ACLens/blob/main/manuelle-sp-einrichtung.md" } else { Start-Process "https://github.com/C129H223N3O54/ACLens/blob/main/manual-sp-setup.md" } }) 
     $pManual.Controls.Add($mBtnDocs)
 
     function New-MField($label, $y, $placeholder) {
         $lbl = [System.Windows.Forms.Label]::new()
-        $lbl.Text = $label; $lbl.Font = $FB; $lbl.ForeColor = HC '#E2E8F0'
+        $lbl.Text = $label; $lbl.Font = $FB
+        $mfLblFg = if ($script:lightMode) { HC "#111111" } else { HC "#E2E8F0" }
+        $lbl.ForeColor = $mfLblFg
         $lbl.BackColor = [System.Drawing.Color]::Transparent; $lbl.AutoSize = $true
         $lbl.Location = [System.Drawing.Point]::new(20, $y)
         $pManual.Controls.Add($lbl)
         $tb = [System.Windows.Forms.TextBox]::new()
-        $tb.Size = [System.Drawing.Size]::new(578, 26); $tb.Location = [System.Drawing.Point]::new(20, $y + 20)
-        $tb.BackColor = HC '#2D2D3F'; $tb.ForeColor = HC '#6B7280'
+        $tb.Size = [System.Drawing.Size]::new(618, 24); $tb.Location = [System.Drawing.Point]::new(20, $y + 22)
+        $mfTbBg = if ($script:lightMode) { HC "#FFFFFF" } else { HC "#2D2D3F" }
+        $mfTbFg = if ($script:lightMode) { HC "#111111" } else { HC "#9CA3AF" }
+        $tb.BackColor = $mfTbBg; $tb.ForeColor = $mfTbFg
         $tb.Text = $placeholder; $tb.BorderStyle = "FixedSingle"; $tb.Font = $FN
+        $tbPlaceholder = $placeholder
+        $tb.Tag = $placeholder
+        $tb.add_GotFocus({
+            if ($this.Text -eq $this.Tag) {
+                $this.Text = ""
+                $mfTbFgActive = if ($script:lightMode) { HC "#111111" } else { HC "#E2E8F0" }
+                $this.ForeColor = $mfTbFgActive
+            }
+        })
+        $tb.add_LostFocus({
+            if ([string]::IsNullOrWhiteSpace($this.Text)) {
+                $this.Text = $this.Tag
+                $mfTbFgReset = if ($script:lightMode) { HC "#6B7280" } else { HC "#9CA3AF" }
+                $this.ForeColor = $mfTbFgReset
+            }
+        })
         $pManual.Controls.Add($tb)
         return $tb
     }
 
-    $mTbTenant = New-MField "Tenant ID"     90  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    $mTbClient = New-MField "Client ID"     140 "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    $mTbSecret = New-MField "Client Secret" 190 "your-client-secret-value"
+    $mTbTenant = New-MField $script:STR.WizTenantId     90  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    $mTbClient = New-MField $script:STR.WizClientId     140 "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    $mTbSecret = New-MField $script:STR.WizSecret 190 "your-client-secret-value"
     $mTbSecret.UseSystemPasswordChar = $false
 
     $mBtnSave = [System.Windows.Forms.Button]::new()
-    $mBtnSave.Text = "Save & Connect"; $mBtnSave.Size = [System.Drawing.Size]::new(160, 34)
-    $mBtnSave.Location = [System.Drawing.Point]::new(20, 250); $mBtnSave.FlatStyle = "Flat"
+    $mBtnSave.Text = $script:STR.WizSaveConnect; $mBtnSave.Size = [System.Drawing.Size]::new(160, 34)
+    $mBtnSave.Location = [System.Drawing.Point]::new(20, 258); $mBtnSave.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $mBtnSave.Font = $FB; $mBtnSave.BackColor = HC '#7C3AED'; $mBtnSave.ForeColor = [System.Drawing.Color]::White
     $mBtnSave.Cursor = "Hand"; $mBtnSave.FlatAppearance.BorderColor = HC '#4C1D95'; $mBtnSave.FlatAppearance.BorderSize = 1
     $pManual.Controls.Add($mBtnSave)
@@ -2241,12 +2653,12 @@ function Show-SPSetupWizard {
     $mBtnSave.add_Click({
         $t = $mTbTenant.Text.Trim(); $c = $mTbClient.Text.Trim(); $sec = $mTbSecret.Text.Trim()
         if (-not $t -or -not $c -or -not $sec -or $t -like "*xxxx*") {
-            [System.Windows.Forms.MessageBox]::Show("Please fill in all fields.", "Missing data", "OK", "Warning") | Out-Null
+            [System.Windows.Forms.MessageBox]::Show($script:STR.WizMissingData, "Missing data", "OK", "Warning") | Out-Null
             return
         }
         Save-SPCredentials $t $c $sec
         Update-SPStatus
-        [System.Windows.Forms.MessageBox]::Show("Credentials saved successfully.", "ACLens", "OK", "Information") | Out-Null
+        [System.Windows.Forms.MessageBox]::Show($script:STR.WizSaved, "ACLens", "OK", "Information") | Out-Null
         $wiz.Close()
     })
 
@@ -2268,8 +2680,10 @@ function Show-SPSetupWizard {
 
     $aBtnGetCode.add_Click({
         $aBtnGetCode.Enabled = $false
-        $aStatusLabel.Text   = "Requesting device code..."
-        $aStatusLabel.ForeColor = HC '#9CA3AF'
+        $aStatusLabelInit = if ($script:lang -eq "DE") { "Gerätecode wird angefordert..." } else { "Requesting device code..." }
+    $aStatusLabel.Text   = $aStatusLabelInit
+        $aStatusFg = if ($script:lightMode) { HC "#92400E" } else { HC "#FBBF24" }
+    $aStatusLabel.ForeColor = $aStatusFg
         $wiz.Refresh()
 
         try {
@@ -2284,8 +2698,9 @@ function Show-SPSetupWizard {
 
             $script:deviceCode  = $resp
             $aCodeLabel.Text    = $resp.user_code
-            $aUrlLabel.Text     = "Go to: $($resp.verification_uri)"
-            $aStatusLabel.Text  = "Waiting for sign-in... (expires in $([int]($resp.expires_in / 60)) minutes)"
+            $aUrlPrefix = if ($script:lang -eq "DE") { "Öffne: " } else { "Go to: " }
+            $aUrlLabel.Text = $aUrlPrefix + $resp.verification_uri
+            $aStatusLabel.Text  = ($script:STR.WizWaiting + " (" + $(if ($script:lang -eq "DE") { "läuft ab in " } else { "expires in " }) + [int]($resp.expires_in / 60) + $(if ($script:lang -eq "DE") { " Minuten)" } else { " minutes)" }))
             $aStatusLabel.ForeColor = HC '#FBBF24'
             $aBtnOpenBrowser.Enabled = $true
 
@@ -2304,7 +2719,7 @@ function Show-SPSetupWizard {
 
                     # Got token — now auto-register the app
                     $script:pollTimer.Stop()
-                    $aStatusLabel.Text = "Signed in! Creating App Registration..."
+                    $aStatusLabel.Text = $script:STR.WizCreating
                     $aStatusLabel.ForeColor = HC '#34D399'
                     $wiz.Refresh()
 
@@ -2365,9 +2780,9 @@ function Show-SPSetupWizard {
                     Save-SPCredentials $tenantId $app.appId $secret.secretText
                     Update-SPStatus
 
-                    $aStatusLabel.Text = "✔  App Registration created! Client ID: $($app.appId)"
+                    $aStatusLabel.Text = "✔  $($script:STR.WizDone) Client ID: $($app.appId)"
                     $aStatusLabel.ForeColor = HC '#34D399'
-                    $aCodeLabel.Text = "Setup complete!"
+                    $aCodeLabel.Text = $script:STR.WizDone
                     $aCodeLabel.ForeColor = HC '#34D399'
 
                     Start-Sleep -Milliseconds 1500
@@ -2378,7 +2793,7 @@ function Show-SPSetupWizard {
                     if ($err -notlike "*authorization_pending*" -and $err -notlike "*slow_down*") {
                         if ($err -like "*authorization_declined*" -or $err -like "*expired*") {
                             $script:pollTimer.Stop()
-                            $aStatusLabel.Text = "Sign-in cancelled or expired. Try again."
+                            $aStatusLabel.Text = $script:STR.WizCancelled
                             $aStatusLabel.ForeColor = HC '#F87171'
                             $aBtnGetCode.Enabled = $true
                         }
@@ -2400,13 +2815,16 @@ function Show-SPSetupWizard {
 
     # Footer separator + close
     $wSepFtr = [System.Windows.Forms.Panel]::new()
-    $wSepFtr.SetBounds(0, 420, 620, 1); $wSepFtr.BackColor = HC '#4B5563'
+    $wSepFtr.SetBounds(0, 420, 660, 1); $wSepFtr.BackColor = $wizSep
     $wiz.Controls.Add($wSepFtr)
 
     $wBtnClose = [System.Windows.Forms.Button]::new()
-    $wBtnClose.Text = "Close"; $wBtnClose.Size = [System.Drawing.Size]::new(100, 34)
-    $wBtnClose.Location = [System.Drawing.Point]::new(500, 434); $wBtnClose.FlatStyle = "Flat"
-    $wBtnClose.Font = $FN; $wBtnClose.BackColor = HC '#374151'; $wBtnClose.ForeColor = HC '#E2E8F0'
+    $wBtnClose.Text = $script:STR.WizClose; $wBtnClose.Size = [System.Drawing.Size]::new(100, 34)
+    $wBtnClose.Location = [System.Drawing.Point]::new(544, 434); $wBtnClose.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $wBtnClose.Font = $FN; $wBtnCloseBg = if ($script:lightMode) { HC '#E0E0E0' } else { HC '#374151' }
+    $wBtnCloseFg = if ($script:lightMode) { HC '#111111' } else { HC '#E2E8F0' }
+    $wBtnClose.BackColor = $wBtnCloseBg; $wBtnClose.ForeColor = $wBtnCloseFg
+    $wBtnClose.UseVisualStyleBackColor = $false
     $wBtnClose.Cursor = "Hand"; $wBtnClose.FlatAppearance.BorderColor = HC '#4B5563'; $wBtnClose.FlatAppearance.BorderSize = 1
     $wBtnClose.add_Click({
         if ($null -ne $script:pollTimer) { $script:pollTimer.Stop() }
@@ -2431,7 +2849,7 @@ $changelogText = @"
 ACLens Changelog
 ================
 
-v0.2.1-alpha  (2026-03-27)
+v0.4.0-beta  (2026-03-27)
 ---------------------------
 - Fixed: switch statement spacing causing ParseException on PS 5.1
 - Version label added to main window header
@@ -2468,21 +2886,29 @@ v0.1.0-alpha  (2026-03-14)
 $btnChangelog.add_Click({
     $dlg = [System.Windows.Forms.Form]::new()
     $dlg.Text            = "ACLens - Changelog"
-    $dlg.Size            = [System.Drawing.Size]::new(520, 420)
+    $dlg.Size            = [System.Drawing.Size]::new(620, 520)
+    $dlg.MinimumSize     = [System.Drawing.Size]::new(420, 300)
     $dlg.StartPosition   = "CenterParent"
-    $dlg.FormBorderStyle = "FixedDialog"
-    $dlg.MaximizeBox     = $false
-    $dlg.BackColor       = HC '#1E1E2E'
+    $dlg.FormBorderStyle = "Sizable"
+    $dlg.MaximizeBox     = $true
+    $dlgBg  = if ($script:lightMode) { HC "#F5F5F5" } else { HC "#1A1A2E" }
+    $logBg  = if ($script:lightMode) { HC "#FFFFFF" } else { HC "#1A1A2E" }
+    $logFg  = if ($script:lightMode) { HC "#111111" } else { HC "#E2E8F0" }
+    $dlg.BackColor = $dlgBg
 
     $txtLog = [System.Windows.Forms.RichTextBox]::new()
     $txtLog.Dock        = "Fill"
-    $txtLog.Text        = $changelogText
-    $txtLog.ReadOnly    = $true
-    $txtLog.BackColor   = HC '#1A1A2E'
-    $txtLog.ForeColor   = HC '#E2E8F0'
+    $txtLog.ScrollBars  = "Vertical"
+    $txtLog.BackColor   = $logBg
+    $txtLog.ForeColor   = $logFg
     $txtLog.Font        = [System.Drawing.Font]::new("Consolas", 9)
     $txtLog.BorderStyle = "None"
     $txtLog.Padding     = [System.Windows.Forms.Padding]::new(12)
+    $txtLog.Text        = $changelogText
+    $txtLog.ReadOnly    = $true
+    # Re-apply colors after Text assignment (WinForms may reset them)
+    $txtLog.BackColor   = $logBg
+    $txtLog.ForeColor   = $logFg
     $dlg.Controls.Add($txtLog)
 
     $dlg.ShowDialog($form) | Out-Null
@@ -2523,125 +2949,6 @@ function Get-RulesKey {
         ForEach-Object { "$($_.Identity)|$($_.AccessType)|$($_.Rights)|$($_.IsInherited)|$($_.InheritanceFlags)|$($_.PropagationFlags)" }) -join ";"
 }
 
-function New-CompareHTMLReport {
-    param([hashtable]$OldData, [hashtable]$NewData, [string]$OldLabel, [string]$NewLabel, [string]$OutputPath)
-
-    $reportDate = Get-Date -Format "dd.MM.yyyy HH:mm:ss"
-
-    $allPaths = @($OldData.Keys) + @($NewData.Keys) | Sort-Object -Unique
-
-    $addedFolders   = @()
-    $removedFolders = @()
-    $changedFolders = @()
-    $rows = [System.Text.StringBuilder]::new()
-
-    foreach ($path in $allPaths) {
-        $inOld = $OldData.ContainsKey($path)
-        $inNew = $NewData.ContainsKey($path)
-
-        if (-not $inOld -and $inNew) {
-            $addedFolders += $path
-            [void]$rows.Append("<tr class='row-added'>")
-            [void]$rows.Append("<td class='path-cell'>&#43; $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
-            [void]$rows.Append("<td><span class='diff-badge badge-added'>Added</span></td>")
-            [void]$rows.Append("<td colspan='2' class='diff-note'>New folder &mdash; not present in baseline</td>")
-            [void]$rows.Append("</tr>")
-        }
-        elseif ($inOld -and -not $inNew) {
-            $removedFolders += $path
-            [void]$rows.Append("<tr class='row-removed'>")
-            [void]$rows.Append("<td class='path-cell'>&#8722; $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
-            [void]$rows.Append("<td><span class='diff-badge badge-removed'>Removed</span></td>")
-            [void]$rows.Append("<td colspan='2' class='diff-note'>Folder removed &mdash; not present in current scan</td>")
-            [void]$rows.Append("</tr>")
-        }
-        else {
-            $old = $OldData[$path]
-            $new = $NewData[$path]
-            $oldKey = Get-RulesKey $old.Rules
-            $newKey = Get-RulesKey $new.Rules
-            $sameInherit = ($old.InheritanceEnabled -eq $new.InheritanceEnabled)
-
-            if ($oldKey -ne $newKey -or -not $sameInherit -or $old.Owner -ne $new.Owner) {
-                $changedFolders += $path
-
-                # Find added/removed rules
-                $oldRules = @{}; foreach ($r in $old.Rules) { $oldRules["$($r.Identity)|$($r.AccessType)|$($r.Rights)|$($r.InheritanceFlags)"] = $r }
-                $newRules = @{}; foreach ($r in $new.Rules) { $newRules["$($r.Identity)|$($r.AccessType)|$($r.Rights)|$($r.InheritanceFlags)"] = $r }
-
-                $addedRules   = $newRules.Keys | Where-Object { -not $oldRules.ContainsKey($_) }
-                $removedRules = $oldRules.Keys | Where-Object { -not $newRules.ContainsKey($_) }
-
-                [void]$rows.Append("<tr class='row-changed'>")
-                [void]$rows.Append("<td class='path-cell' rowspan='999'>&#9998; $([System.Web.HttpUtility]::HtmlEncode($path))</td>")
-                [void]$rows.Append("<td><span class='diff-badge badge-changed'>Changed</span></td>")
-
-                $details = [System.Text.StringBuilder]::new()
-
-                if ($old.Owner -ne $new.Owner) {
-                    [void]$details.Append("<div class='diff-detail'><span class='diff-key'>Owner:</span> <span class='old-val'>$([System.Web.HttpUtility]::HtmlEncode($old.Owner))</span> &rarr; <span class='new-val'>$([System.Web.HttpUtility]::HtmlEncode($new.Owner))</span></div>")
-                }
-                if (-not $sameInherit) {
-                    $oldI = if ($old.InheritanceEnabled) { 'Active' } else { 'Disabled' }
-                    $newI = if ($new.InheritanceEnabled) { 'Active' } else { 'Disabled' }
-                    [void]$details.Append("<div class='diff-detail'><span class='diff-key'>Inheritance:</span> <span class='old-val'>$oldI</span> &rarr; <span class='new-val'>$newI</span></div>")
-                }
-                foreach ($k in $addedRules) {
-                    $r = $newRules[$k]
-                    [void]$details.Append("<div class='diff-detail added-rule'>&#43; $([System.Web.HttpUtility]::HtmlEncode($r.Identity)) &mdash; $($r.AccessType) &mdash; $($r.Rights)</div>")
-                }
-                foreach ($k in $removedRules) {
-                    $r = $oldRules[$k]
-                    [void]$details.Append("<div class='diff-detail removed-rule'>&#8722; $([System.Web.HttpUtility]::HtmlEncode($r.Identity)) &mdash; $($r.AccessType) &mdash; $($r.Rights)</div>")
-                }
-
-                [void]$rows.Append("<td colspan='2'>$($details.ToString())</td></tr>")
-            }
-        }
-    }
-
-    $totalChanged = $changedFolders.Count
-    $totalAdded   = $addedFolders.Count
-    $totalRemoved = $removedFolders.Count
-    $totalSame    = $allPaths.Count - $totalChanged - $totalAdded - $totalRemoved
-
-    $cssCompare = ':root{--bg:#1E1E2E;--bg2:#2D2D3F;--bg3:#1A1A2E;--bg4:#252535;--border:#4B5563;--border2:#374151;--text:#E2E8F0;--text2:#9CA3AF;--text3:#6B7280;--accent:#A78BFA;--green:#34D399;--red:#F87171;--yellow:#FBBF24;--font-mono:Consolas,monospace;--font-ui:"Segoe UI",system-ui,sans-serif;--radius:6px}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:13px;line-height:1.5}.header{background:linear-gradient(180deg,#2D2D3F,#1E1E2E);border-bottom:1px solid var(--border);padding:24px 32px 18px}.title{font-size:20px;font-weight:700;color:var(--accent);margin-bottom:6px}.subtitle{color:var(--text2);font-size:12px;margin-bottom:12px}.meta{display:flex;gap:24px;flex-wrap:wrap}.meta-item{display:flex;flex-direction:column;gap:2px}.meta-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}.meta-val{font-size:13px;font-weight:500}.stats{display:flex;gap:10px;padding:14px 32px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}.stat{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:9px 16px;display:flex;flex-direction:column;align-items:center;min-width:110px}.stat-num{font-size:22px;font-weight:700;line-height:1}.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}.s-changed .stat-num{color:var(--yellow)}.s-added .stat-num{color:var(--green)}.s-removed .stat-num{color:var(--red)}.s-same .stat-num{color:var(--text2)}.table-wrap{padding:16px 24px;overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}thead tr{background:var(--bg4)}th{text-align:left;padding:7px 10px;color:var(--text2);font-weight:500;font-size:11px;border-bottom:1px solid var(--border)}td{padding:7px 10px;border-bottom:1px solid var(--border2);vertical-align:top}.path-cell{font-family:var(--font-mono);font-size:11px;color:var(--text);min-width:260px}.row-added{background:rgba(52,211,153,.06)}.row-added .path-cell{color:var(--green)}.row-removed{background:rgba(241,113,113,.06)}.row-removed .path-cell{color:var(--red)}.row-changed{background:rgba(251,191,36,.05)}.row-changed .path-cell{color:var(--yellow)}.diff-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap}.badge-added{background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.4);color:var(--green)}.badge-removed{background:rgba(241,113,113,.15);border:1px solid rgba(241,113,113,.4);color:var(--red)}.badge-changed{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--yellow)}.diff-note{color:var(--text2)}.diff-detail{margin:2px 0;font-size:11px;color:var(--text2)}.diff-key{font-weight:600;color:var(--text);margin-right:4px}.old-val{color:var(--red);text-decoration:line-through;margin-right:4px}.new-val{color:var(--green)}.added-rule{color:var(--green)}.removed-rule{color:var(--red)}.footer{text-align:center;padding:16px;color:var(--text3);font-size:11px;border-top:1px solid var(--border2);background:var(--bg3)}.no-diff{padding:40px 32px;text-align:center;color:var(--text3);font-size:14px}'
-
-    $noRows = ($totalChanged + $totalAdded + $totalRemoved) -eq 0
-
-    $html  = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>ACLens Compare</title>"
-    $html += "<style>$cssCompare</style></head><body>"
-    $html += "<div class='header'>"
-    $html += "<div class='title'>&#128270; ACLens &mdash; Permission Diff</div>"
-    $html += "<div class='subtitle'>Baseline vs. Current Scan</div>"
-    $html += "<div class='meta'>"
-    $html += "<div class='meta-item'><span class='meta-lbl'>Baseline</span><span class='meta-val'>$([System.Web.HttpUtility]::HtmlEncode($OldLabel))</span></div>"
-    $html += "<div class='meta-item'><span class='meta-lbl'>Current Scan</span><span class='meta-val'>$([System.Web.HttpUtility]::HtmlEncode($NewLabel))</span></div>"
-    $html += "<div class='meta-item'><span class='meta-lbl'>Generated</span><span class='meta-val'>$reportDate</span></div>"
-    $html += "</div></div>"
-    $html += "<div class='stats'>"
-    $html += "<div class='stat s-changed'><span class='stat-num'>$totalChanged</span><span class='stat-lbl'>Permissions changed</span></div>"
-    $html += "<div class='stat s-added'><span class='stat-num'>$totalAdded</span><span class='stat-lbl'>Folders added</span></div>"
-    $html += "<div class='stat s-removed'><span class='stat-num'>$totalRemoved</span><span class='stat-lbl'>Folders removed</span></div>"
-    $html += "<div class='stat s-same'><span class='stat-num'>$totalSame</span><span class='stat-lbl'>Unchanged</span></div>"
-    $html += "</div>"
-
-    if ($noRows) {
-        $html += "<div class='no-diff'>&#10003; No differences found &mdash; permissions are identical.</div>"
-    } else {
-        $html += "<div class='table-wrap'><table>"
-        $html += "<thead><tr><th>Path</th><th>Status</th><th colspan='2'>Details</th></tr></thead><tbody>"
-        $html += $rows.ToString()
-        $html += "</tbody></table></div>"
-    }
-
-    $html += "<div class='footer'>ACLens Compare &bull; $reportDate</div>"
-    $html += "</body></html>"
-
-    [System.IO.File]::WriteAllText($OutputPath, $html, [System.Text.UTF8Encoding]::new($true))
-    return [PSCustomObject]@{ Changed=$totalChanged; Added=$totalAdded; Removed=$totalRemoved }
-}
-
 # ── Compare Window ─────────────────────────────────────────
 $btnCompare.add_Click({
 
@@ -2678,14 +2985,14 @@ $btnCompare.add_Click({
     # ── Mode selector tabs ────────────────────────────────────
     $cTabNTFS = [System.Windows.Forms.Button]::new()
     $cTabNTFS.Text = "  NTFS Compare"; $cTabNTFS.Size = [System.Drawing.Size]::new(150, 34)
-    $cTabNTFS.Location = [System.Drawing.Point]::new(16, 62); $cTabNTFS.FlatStyle = "Flat"
+    $cTabNTFS.Location = [System.Drawing.Point]::new(16, 62); $cTabNTFS.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $cTabNTFS.Font = $FB; $cTabNTFS.BackColor = HC '#7C3AED'; $cTabNTFS.ForeColor = [System.Drawing.Color]::White
     $cTabNTFS.Cursor = "Hand"; $cTabNTFS.FlatAppearance.BorderColor = HC '#4C1D95'; $cTabNTFS.FlatAppearance.BorderSize = 1
     $cWin.Controls.Add($cTabNTFS)
 
     $cTabSP = [System.Windows.Forms.Button]::new()
     $cTabSP.Text = "  SharePoint Compare"; $cTabSP.Size = [System.Drawing.Size]::new(180, 34)
-    $cTabSP.Location = [System.Drawing.Point]::new(174, 62); $cTabSP.FlatStyle = "Flat"
+    $cTabSP.Location = [System.Drawing.Point]::new(174, 62); $cTabSP.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $cTabSP.Font = $FB; $cTabSP.BackColor = HC '#374151'; $cTabSP.ForeColor = HC '#9CA3AF'
     $cTabSP.Cursor = "Hand"; $cTabSP.FlatAppearance.BorderColor = HC '#4B5563'; $cTabSP.FlatAppearance.BorderSize = 1
     $cWin.Controls.Add($cTabSP)
@@ -2714,8 +3021,8 @@ $btnCompare.add_Click({
 
     $nBtnJson = [System.Windows.Forms.Button]::new()
     $nBtnJson.Text = "Browse..."; $nBtnJson.Size = [System.Drawing.Size]::new(110, 26)
-    $nBtnJson.Location = [System.Drawing.Point]::new(554, 36); $nBtnJson.FlatStyle = "Flat"
-    $nBtnJson.BackColor = HC '#374151'; $nBtnJson.ForeColor = HC '#E2E8F0'; $nBtnJson.Cursor = "Hand"
+    $nBtnJson.Location = [System.Drawing.Point]::new(554, 36); $nBtnJson.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $nBtnJson.BackColor = HC '#374151'; $nBtnJson.ForeColor = HC '#E2E8F0'; $nBtnJson.UseVisualStyleBackColor = $false; $nBtnJson.Cursor = "Hand"
     $nBtnJson.FlatAppearance.BorderColor = HC '#4B5563'; $nBtnJson.FlatAppearance.BorderSize = 1
     $nBtnJson.add_Click({
         $ofd = [System.Windows.Forms.OpenFileDialog]::new()
@@ -2739,8 +3046,8 @@ $btnCompare.add_Click({
 
     $nBtnPath = [System.Windows.Forms.Button]::new()
     $nBtnPath.Text = "Browse..."; $nBtnPath.Size = [System.Drawing.Size]::new(110, 26)
-    $nBtnPath.Location = [System.Drawing.Point]::new(554, 96); $nBtnPath.FlatStyle = "Flat"
-    $nBtnPath.BackColor = HC '#374151'; $nBtnPath.ForeColor = HC '#E2E8F0'; $nBtnPath.Cursor = "Hand"
+    $nBtnPath.Location = [System.Drawing.Point]::new(554, 96); $nBtnPath.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $nBtnPath.BackColor = HC '#374151'; $nBtnPath.ForeColor = HC '#E2E8F0'; $nBtnPath.UseVisualStyleBackColor = $false; $nBtnPath.Cursor = "Hand"
     $nBtnPath.FlatAppearance.BorderColor = HC '#4B5563'; $nBtnPath.FlatAppearance.BorderSize = 1
     $nBtnPath.add_Click({
         $fbd = [System.Windows.Forms.FolderBrowserDialog]::new()
@@ -2767,8 +3074,8 @@ $btnCompare.add_Click({
 
     $sBtnJson = [System.Windows.Forms.Button]::new()
     $sBtnJson.Text = "Browse..."; $sBtnJson.Size = [System.Drawing.Size]::new(110, 26)
-    $sBtnJson.Location = [System.Drawing.Point]::new(554, 36); $sBtnJson.FlatStyle = "Flat"
-    $sBtnJson.BackColor = HC '#374151'; $sBtnJson.ForeColor = HC '#E2E8F0'; $sBtnJson.Cursor = "Hand"
+    $sBtnJson.Location = [System.Drawing.Point]::new(554, 36); $sBtnJson.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $sBtnJson.BackColor = HC '#374151'; $sBtnJson.ForeColor = HC '#E2E8F0'; $sBtnJson.UseVisualStyleBackColor = $false; $sBtnJson.Cursor = "Hand"
     $sBtnJson.FlatAppearance.BorderColor = HC '#4B5563'; $sBtnJson.FlatAppearance.BorderSize = 1
     $sBtnJson.add_Click({
         $ofd = [System.Windows.Forms.OpenFileDialog]::new()
@@ -2836,7 +3143,7 @@ $btnCompare.add_Click({
 
     $btnRun = [System.Windows.Forms.Button]::new()
     $btnRun.Text = "Run Comparison"; $btnRun.Size = [System.Drawing.Size]::new(160, 36)
-    $btnRun.Location = [System.Drawing.Point]::new(16, 440); $btnRun.FlatStyle = "Flat"
+    $btnRun.Location = [System.Drawing.Point]::new(16, 440); $btnRun.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
     $btnRun.Font = $FB; $btnRun.BackColor = HC '#7C3AED'; $btnRun.ForeColor = [System.Drawing.Color]::White
     $btnRun.Cursor = "Hand"; $btnRun.FlatAppearance.BorderColor = HC '#4C1D95'; $btnRun.FlatAppearance.BorderSize = 1
     $cWin.Controls.Add($btnRun)
@@ -3235,5 +3542,6 @@ function New-SPCompareHTMLReport {
     $html += "<div class='footer'>ACLens SharePoint Compare &bull; $reportDate</div></body></html>"
     [System.IO.File]::WriteAllText($OutputPath, $html, [System.Text.UTF8Encoding]::new($true))
 }
+
 
 
